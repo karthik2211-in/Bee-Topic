@@ -1,4 +1,5 @@
 import React from "react";
+import { ActivityIndicator } from "react-native";
 import * as Linking from "expo-linking";
 import * as Browser from "expo-web-browser";
 import { useOAuth } from "@clerk/clerk-expo";
@@ -21,9 +22,11 @@ Browser.maybeCompleteAuthSession();
 
 export const GoogleSignInButton = () => {
   void useWarmUpBrowser();
+  const [isLoading, setIsLoading] = React.useState(false);
   const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
 
   const onPress = React.useCallback(async () => {
+    setIsLoading(true);
     try {
       const { createdSessionId, setActive } = await startOAuthFlow({
         redirectUrl: Linking.createURL("/", { scheme: "beetopic" }),
@@ -37,10 +40,17 @@ export const GoogleSignInButton = () => {
     } catch (err) {
       console.error("OAuth error", err);
     }
+    setIsLoading(false);
   }, []);
 
   return (
-    <Button size={"lg"} onPress={onPress} className="w-full">
+    <Button
+      disabled={isLoading}
+      size={"lg"}
+      onPress={onPress}
+      className="w-full"
+    >
+      {isLoading && <ActivityIndicator color={"black"} />}
       <Text className="font-semibold">Continue with Google</Text>
     </Button>
   );
