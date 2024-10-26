@@ -38,27 +38,56 @@ SplashScreen.preventAutoHideAsync();
 // It wraps your pages with the providers they need
 
 function InitialLayout() {
+  const { colorScheme, setColorScheme, isDarkColorScheme } = useColorScheme();
+  const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
   const { isSignedIn, isLoaded } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
   React.useEffect(() => {
-    if (!isLoaded) return;
-    const isAuthSegment = segments[0] === "(auth)";
+    (async () => {
+      const theme = await AsyncStorage.getItem("theme");
 
-    if (isSignedIn && isAuthSegment) {
-      router.replace("/(main)");
-    } else if (!isSignedIn) {
-      router.replace("/(auth)");
-    }
+      if (!theme) {
+        AsyncStorage.setItem("theme", colorScheme);
+        setIsColorSchemeLoaded(true);
+        return;
+      }
+      const colorTheme = theme === "dark" ? "dark" : "light";
+      if (colorTheme !== colorScheme) {
+        setColorScheme(colorTheme);
+
+        setIsColorSchemeLoaded(true);
+        return;
+      }
+      setIsColorSchemeLoaded(true);
+    })().finally(() => {
+      if (isLoaded) {
+        const isAuthSegment = segments[0] === "(auth)";
+
+        if (isSignedIn && isAuthSegment) {
+          router.replace("/(main)");
+        } else if (!isSignedIn) {
+          router.replace("/(auth)");
+        }
+        SplashScreen.hideAsync();
+      }
+    });
   }, [isSignedIn, isLoaded]);
-  return <Slot screenOptions={{ headerShown: false }} />;
+
+  if (!isColorSchemeLoaded) {
+    return null;
+  }
+
+  return (
+    <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+      <Slot screenOptions={{ headerShown: false }} />
+      <StatusBar />
+    </ThemeProvider>
+  );
 }
 
 export default function RootLayout() {
-  const { colorScheme, setColorScheme, isDarkColorScheme } = useColorScheme();
-  const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
-
   const tokenCache = {
     async getToken(key: string) {
       try {
@@ -92,44 +121,15 @@ export default function RootLayout() {
     );
   }
 
-  React.useEffect(() => {
-    (async () => {
-      const theme = await AsyncStorage.getItem("theme");
-
-      if (!theme) {
-        AsyncStorage.setItem("theme", colorScheme);
-        setIsColorSchemeLoaded(true);
-        return;
-      }
-      const colorTheme = theme === "dark" ? "dark" : "light";
-      if (colorTheme !== colorScheme) {
-        setColorScheme(colorTheme);
-
-        setIsColorSchemeLoaded(true);
-        return;
-      }
-      setIsColorSchemeLoaded(true);
-    })().finally(() => {
-      SplashScreen.hideAsync();
-    });
-  }, []);
-
-  if (!isColorSchemeLoaded) {
-    return null;
-  }
-
   return (
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
       <ClerkLoaded>
         <TRPCProvider>
-          <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-            {/*
+          {/*
           The Stack component displays the current page.
           It also allows you to configure your screens 
           */}
-            <InitialLayout />
-            <StatusBar />
-          </ThemeProvider>
+          <InitialLayout />
         </TRPCProvider>
       </ClerkLoaded>
     </ClerkProvider>
