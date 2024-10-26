@@ -1,6 +1,7 @@
 import "@bacons/text-decoder/install";
 
-import { SplashScreen, Stack } from "expo-router";
+import { Slot, SplashScreen, useRouter, useSegments } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Theme, ThemeProvider } from "@react-navigation/native";
@@ -11,6 +12,7 @@ import "expo-router";
 import "../styles.css";
 
 import React from "react";
+import { ClerkLoaded, ClerkProvider, useAuth } from "@clerk/clerk-expo";
 
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
@@ -34,9 +36,61 @@ SplashScreen.preventAutoHideAsync();
 
 // This is the main layout of the app
 // It wraps your pages with the providers they need
+
+function InitialLayout() {
+  const { isSignedIn, isLoaded } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (!isLoaded) return;
+    const isAuthSegment = segments[0] === "(auth)";
+
+    if (isSignedIn && isAuthSegment) {
+      router.replace("/(main)");
+    } else if (!isSignedIn) {
+      router.replace("/(auth)");
+    }
+  }, [isSignedIn, isLoaded]);
+  return <Slot screenOptions={{ headerShown: false }} />;
+}
+
 export default function RootLayout() {
   const { colorScheme, setColorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
+
+  const tokenCache = {
+    async getToken(key: string) {
+      try {
+        const item = await SecureStore.getItemAsync(key);
+        if (item) {
+          console.log(`${key} was used 🔐 \n`);
+        } else {
+          console.log("No values stored under key: " + key);
+        }
+        return item;
+      } catch (error) {
+        console.error("SecureStore get item error: ", error);
+        await SecureStore.deleteItemAsync(key);
+        return null;
+      }
+    },
+    async saveToken(key: string, value: string) {
+      try {
+        return SecureStore.setItemAsync(key, value);
+      } catch (err) {
+        return;
+      }
+    },
+  };
+
+  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+
+  if (!publishableKey) {
+    throw new Error(
+      "Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your .env",
+    );
+  }
 
   React.useEffect(() => {
     (async () => {
@@ -65,15 +119,19 @@ export default function RootLayout() {
   }
 
   return (
-    <TRPCProvider>
-      <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-        {/*
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+      <ClerkLoaded>
+        <TRPCProvider>
+          <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+            {/*
           The Stack component displays the current page.
           It also allows you to configure your screens 
           */}
-        <Stack />
-        <StatusBar />
-      </ThemeProvider>
-    </TRPCProvider>
+            <InitialLayout />
+            <StatusBar />
+          </ThemeProvider>
+        </TRPCProvider>
+      </ClerkLoaded>
+    </ClerkProvider>
   );
 }

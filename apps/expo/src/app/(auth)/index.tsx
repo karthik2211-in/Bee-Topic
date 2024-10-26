@@ -1,10 +1,11 @@
-import { TouchableNativeFeedback, View } from "react-native";
+import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack } from "expo-router";
 
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
-import { H1, Large, Lead, Muted } from "~/components/ui/typography";
+import { H1, Lead, Muted } from "~/components/ui/typography";
+import { GoogleSignInButton } from "~/utils/auth";
 
 export default function Index() {
   return (
@@ -16,11 +17,9 @@ export default function Index() {
         <Lead className="text-center text-3xl leading-snug">
           Where students collects the knowledge like bees 🐝 gathering honey 🍯
         </Lead>
-        <View className="mt-40 w-full items-center gap-3">
+        <View className="mt-44 w-full items-center gap-3">
           <Muted className="text-base">continue with one click</Muted>
-          <Button size={"lg"} className="w-full">
-            <Text className="font-semibold">Continue with Google</Text>
-          </Button>
+          <GoogleSignInButton />
         </View>
       </View>
     </SafeAreaView>

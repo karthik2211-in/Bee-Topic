@@ -1,57 +1,47 @@
+import React from "react";
 import * as Linking from "expo-linking";
-import { useRouter } from "expo-router";
 import * as Browser from "expo-web-browser";
+import { useOAuth } from "@clerk/clerk-expo";
 
-import { api } from "./api";
-import { getBaseUrl } from "./base-url";
-import { deleteToken, setToken } from "./session-store";
+import { Button } from "~/components/ui/button";
+import { Text } from "~/components/ui/text";
 
-export const signIn = async () => {
-  const signInUrl = `${getBaseUrl()}/api/auth/signin`;
-  const redirectTo = Linking.createURL("/login");
-  const result = await Browser.openAuthSessionAsync(
-    `${signInUrl}?expo-redirect=${encodeURIComponent(redirectTo)}`,
-    redirectTo,
+export const useWarmUpBrowser = () => {
+  React.useEffect(() => {
+    // Warm up the android browser to improve UX
+    // https://docs.expo.dev/guides/authentication/#improving-user-experience
+    void Browser.warmUpAsync();
+    return () => {
+      void Browser.coolDownAsync();
+    };
+  }, []);
+};
+
+Browser.maybeCompleteAuthSession();
+
+export const GoogleSignInButton = () => {
+  void useWarmUpBrowser();
+  const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
+
+  const onPress = React.useCallback(async () => {
+    try {
+      const { createdSessionId, setActive } = await startOAuthFlow({
+        redirectUrl: Linking.createURL("/", { scheme: "beetopic" }),
+      });
+
+      if (createdSessionId) {
+        setActive!({ session: createdSessionId });
+      } else {
+        // Use signIn or signUp for next steps such as MFA
+      }
+    } catch (err) {
+      console.error("OAuth error", err);
+    }
+  }, []);
+
+  return (
+    <Button size={"lg"} onPress={onPress} className="w-full">
+      <Text className="font-semibold">Continue with Google</Text>
+    </Button>
   );
-
-  if (result.type !== "success") return false;
-  const url = Linking.parse(result.url);
-  const sessionToken = String(url.queryParams?.session_token);
-  if (!sessionToken) throw new Error("No session token found");
-
-  setToken(sessionToken);
-
-  return true;
-};
-
-export const useUser = () => {
-  const { data: session } = api.auth.getSession.useQuery();
-  return session?.userId ?? null;
-};
-
-export const useSignIn = () => {
-  const utils = api.useUtils();
-  const router = useRouter();
-
-  return async () => {
-    const success = await signIn();
-    if (!success) return;
-
-    await utils.invalidate();
-    router.replace("/");
-  };
-};
-
-export const useSignOut = () => {
-  const utils = api.useUtils();
-  const signOut = api.auth.signOut.useMutation();
-  const router = useRouter();
-
-  return async () => {
-    const res = await signOut.mutateAsync();
-    if (!res.success) return;
-    await deleteToken();
-    await utils.invalidate();
-    router.replace("/");
-  };
 };
