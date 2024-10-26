@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Button } from "@bt/ui/button";
 
 export default function HomePage() {
@@ -9,7 +11,9 @@ export default function HomePage() {
       <p className="w-1/3 text-wrap text-center text-xl text-muted-foreground">
         Where students collects the knowledge like bees 🐝 gathering honey 🍯
       </p>
-      <Button size={"lg"}>Get Started</Button>
+      <Link href={"/sign-in"}>
+        <Button size={"lg"}>Get Started</Button>
+      </Link>
     </div>
   );
 }
