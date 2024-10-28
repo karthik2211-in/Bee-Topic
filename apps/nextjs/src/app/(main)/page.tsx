@@ -69,12 +69,12 @@ async function ChannelsPage() {
         </section>
       )}
 
-      <section aria-label="Channels Grid" className="grid grid-cols-4">
+      <section aria-label="Channels Grid" className="grid grid-cols-4 gap-4">
         {channels.length !== 0 &&
           channels.map((channel) => (
             <Card
               key={channel.id}
-              className="overflow-hidden transition-all duration-200 hover:cursor-pointer hover:bg-accent/60"
+              className="overflow-hidden rounded-lg transition-all duration-200 hover:cursor-pointer hover:bg-accent/60"
             >
               <CardContent className="flex h-44 items-center justify-center bg-primary/15">
                 <ShellIcon className="size-20 text-primary" strokeWidth={1.3} />

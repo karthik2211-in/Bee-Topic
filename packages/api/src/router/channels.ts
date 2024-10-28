@@ -9,7 +9,7 @@ import { protectedProcedure } from "../trpc";
 export const channelsRouter = {
   all: protectedProcedure.query(({ ctx }) => {
     return ctx.db.query.Channels.findMany({
-      orderBy: desc(Channels.id),
+      orderBy: desc(Channels.createdAt),
       limit: 10,
       where: eq(Channels.createdByClerkUserId, ctx.session.userId),
     });
