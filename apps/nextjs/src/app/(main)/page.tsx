@@ -72,18 +72,20 @@ async function ChannelsPage() {
       <section aria-label="Channels Grid" className="grid grid-cols-4 gap-4">
         {channels.length !== 0 &&
           channels.map((channel) => (
-            <Card
-              key={channel.id}
-              className="overflow-hidden rounded-lg transition-all duration-200 hover:cursor-pointer hover:bg-accent/60"
-            >
-              <CardContent className="flex h-44 items-center justify-center bg-primary/15">
-                <ShellIcon className="size-20 text-primary" strokeWidth={1.3} />
-              </CardContent>
-              <CardHeader className="p-4">
-                <CardTitle>{channel.title}</CardTitle>
-                <CardDescription>0 chapters</CardDescription>
-              </CardHeader>
-            </Card>
+            <Link key={channel.id} href={`/${channel.id}`}>
+              <Card className="overflow-hidden rounded-lg transition-all duration-200 hover:cursor-pointer hover:bg-accent/60">
+                <CardContent className="flex h-44 items-center justify-center bg-primary/15">
+                  <ShellIcon
+                    className="size-20 text-primary"
+                    strokeWidth={1.3}
+                  />
+                </CardContent>
+                <CardHeader className="p-4">
+                  <CardTitle>{channel.title}</CardTitle>
+                  <CardDescription>0 chapters</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
           ))}
       </section>
     </div>

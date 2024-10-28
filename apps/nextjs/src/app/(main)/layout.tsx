@@ -3,6 +3,7 @@ import { UserButton } from "@clerk/nextjs";
 import { Bell } from "lucide-react";
 
 import { Button } from "@bt/ui/button";
+import { ThemeToggle } from "@bt/ui/theme";
 
 export default function MainLayout({
   children,
@@ -10,16 +11,24 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="h-screen w-screen overflow-y-auto">
-      <header className="sticky top-0 z-[9999] flex h-16 items-center justify-between border-b bg-secondary/25 px-6 backdrop-blur-xl">
-        <h4 className="font-mono text-xl font-semibold">🐝BeeTopic</h4>
-        <div className="flex items-center gap-3">
-          <Button size={"icon"} variant={"ghost"} className="rounded-full">
-            <Bell className="size-5" />
-          </Button>
-          <UserButton />
-        </div>
-      </header>
+    <main className="flex min-h-screen flex-col">
+      <div className="sticky inset-0 z-20 flex flex-col border-b bg-secondary/25 backdrop-blur-xl">
+        <header className="flex h-16 items-center justify-between px-6">
+          <h4 className="font-mono text-xl font-semibold">🐝BeeTopic</h4>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+
+            <Button size={"icon"} variant={"outline"} className="rounded-full">
+              <Bell className="size-5" strokeWidth={1.8} />
+            </Button>
+            <UserButton
+              appearance={{
+                elements: { userButtonAvatarBox: "border size-9" },
+              }}
+            />
+          </div>
+        </header>
+      </div>
       {children}
     </main>
   );

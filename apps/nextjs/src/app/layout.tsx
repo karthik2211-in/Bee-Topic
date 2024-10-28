@@ -46,7 +46,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <body
         className={cn(
-          "min-h-screen bg-background font-sans text-foreground antialiased",
+          "bg-background font-sans text-foreground antialiased",
           GeistSans.variable,
           GeistMono.variable,
         )}
@@ -59,9 +59,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
             enableSystem
           >
             <TRPCReactProvider>{props.children}</TRPCReactProvider>
-            <div className="absolute bottom-4 right-4">
-              <ThemeToggle />
-            </div>
+
             <Toaster richColors />
           </ThemeProvider>
         </ClerkProvider>
