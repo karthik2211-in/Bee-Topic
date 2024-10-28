@@ -17,7 +17,7 @@ export default async function ChannelLayout({
     <div className="w-full">
       <div className="p-6">
         <h1 className="text-3xl font-bold">{chapter?.title}</h1>
-        <p className="text-sm text-muted-foreground">{chapter?.description}.</p>
+        <p className="text-sm text-muted-foreground">{chapter?.description}</p>
       </div>
 
       <div className="px-6">
