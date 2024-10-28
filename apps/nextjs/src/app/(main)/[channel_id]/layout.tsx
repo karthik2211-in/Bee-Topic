@@ -31,10 +31,10 @@ export default function ChannelLayout({
                 <Input placeholder="Search chapter..." className="h-8 ps-8" />
               </div>
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <Button
                     size={"icon"}
-                    className="size-8"
+                    className="size-8 w-10"
                     variant={"secondary"}
                   >
                     <Plus className="size-5" />
