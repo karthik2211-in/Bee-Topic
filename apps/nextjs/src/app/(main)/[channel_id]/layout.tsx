@@ -83,19 +83,6 @@ export default function ChannelLayout({
                   </CardDescription>
                 </CardHeader>
               </Card>
-              <Card className="flex overflow-hidden rounded-md shadow-none hover:cursor-pointer hover:bg-accent/90">
-                <CardContent className="flex size-12 items-center justify-center border-r bg-primary/20 p-2">
-                  <HashIcon />
-                </CardContent>
-                <CardHeader className="flex flex-col justify-center gap-1 space-y-0 p-0 px-2">
-                  <CardTitle className="m-0 p-0 text-sm font-medium">
-                    Chapter 1
-                  </CardTitle>
-                  <CardDescription className="m-0 p-0 font-mono text-xs">
-                    10 videos
-                  </CardDescription>
-                </CardHeader>
-              </Card>
             </div>
           </nav>
         </aside>
