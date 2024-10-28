@@ -19,6 +19,7 @@ import {
 } from "@bt/ui/tooltip";
 
 import { api } from "~/trpc/server";
+import { CreateChapterButton } from "./create-chapter";
 
 async function ChaptersList({ channelId }: { channelId: string }) {
   const chapters = await api.chapters.all({ channelId });
@@ -79,24 +80,7 @@ export default function ChannelLayout({
                 <Search className="absolute ml-2.5 mr-2.5 size-4 text-muted-foreground" />
                 <Input placeholder="Search chapter..." className="h-8 ps-8" />
               </div>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size={"icon"}
-                    className="size-8 w-10"
-                    variant={"secondary"}
-                  >
-                    <Plus className="size-5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent
-                  className="bg-secondary text-secondary-foreground"
-                  side="right"
-                  sideOffset={10}
-                >
-                  Create Chapter
-                </TooltipContent>
-              </Tooltip>
+              <CreateChapterButton />
             </div>
 
             <Suspense
