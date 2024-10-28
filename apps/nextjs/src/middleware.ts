@@ -1,9 +1,14 @@
-export { clerkMiddleware as middleware } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-// Or like this if you need to do something here.
-// export default auth((req) => {
-//   console.log(req.auth) //  { session: { user: { ... } } }
-// })
+const isPublicRoutes = createRouteMatcher(["/sign-in"]);
+
+export default clerkMiddleware(
+  async (auth, request) => {
+    if (!isPublicRoutes(request)) await auth.protect();
+  },
+  { afterSignInUrl: "/" },
+);
 
 // Read more: https://nextjs.org/docs/app/building-your-application/routing/middleware#matcher
 export const config = {

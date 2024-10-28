@@ -2,11 +2,11 @@ import Link from "next/link";
 
 import { Button } from "@bt/ui/button";
 
-export default function HomePage() {
+export default async function HomePage() {
   return (
     <div className="flex h-screen flex-col items-center justify-center gap-6">
       <h1 className="scroll-m-20 font-mono text-4xl font-extrabold tracking-tight lg:text-5xl">
-        Let's learn new today
+        Let's learn new today user
       </h1>
       <p className="w-1/3 text-wrap text-center text-xl text-muted-foreground">
         Where students collects the knowledge like bees 🐝 gathering honey 🍯

@@ -305,6 +305,9 @@ importers:
       '@bt/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/typescript
+      '@clerk/types':
+        specifier: ^4.28.0
+        version: 4.28.0
       '@types/node':
         specifier: ^20.16.11
         version: 20.16.11
