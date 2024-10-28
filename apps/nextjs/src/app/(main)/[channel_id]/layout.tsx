@@ -29,7 +29,7 @@ export default function ChannelLayout({
           </div>
         </nav>
       </aside>
-      <div className="min-w-0">{children}</div>
+      <div className="w-full min-w-0">{children}</div>
     </main>
   );
 }
