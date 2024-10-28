@@ -3,6 +3,13 @@ import { UserButton } from "@clerk/nextjs";
 import { HashIcon, Plus, Search } from "lucide-react";
 
 import { Button } from "@bt/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@bt/ui/card";
 import { Input } from "@bt/ui/input";
 import {
   Tooltip,
@@ -50,7 +57,8 @@ export default function ChannelLayout({
               </Tooltip>
             </div>
 
-            <div className="mt-28 flex flex-col items-center gap-2 px-3">
+            {/**Empty state */}
+            {/* <div className="mt-28 flex flex-col items-center gap-2 px-3">
               <HashIcon className="size-8" strokeWidth={1.25} />
               <div className="text-center text-base font-semibold">
                 No chapters
@@ -58,6 +66,36 @@ export default function ChannelLayout({
               <p className="text-center text-xs text-muted-foreground">
                 Create chapter to add videos by clicking on above plus icon
               </p>
+            </div> */}
+
+            {/**Chapters List */}
+            <div className="flex w-full flex-col gap-2">
+              <Card className="flex overflow-hidden rounded-md shadow-none hover:cursor-pointer hover:bg-accent/90">
+                <CardContent className="flex size-12 items-center justify-center border-r bg-primary/20 p-2">
+                  <HashIcon />
+                </CardContent>
+                <CardHeader className="flex flex-col justify-center gap-1 space-y-0 p-0 px-2">
+                  <CardTitle className="m-0 p-0 text-sm font-medium">
+                    Chapter 1
+                  </CardTitle>
+                  <CardDescription className="m-0 p-0 font-mono text-xs">
+                    10 videos
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+              <Card className="flex overflow-hidden rounded-md shadow-none hover:cursor-pointer hover:bg-accent/90">
+                <CardContent className="flex size-12 items-center justify-center border-r bg-primary/20 p-2">
+                  <HashIcon />
+                </CardContent>
+                <CardHeader className="flex flex-col justify-center gap-1 space-y-0 p-0 px-2">
+                  <CardTitle className="m-0 p-0 text-sm font-medium">
+                    Chapter 1
+                  </CardTitle>
+                  <CardDescription className="m-0 p-0 font-mono text-xs">
+                    10 videos
+                  </CardDescription>
+                </CardHeader>
+              </Card>
             </div>
           </nav>
         </aside>
