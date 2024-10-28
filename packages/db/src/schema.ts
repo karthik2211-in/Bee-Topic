@@ -26,7 +26,10 @@ export const Chapters = pgTable("chapters", (t) => ({
   id: t.uuid().notNull().primaryKey().defaultRandom(),
   channelId: t
     .uuid()
-    .references(() => Channels.id)
+    .references(() => Channels.id, {
+      onDelete: "cascade",
+      onUpdate: "set null",
+    })
     .notNull(),
   title: t.varchar({ length: 256 }).notNull(),
   createdAt: t.timestamp().defaultNow().notNull(),
