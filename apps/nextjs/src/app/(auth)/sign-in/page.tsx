@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { ArrowRight } from "lucide-react";
 import { z } from "zod";
 
 import { Button } from "@bt/ui/button";
@@ -51,7 +52,7 @@ export default function Page() {
               )}
             />
             <Button size={"lg"} className="w-full">
-              Continue
+              Continue <ArrowRight className="size-4" />
             </Button>
           </form>
         </Form>
