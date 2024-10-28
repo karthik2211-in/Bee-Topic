@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { PlusCircleIcon } from "lucide-react";
 import { z } from "zod";
 
@@ -24,6 +25,7 @@ import {
   useForm,
 } from "@bt/ui/form";
 import { Input } from "@bt/ui/input";
+import { toast } from "@bt/ui/toast";
 
 import { api } from "~/trpc/react";
 
@@ -36,11 +38,25 @@ const createChannelSchema = z.object({
 
 export function CreateChannelButton() {
   const [open, onChangeOpen] = React.useState(false);
-  const form = useForm({ schema: createChannelSchema });
-  const { mutateAsync: createChannel } = api.channels.create.useMutation();
+  const form = useForm({
+    schema: createChannelSchema,
+    defaultValues: { title: "" },
+  });
+  const router = useRouter();
+  const { mutateAsync: createChannel } = api.channels.create.useMutation({
+    onError(error) {
+      toast.error(error.message);
+    },
+    onSuccess() {
+      toast.success("Channel created");
+      form.reset();
+      router.refresh();
+      onChangeOpen(false);
+    },
+  });
 
   async function onSubmit(values: z.infer<typeof createChannelSchema>) {
-    createChannel({
+    await createChannel({
       title: values.title,
     });
   }
@@ -58,7 +74,7 @@ export function CreateChannelButton() {
           <DialogTitle>New Channel</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form>
+          <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
               name="title"
@@ -72,19 +88,11 @@ export function CreateChannelButton() {
                 </FormItem>
               )}
             />
+            <DialogFooter>
+              <Button isLoading={form.formState.isSubmitting}>Create</Button>
+            </DialogFooter>
           </form>
         </Form>
-        <DialogFooter>
-          <Button onClick={() => onChangeOpen(false)} variant={"secondary"}>
-            Cancel
-          </Button>
-          <Button
-            isLoading={form.formState.isSubmitting}
-            onClick={form.handleSubmit(onSubmit)}
-          >
-            Create
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

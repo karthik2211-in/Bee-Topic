@@ -7,13 +7,12 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@bt/ui/card";
 import { Input } from "@bt/ui/input";
 
-import { api, HydrateClient } from "~/trpc/server";
+import { api } from "~/trpc/server";
 import { CreateChannelButton } from "./create-channel";
 
 export function HomePage() {
@@ -81,7 +80,7 @@ async function ChannelsPage() {
                 <ShellIcon className="size-20 text-primary" strokeWidth={1.3} />
               </CardContent>
               <CardHeader className="p-4">
-                <CardTitle>{channel.id}</CardTitle>
+                <CardTitle>{channel.title}</CardTitle>
                 <CardDescription>0 chapters</CardDescription>
               </CardHeader>
             </Card>
@@ -93,13 +92,13 @@ async function ChannelsPage() {
 
 export default function Page() {
   return (
-    <HydrateClient>
+    <>
       <SignedIn>
         <ChannelsPage />
       </SignedIn>
       <SignedOut>
         <HomePage />
       </SignedOut>
-    </HydrateClient>
+    </>
   );
 }
