@@ -20,6 +20,10 @@ const signInSchema = z.object({
   email: z.string().email().min(1, "Required"),
 });
 
+const verifySchema = z.object({
+  code: z.string().email().min(1, "Required"),
+});
+
 export default function Page() {
   const form = useForm({
     schema: signInSchema,
