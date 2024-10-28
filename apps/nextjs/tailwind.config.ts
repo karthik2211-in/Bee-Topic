@@ -1,8 +1,9 @@
-import type { Config } from "tailwindcss";
-import baseConfig from "@bt/tailwind-config/web";
 import { fontFamily } from "tailwindcss/defaultTheme";
+import { withUt } from "uploadthing/tw";
 
-export default {
+import baseConfig from "@bt/tailwind-config/web";
+
+export default withUt({
   // We need to append the path to the UI package to the content array so that
   // those classes are included correctly.
   content: [...baseConfig.content, "../../packages/ui/src/*.{ts,tsx}"],
@@ -15,4 +16,4 @@ export default {
       },
     },
   },
-} satisfies Config;
+});

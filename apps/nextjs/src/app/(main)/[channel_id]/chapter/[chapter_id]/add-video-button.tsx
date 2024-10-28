@@ -14,6 +14,8 @@ import {
   SheetTrigger,
 } from "@bt/ui/sheet";
 
+import { UploadDropzone } from "~/utils/uploadthing";
+
 export default function AddVideoButton() {
   return (
     <Sheet>
@@ -30,6 +32,10 @@ export default function AddVideoButton() {
             Fill in the details below to add a new video to the chapter.
           </SheetDescription>
         </SheetHeader>
+        <UploadDropzone
+          endpoint={"videoUploader"}
+          config={{ mode: "manual" }}
+        />
         <SheetFooter>
           <Button size={"lg"}>Add</Button>
         </SheetFooter>
