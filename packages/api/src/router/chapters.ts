@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { desc, eq } from "@bt/db";
+import { asc, eq } from "@bt/db";
 import { Chapters, CreateChapterSchema } from "@bt/db/schema";
 
 import { protectedProcedure } from "../trpc";
@@ -11,7 +11,7 @@ export const ChaptersRouter = {
     .input(z.object({ channelId: z.string().min(1) }))
     .query(({ ctx, input }) => {
       return ctx.db.query.Chapters.findMany({
-        orderBy: desc(Chapters.createdAt),
+        orderBy: asc(Chapters.createdAt),
         limit: 10,
         where: eq(Chapters.channelId, input.channelId),
       });
