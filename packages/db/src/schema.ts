@@ -32,12 +32,14 @@ export const Chapters = pgTable("chapters", (t) => ({
     })
     .notNull(),
   title: t.varchar({ length: 256 }).notNull(),
+  description: t.text(),
   createdAt: t.timestamp().defaultNow().notNull(),
   updatedAt: t.timestamp().$onUpdateFn(() => sql`now()`),
 }));
 
 export const CreateChapterSchema = createInsertSchema(Chapters, {
   title: z.string().max(256),
+  description: z.string(),
   channelId: z.string().min(1),
 }).omit({
   id: true,

@@ -18,6 +18,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -25,6 +26,7 @@ import {
   useForm,
 } from "@bt/ui/form";
 import { Input } from "@bt/ui/input";
+import { Textarea } from "@bt/ui/textarea";
 import { toast } from "@bt/ui/toast";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@bt/ui/tooltip";
 
@@ -35,13 +37,14 @@ const createChapterSchema = z.object({
     .string()
     .max(256)
     .min(1, { message: "title of the chapter is required" }),
+  description: z.string(),
 });
 
 export function CreateChapterButton() {
   const [open, onChangeOpen] = React.useState(false);
   const form = useForm({
     schema: createChapterSchema,
-    defaultValues: { title: "" },
+    defaultValues: { title: "", description: "" },
   });
   const router = useRouter();
   const params = useParams();
@@ -61,6 +64,7 @@ export function CreateChapterButton() {
     await createChapter({
       title: values.title,
       channelId: params.channel_id as string,
+      description: values.description,
     });
   }
 
@@ -97,6 +101,22 @@ export function CreateChapterButton() {
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea className="resize-none" rows={4} {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    It's recommended to add to give a context of the chapter
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
