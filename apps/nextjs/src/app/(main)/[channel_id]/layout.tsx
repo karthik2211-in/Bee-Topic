@@ -1,6 +1,8 @@
 import React, { Suspense } from "react";
+import Link from "next/link";
 import { HashIcon, Plus, Search } from "lucide-react";
 
+import { cn } from "@bt/ui";
 import { Button } from "@bt/ui/button";
 import {
   Card,
@@ -18,10 +20,17 @@ import {
   TooltipTrigger,
 } from "@bt/ui/tooltip";
 
-import { api } from "~/trpc/server";
+import { api, HydrateClient } from "~/trpc/server";
+import ChapterItem from "./chapter-client";
 import { CreateChapterButton } from "./create-chapter";
 
-async function ChaptersList({ channelId }: { channelId: string }) {
+async function ChaptersList({
+  channelId,
+  chapterId,
+}: {
+  channelId: string;
+  chapterId: string;
+}) {
   const chapters = await api.chapters.all({ channelId });
 
   if (chapters.length === 0)
@@ -36,26 +45,15 @@ async function ChaptersList({ channelId }: { channelId: string }) {
     );
 
   return (
-    <div className="flex w-full flex-col gap-2">
-      {chapters.map((chapter) => (
-        <Card
-          key={chapter.id}
-          className="flex overflow-hidden rounded-md shadow-none hover:cursor-pointer hover:bg-accent/90"
-        >
-          <CardContent className="flex size-12 items-center justify-center border-r bg-primary/20 p-2">
-            <HashIcon />
-          </CardContent>
-          <CardHeader className="flex flex-col justify-center gap-1 space-y-0 p-0 px-2">
-            <CardTitle className="m-0 p-0 text-sm font-medium">
-              {chapter.title}
-            </CardTitle>
-            <CardDescription className="m-0 p-0 font-mono text-xs">
-              0 videos
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      ))}
-    </div>
+    <HydrateClient>
+      <div className="flex w-full flex-col gap-2">
+        {chapters.map((chapter) => (
+          <Link key={chapter.id} href={`/${channelId}/chapter/${chapter.id}`}>
+            <ChapterItem chapter={chapter} />
+          </Link>
+        ))}
+      </div>
+    </HydrateClient>
   );
 }
 
@@ -64,7 +62,7 @@ export default function ChannelLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: { channel_id: string };
+  params: { channel_id: string; chapter_id: string };
 }) {
   return (
     <main className="z-10 flex flex-1">
@@ -92,7 +90,10 @@ export default function ChannelLayout({
                 </div>
               }
             >
-              <ChaptersList channelId={params.channel_id} />
+              <ChaptersList
+                channelId={params.channel_id}
+                chapterId={params.chapter_id}
+              />
             </Suspense>
           </nav>
         </aside>
