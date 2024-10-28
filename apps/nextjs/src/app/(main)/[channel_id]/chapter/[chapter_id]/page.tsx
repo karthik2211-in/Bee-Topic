@@ -1,8 +1,8 @@
-import React from "react";
 import { PlayCircleIcon, Search } from "lucide-react";
 
-import { Button } from "@bt/ui/button";
 import { Input } from "@bt/ui/input";
+
+import AddVideoButton from "./add-video-button";
 
 export default function Page() {
   return (
@@ -12,7 +12,7 @@ export default function Page() {
           <Search className="absolute ml-2.5 mr-2.5 size-5 text-muted-foreground" />
           <Input placeholder="Search video..." className="h-10 ps-10" />
         </div>
-        <Button size={"lg"}>Add New</Button>
+        <AddVideoButton />
       </div>
       <section
         aria-label="Channels Empty"
