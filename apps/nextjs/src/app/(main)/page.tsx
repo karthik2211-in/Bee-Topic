@@ -1,10 +1,19 @@
 import Link from "next/link";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
-import { Search, TvMinimal } from "lucide-react";
+import { Search, ShellIcon, TvMinimal } from "lucide-react";
 
 import { Button } from "@bt/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@bt/ui/card";
 import { Input } from "@bt/ui/input";
 
+import { api, HydrateClient } from "~/trpc/server";
 import { CreateChannelButton } from "./create-channel";
 
 export function HomePage() {
@@ -23,7 +32,9 @@ export function HomePage() {
   );
 }
 
-function ChannelsPage() {
+async function ChannelsPage() {
+  const channels = await api.channels.all();
+
   return (
     <div className="flex flex-col gap-4 px-6 py-4">
       <div>
@@ -39,21 +50,42 @@ function ChannelsPage() {
         </div>
         <CreateChannelButton />
       </div>
-      <section
-        aria-label="Channels Empty"
-        className="flex flex-col items-center gap-3 py-40"
-      >
-        <TvMinimal
-          className="size-20 text-muted-foreground"
-          strokeWidth={1.25}
-        />
-        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-          No channels
-        </h4>
-        <p className="w-1/3 text-center text-sm text-muted-foreground">
-          Create one by clicking on create channel and organize a space for your
-          course/subject
-        </p>
+
+      {channels.length === 0 && (
+        <section
+          aria-label="Channels Empty"
+          className="flex flex-col items-center gap-3 py-40"
+        >
+          <TvMinimal
+            className="size-20 text-muted-foreground"
+            strokeWidth={1.25}
+          />
+          <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+            No channels
+          </h4>
+          <p className="w-1/3 text-center text-sm text-muted-foreground">
+            Create one by clicking on create channel and organize a space for
+            your course/subject
+          </p>
+        </section>
+      )}
+
+      <section aria-label="Channels Grid" className="grid grid-cols-4">
+        {channels.length !== 0 &&
+          channels.map((channel) => (
+            <Card
+              key={channel.id}
+              className="overflow-hidden transition-all duration-200 hover:cursor-pointer hover:bg-accent/60"
+            >
+              <CardContent className="flex h-44 items-center justify-center bg-primary/15">
+                <ShellIcon className="size-20 text-primary" strokeWidth={1.3} />
+              </CardContent>
+              <CardHeader className="p-4">
+                <CardTitle>{channel.id}</CardTitle>
+                <CardDescription>0 chapters</CardDescription>
+              </CardHeader>
+            </Card>
+          ))}
       </section>
     </div>
   );
@@ -61,13 +93,13 @@ function ChannelsPage() {
 
 export default function Page() {
   return (
-    <>
+    <HydrateClient>
       <SignedIn>
         <ChannelsPage />
       </SignedIn>
       <SignedOut>
         <HomePage />
       </SignedOut>
-    </>
+    </HydrateClient>
   );
 }

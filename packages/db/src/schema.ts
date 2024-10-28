@@ -15,9 +15,9 @@ export const Channels = pgTable("channels", (t) => ({
 
 export const CreateChannelSchema = createInsertSchema(Channels, {
   title: z.string().max(256),
-  createdByClerkUserId: z.string().min(1, "Required"),
 }).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  createdByClerkUserId: true,
 });

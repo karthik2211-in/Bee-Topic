@@ -25,6 +25,8 @@ import {
 } from "@bt/ui/form";
 import { Input } from "@bt/ui/input";
 
+import { api } from "~/trpc/react";
+
 const createChannelSchema = z.object({
   title: z
     .string()
@@ -35,8 +37,13 @@ const createChannelSchema = z.object({
 export function CreateChannelButton() {
   const [open, onChangeOpen] = React.useState(false);
   const form = useForm({ schema: createChannelSchema });
+  const { mutateAsync: createChannel } = api.channels.create.useMutation();
 
-  async function onSubmit(values: z.infer<typeof createChannelSchema>) {}
+  async function onSubmit(values: z.infer<typeof createChannelSchema>) {
+    createChannel({
+      title: values.title,
+    });
+  }
 
   return (
     <Dialog onOpenChange={onChangeOpen} open={open}>
