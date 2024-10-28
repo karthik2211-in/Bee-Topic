@@ -55,10 +55,7 @@ async function ChannelsPage() {
           aria-label="Channels Empty"
           className="flex flex-col items-center gap-3 py-40"
         >
-          <TvMinimal
-            className="size-20 text-muted-foreground"
-            strokeWidth={1.25}
-          />
+          <TvMinimal className="size-10" strokeWidth={1.25} />
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
             No channels
           </h4>
