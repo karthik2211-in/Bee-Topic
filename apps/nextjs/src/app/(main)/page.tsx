@@ -1,9 +1,11 @@
 import Link from "next/link";
-import { SignedIn, SignedOut, SignOutButton } from "@clerk/nextjs";
-import { PlusCircleIcon, Search, TvMinimal } from "lucide-react";
+import { SignedIn, SignedOut } from "@clerk/nextjs";
+import { Search, TvMinimal } from "lucide-react";
 
 import { Button } from "@bt/ui/button";
 import { Input } from "@bt/ui/input";
+
+import { CreateChannelButton } from "./create-channel";
 
 export function HomePage() {
   return (
@@ -35,10 +37,7 @@ function ChannelsPage() {
           <Search className="absolute ml-2.5 mr-2.5 size-5 text-muted-foreground" />
           <Input placeholder="Search channel..." className="h-10 ps-10" />
         </div>
-        <Button size={"lg"}>
-          <PlusCircleIcon className="size-4" />
-          Create New
-        </Button>
+        <CreateChannelButton />
       </div>
       <section
         aria-label="Channels Empty"
