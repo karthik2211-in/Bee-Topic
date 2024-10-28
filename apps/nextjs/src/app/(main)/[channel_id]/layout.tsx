@@ -71,7 +71,7 @@ export default function ChannelLayout({
       <TooltipProvider>
         <aside
           style={{ marginTop: -64, paddingTop: 64 }}
-          className="sticky inset-0 hidden h-screen w-60 flex-shrink-0 flex-col gap-3 border-r bg-secondary/25 p-2 backdrop-blur-xl lg:flex 2xl:w-64"
+          className="sticky inset-0 hidden h-screen w-60 flex-shrink-0 flex-col gap-3 border-r bg-secondary/25 p-2 backdrop-blur-xl lg:flex 2xl:w-72"
         >
           <nav className="shadow-overflow relative flex w-full flex-col gap-3 overflow-y-auto overflow-x-hidden px-3 py-3 lg:pr-0">
             <p className="text-sm text-muted-foreground">All chapters</p>
