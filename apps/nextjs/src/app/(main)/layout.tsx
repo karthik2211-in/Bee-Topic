@@ -13,7 +13,7 @@ export default function MainLayout({
   return (
     <main className="flex min-h-screen flex-col">
       <div className="sticky inset-0 z-20 flex flex-col border-b bg-secondary/25 backdrop-blur-xl">
-        <header className="flex h-16 items-center justify-between px-6">
+        <header className="flex h-16 items-center justify-between px-4">
           <h4 className="font-mono text-xl font-semibold">🐝BeeTopic</h4>
           <div className="flex items-center gap-3">
             <ThemeToggle />
