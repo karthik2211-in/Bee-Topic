@@ -83,7 +83,7 @@ async function ChannelsPage() {
                 <CardHeader className="p-4">
                   <CardTitle>{channel.title}</CardTitle>
                   <CardDescription className="font-mono">
-                    0 chapters
+                    {channel.chapterCount} chapters
                   </CardDescription>
                 </CardHeader>
               </Card>

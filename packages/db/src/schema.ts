@@ -48,5 +48,8 @@ export const ChannelsRelations = relations(Channels, ({ many }) => ({
 }));
 
 export const ChaptersRelations = relations(Chapters, ({ one }) => ({
-  channel: one(Channels),
+  channel: one(Channels, {
+    fields: [Chapters.channelId],
+    references: [Channels.id],
+  }),
 }));
