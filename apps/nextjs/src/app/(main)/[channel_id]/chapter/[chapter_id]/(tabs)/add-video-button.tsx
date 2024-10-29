@@ -58,8 +58,11 @@ export default function AddVideoButton() {
       });
       setOpen(false);
       utils.videos.invalidate();
+      form.reset();
       toast.success("Video added successfully");
-    } catch (e) {}
+    } catch (e) {
+      toast.error("Something went wrong");
+    }
   }
 
   return (

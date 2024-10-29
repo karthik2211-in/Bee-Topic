@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { PlayCircleIcon } from "lucide-react";
 
@@ -50,17 +51,21 @@ export function Videos() {
   return (
     <div className="grid grid-cols-4 gap-3 py-4">
       {videos?.map((video) => (
-        <Card className="w-full overflow-hidden rounded-md">
-          <CardContent className="flex h-44 items-center justify-center bg-primary/20 p-0">
-            <PlayCircleIcon className="size-10" />
-          </CardContent>
-          <CardHeader className="p-4">
-            <CardTitle className="text-base">{video.title}</CardTitle>
-            <CardDescription className="text-xs">
-              20 min • 20k views • 1 min ago
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        <Link
+          href={`/${video.chapters.channel.id}/chapter/${video.chapterId}/v/${video.id}`}
+        >
+          <Card className="w-full overflow-hidden rounded-md active:scale-[98%]">
+            <CardContent className="flex h-44 items-center justify-center bg-primary/20 p-0">
+              <PlayCircleIcon className="size-10" />
+            </CardContent>
+            <CardHeader className="p-4">
+              <CardTitle className="text-base">{video.title}</CardTitle>
+              <CardDescription className="text-xs">
+                20 min • 20k views • 1 min ago
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </Link>
       ))}
     </div>
   );

@@ -14,6 +14,20 @@ export const VideosRouter = {
         orderBy: asc(Videos.createdAt),
         limit: 10,
         where: eq(Videos.chapterId, input.chapterId),
+        with: {
+          chapters: {
+            columns: {
+              id: true,
+            },
+            with: {
+              channel: {
+                columns: {
+                  id: true,
+                },
+              },
+            },
+          },
+        },
       });
     }),
 
