@@ -35,7 +35,7 @@ export default function ChapterItem({
           {chapter.title}
         </CardTitle>
         <CardDescription className="m-0 p-0 font-mono text-xs">
-          0 videos
+          {chapter.videosCount} videos
         </CardDescription>
       </CardHeader>
     </Card>

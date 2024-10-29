@@ -1,24 +1,10 @@
 import React, { Suspense } from "react";
 import Link from "next/link";
-import { HashIcon, Plus, Search } from "lucide-react";
+import { HashIcon, Search } from "lucide-react";
 
-import { cn } from "@bt/ui";
-import { Button } from "@bt/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@bt/ui/card";
 import { Input } from "@bt/ui/input";
 import { Skeleton } from "@bt/ui/skeleton";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@bt/ui/tooltip";
+import { TooltipProvider } from "@bt/ui/tooltip";
 
 import { api, HydrateClient } from "~/trpc/server";
 import ChapterItem from "./chapter-client";
@@ -26,7 +12,6 @@ import { CreateChapterButton } from "./create-chapter";
 
 async function ChaptersList({
   channelId,
-  chapterId,
 }: {
   channelId: string;
   chapterId: string;

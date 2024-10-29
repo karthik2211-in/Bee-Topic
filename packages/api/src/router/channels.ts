@@ -21,8 +21,7 @@ export const channelsRouter = {
       .leftJoin(Chapters, eq(Chapters.channelId, Channels.id)) // Adjust 'channelId' to the actual foreign key field
       .where(eq(Channels.createdByClerkUserId, ctx.session.userId))
       .groupBy(Channels.id)
-      .orderBy(desc(Channels.createdAt))
-      .limit(10);
+      .orderBy(desc(Channels.createdAt));
   }),
 
   byId: protectedProcedure
