@@ -43,6 +43,7 @@ const addVideoSchema = z.object({
 export default function AddVideoButton() {
   const form = useForm({ schema: addVideoSchema });
   const params = useParams();
+  const utils = api.useUtils();
   const { mutateAsync: addVideo } = api.videos.create.useMutation();
   const [open, setOpen] = React.useState(false);
 
@@ -56,6 +57,7 @@ export default function AddVideoButton() {
         isPublished: true,
       });
       setOpen(false);
+      utils.videos.invalidate();
       toast.success("Video added successfully");
     } catch (e) {}
   }
@@ -63,7 +65,7 @@ export default function AddVideoButton() {
   return (
     <Sheet
       open={open}
-      onOpenChange={async (isOpen) => {
+      onOpenChange={(isOpen) => {
         setOpen(isOpen);
       }}
     >
@@ -148,6 +150,7 @@ export default function AddVideoButton() {
             />
             <SheetFooter>
               <Button
+                isLoading={form.formState.isSubmitting}
                 disabled={
                   !form.formState.isValid || form.formState.isSubmitting
                 }

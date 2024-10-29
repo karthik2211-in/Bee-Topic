@@ -1,10 +1,11 @@
-import { PlayCircleIcon, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
 import { Input } from "@bt/ui/input";
 
 import AddVideoButton from "./add-video-button";
+import { Videos } from "./videos";
 
-export default function Page() {
+export default async function Page() {
   return (
     <div>
       <div className="flex gap-3">
@@ -14,19 +15,8 @@ export default function Page() {
         </div>
         <AddVideoButton />
       </div>
-      <section
-        aria-label="Channels Empty"
-        className="flex flex-col items-center gap-3 py-40"
-      >
-        <PlayCircleIcon className="size-10" strokeWidth={1.25} />
-        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-          No Videos
-        </h4>
-        <p className="w-1/3 text-center text-sm text-muted-foreground">
-          Start adding videos by clicking on new video. Share your meaning full
-          knowledge with bees 🐝
-        </p>
-      </section>
+
+      <Videos />
     </div>
   );
 }
