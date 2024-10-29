@@ -11,7 +11,11 @@ import { TRPCReactProvider } from "~/trpc/react";
 
 import "~/app/globals.css";
 
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { extractRouterConfig } from "uploadthing/server";
+
 import { env } from "~/env";
+import { ourFileRouter } from "./api/uploadthing/core";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -58,6 +62,15 @@ export default function RootLayout(props: { children: React.ReactNode }) {
             defaultTheme="system"
             enableSystem
           >
+            <NextSSRPlugin
+              /**
+               * The `extractRouterConfig` will extract **only** the route configs
+               * from the router to prevent additional information from being
+               * leaked to the client. The data passed to the client is the same
+               * as if you were to fetch `/api/uploadthing` directly.
+               */
+              routerConfig={extractRouterConfig(ourFileRouter)}
+            />
             <TRPCReactProvider>{props.children}</TRPCReactProvider>
 
             <Toaster richColors />

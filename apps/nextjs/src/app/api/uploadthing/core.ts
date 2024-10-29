@@ -8,19 +8,20 @@ const f = createUploadthing();
 // FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {
   // Define as many FileRoutes as you like, each with a unique routeSlug
-  videoUploader: f({
-    video: { maxFileSize: "8GB", minFileCount: 1 },
-  })
+  videoUploader: f(
+    { video: { maxFileSize: "8GB", maxFileCount: 1 } },
+    { awaitServerData: false },
+  )
     // Set permissions and file types for this FileRoute
-    .middleware(async (opts) => {
+    .middleware(async ({ req }) => {
       // This code runs on your server before upload
-      const { userId } = await auth();
+      const user = await auth();
 
       // If you throw, the user will not be able to upload
-      if (!userId) throw new UploadThingError("Unauthorized");
+      if (!user.userId) throw new UploadThingError("Unauthorized");
 
       // Whatever is returned here is accessible in onUploadComplete as `metadata`
-      return { userId };
+      return { userId: user.userId };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload

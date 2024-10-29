@@ -24,6 +24,7 @@
     "@clerk/nextjs": "catalog:",
     "@trpc/server": "catalog:",
     "superjson": "2.2.1",
+    "uploadthing": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

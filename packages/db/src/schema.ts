@@ -47,14 +47,50 @@ export const CreateChapterSchema = createInsertSchema(Chapters, {
   updatedAt: true,
 });
 
+export const Videos = pgTable("videos", (t) => ({
+  id: t.uuid().notNull().primaryKey().defaultRandom(),
+  chapterId: t
+    .uuid()
+    .references(() => Chapters.id, {
+      onDelete: "cascade",
+      onUpdate: "set null",
+    })
+    .notNull(),
+  title: t.varchar({ length: 256 }).notNull(),
+  description: t.text(),
+  ut_fileKey: t.text().notNull(),
+  isPublished: t.boolean().default(false),
+  createdAt: t.timestamp().defaultNow().notNull(),
+  updatedAt: t.timestamp().$onUpdateFn(() => sql`now()`),
+}));
+
+export const CreateVideoSchema = createInsertSchema(Videos, {
+  title: z.string().max(256),
+  description: z.string(),
+  ut_fileKey: z.string().min(1, "Required"),
+  chapterId: z.string().min(1),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 //Relations
 export const ChannelsRelations = relations(Channels, ({ many }) => ({
   chapters: many(Chapters),
 }));
 
-export const ChaptersRelations = relations(Chapters, ({ one }) => ({
+export const ChaptersRelations = relations(Chapters, ({ one, many }) => ({
   channel: one(Channels, {
     fields: [Chapters.channelId],
     references: [Channels.id],
+  }),
+  videos: many(Videos),
+}));
+
+export const VideosRelations = relations(Videos, ({ one }) => ({
+  chapters: one(Chapters, {
+    fields: [Videos.chapterId],
+    references: [Chapters.id],
   }),
 }));
