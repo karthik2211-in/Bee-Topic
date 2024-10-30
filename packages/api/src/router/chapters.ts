@@ -1,14 +1,16 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { asc, desc, eq, sql } from "@bt/db";
+import { and, desc, eq, ilike, sql } from "@bt/db";
 import { Chapters, CreateChapterSchema, Videos } from "@bt/db/schema";
 
 import { protectedProcedure } from "../trpc";
 
 export const ChaptersRouter = {
   all: protectedProcedure
-    .input(z.object({ channelId: z.string().min(1) }))
+    .input(
+      z.object({ channelId: z.string().min(1), query: z.string().nullable() }),
+    )
     .query(({ ctx, input }) => {
       return ctx.db
         .select({
@@ -21,7 +23,14 @@ export const ChaptersRouter = {
         })
         .from(Chapters)
         .leftJoin(Videos, eq(Videos.chapterId, Chapters.id)) // Adjust 'channelId' to the actual foreign key field
-        .where(eq(Chapters.channelId, input.channelId))
+        .where(
+          input.query
+            ? and(
+                eq(Chapters.channelId, input.channelId),
+                ilike(Chapters.title, `%${input.query}%`),
+              )
+            : eq(Chapters.channelId, input.channelId),
+        )
         .groupBy(Chapters.id)
         .orderBy(desc(Chapters.createdAt));
     }),
