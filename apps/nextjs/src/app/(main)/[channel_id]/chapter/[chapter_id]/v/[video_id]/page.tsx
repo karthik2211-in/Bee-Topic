@@ -73,7 +73,7 @@ export default function Page() {
       <div className="flex flex-col items-center gap-4 px-52 py-10">
         <Player
           accentColor="hsl(45 100% 60%)"
-          className="overflow-hidden rounded-lg border border-primary"
+          className="aspect-video overflow-hidden rounded-lg border border-primary"
           src={`https://utfs.io/f/${video?.ut_fileKey}`}
         />
         <Form {...form}>

@@ -98,6 +98,7 @@ export default function AddVideoButton() {
                   {field.value ? (
                     <div>
                       <Player
+                        className="aspect-video"
                         accentColor="hsl(45 100% 60%)"
                         src={`https://utfs.io/f/${field.value}`}
                       />
