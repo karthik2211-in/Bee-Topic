@@ -26,9 +26,9 @@ export default function MainLayout({
           <div className="flex items-center gap-3">
             <ThemeToggle />
 
-            <Button size={"icon"} variant={"outline"} className="rounded-full">
+            {/* <Button size={"icon"} variant={"outline"} className="rounded-full">
               <Bell className="size-5" strokeWidth={1.8} />
-            </Button>
+            </Button> */}
             <UserButton
               appearance={{
                 elements: { userButtonAvatarBox: "border size-9" },
