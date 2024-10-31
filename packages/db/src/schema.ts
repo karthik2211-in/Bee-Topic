@@ -10,13 +10,22 @@ export const Channels = pgTable("channels", (t) => ({
   createdAt: t.timestamp().defaultNow().notNull(),
   updatedAt: t
     .timestamp({ mode: "date", withTimezone: true })
-    .$onUpdateFn(() => sql`now()`),
+    .$onUpdate(() => new Date()),
 }));
 
 export const CreateChannelSchema = createInsertSchema(Channels, {
   title: z.string().max(256),
 }).omit({
   id: true,
+  createdAt: true,
+  updatedAt: true,
+  createdByClerkUserId: true,
+});
+
+export const UpdateChannelSchema = createInsertSchema(Channels, {
+  title: z.string().max(256),
+  id: z.string().min(1),
+}).omit({
   createdAt: true,
   updatedAt: true,
   createdByClerkUserId: true,
