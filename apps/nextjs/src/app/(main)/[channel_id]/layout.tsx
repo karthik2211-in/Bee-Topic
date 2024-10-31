@@ -18,7 +18,7 @@ export default function ChannelLayout({
     <main className="z-10 flex flex-1">
       <TooltipProvider>
         <aside
-          style={{ marginTop: -64, paddingTop: 64 }}
+          style={{ marginTop: -65, paddingTop: 65 }}
           className="sticky inset-0 hidden h-screen w-60 flex-shrink-0 flex-col gap-3 border-r bg-secondary/25 p-2 backdrop-blur-xl lg:flex 2xl:w-72"
         >
           <nav className="shadow-overflow relative flex w-full flex-col gap-3 overflow-y-auto overflow-x-hidden px-3 py-3 lg:pr-0">
