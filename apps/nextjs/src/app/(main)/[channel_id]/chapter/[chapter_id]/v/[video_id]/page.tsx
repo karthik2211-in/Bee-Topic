@@ -62,6 +62,7 @@ export function DeleteVideoDialog({
         router.back();
         router.refresh();
         utils.videos.invalidate();
+        utils.chapters.invalidate();
         onChangeOpen(false);
       },
     });
