@@ -8,6 +8,12 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
+import {
+  formatDistance,
+  formatDistanceStrict,
+  formatDistanceToNow,
+  formatDistanceToNowStrict,
+} from "date-fns";
 import { PlayCircleIcon, SearchXIcon } from "lucide-react";
 
 import { Button } from "@bt/ui/button";
@@ -110,7 +116,10 @@ export function Videos() {
             <CardHeader className="p-4">
               <CardTitle className="text-base">{video.title}</CardTitle>
               <CardDescription className="text-xs">
-                20 min • 20k views • 1 min ago
+                20 min • 20k views •{" "}
+                {formatDistanceToNowStrict(video.createdAt, {
+                  addSuffix: true,
+                })}
               </CardDescription>
             </CardHeader>
           </Card>

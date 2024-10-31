@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { formatDistanceToNowStrict } from "date-fns";
 import {
   MoreHorizontalIcon,
   SearchXIcon,
@@ -115,7 +116,10 @@ export function ChannelsListClient() {
             <div className="space-y-2">
               <CardTitle>{channel.title}</CardTitle>
               <CardDescription className="font-mono">
-                {channel.chapterCount} chapters
+                {channel.chapterCount} chapters •{" "}
+                {formatDistanceToNowStrict(channel.createdAt, {
+                  addSuffix: true,
+                })}
               </CardDescription>
             </div>
             <DropdownMenu key={channel.id}>
