@@ -16,7 +16,7 @@ export const VideosRouter = {
     )
     .query(({ ctx, input }) => {
       return ctx.db.query.Videos.findMany({
-        orderBy: asc(Videos.createdAt),
+        orderBy: asc(Videos.title),
         limit: 10,
         where: input.query
           ? and(

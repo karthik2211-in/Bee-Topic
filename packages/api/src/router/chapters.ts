@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { and, desc, eq, ilike, sql } from "@bt/db";
+import { and, asc, desc, eq, ilike, sql } from "@bt/db";
 import {
   Chapters,
   CreateChapterSchema,
@@ -37,7 +37,7 @@ export const ChaptersRouter = {
             : eq(Chapters.channelId, input.channelId),
         )
         .groupBy(Chapters.id)
-        .orderBy(desc(Chapters.createdAt));
+        .orderBy(asc(Chapters.title));
     }),
 
   byId: protectedProcedure
