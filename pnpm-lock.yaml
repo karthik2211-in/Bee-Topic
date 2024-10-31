@@ -399,15 +399,15 @@ importers:
 
   packages/db:
     dependencies:
-      '@vercel/postgres':
-        specifier: ^0.10.0
-        version: 0.10.0(utf-8-validate@6.0.4)
+      '@neondatabase/serverless':
+        specifier: ^0.10.1
+        version: 0.10.1
       drizzle-orm:
         specifier: ^0.35.1
-        version: 0.35.1(@neondatabase/serverless@0.10.0)(@opentelemetry/api@1.9.0)(@planetscale/database@1.19.0)(@types/pg@8.11.10)(@types/react@18.3.11)(@vercel/postgres@0.10.0(utf-8-validate@6.0.4))(mysql2@3.11.3)(postgres@3.4.4)(react@18.3.1)
+        version: 0.35.1(@neondatabase/serverless@0.10.1)(@opentelemetry/api@1.9.0)(@planetscale/database@1.19.0)(@types/pg@8.11.10)(@types/react@18.3.11)(@vercel/postgres@0.10.0)(mysql2@3.11.3)(postgres@3.4.5)(react@18.3.1)
       drizzle-zod:
         specifier: ^0.5.1
-        version: 0.5.1(drizzle-orm@0.35.1(@neondatabase/serverless@0.10.0)(@opentelemetry/api@1.9.0)(@planetscale/database@1.19.0)(@types/pg@8.11.10)(@types/react@18.3.11)(@vercel/postgres@0.10.0(utf-8-validate@6.0.4))(mysql2@3.11.3)(postgres@3.4.4)(react@18.3.1))(zod@3.23.8)
+        version: 0.5.1(drizzle-orm@0.35.1(@neondatabase/serverless@0.10.1)(@opentelemetry/api@1.9.0)(@planetscale/database@1.19.0)(@types/pg@8.11.10)(@types/react@18.3.11)(@vercel/postgres@0.10.0)(mysql2@3.11.3)(postgres@3.4.5)(react@18.3.1))(zod@3.23.8)
       zod:
         specifier: 'catalog:'
         version: 3.23.8
@@ -2319,8 +2319,8 @@ packages:
   '@mux/playback-core@0.25.1':
     resolution: {integrity: sha512-BqGS11gn1CeKcR+aQ7LfawXLOjzf7bGkD1rBli/hfJYYqX6Br4fCpzpiBCOHOyWA2hc5H4LCTCLLjt2sARkTpw==}
 
-  '@neondatabase/serverless@0.10.0':
-    resolution: {integrity: sha512-+0mjRGJFL2kGyTtWo60PxIcgv0a/X/vCu4DV2iS3tL+Rl/OrFocJoN3aNajugvgBQj624aOK7LowLijoQHWIXg==}
+  '@neondatabase/serverless@0.10.1':
+    resolution: {integrity: sha512-Upn555uEYL/q8aqMdPSviggNWeeZLCl5FhCIs7A4hmshfoOAAfML+Sqbcxr+Re2WZN5+hpyM9JClImXnBuhuXw==}
 
   '@neondatabase/serverless@0.9.5':
     resolution: {integrity: sha512-siFas6gItqv6wD/pZnvdu34wEqgG3nSE6zWZdq5j2DEsa+VvX8i/5HXJOo06qrw5axPXn+lGCxeR+NLaSPIXug==}
@@ -7029,8 +7029,8 @@ packages:
   postgres-range@1.1.4:
     resolution: {integrity: sha512-i/hbxIE9803Alj/6ytL7UHQxRvZkI9O4Sy+J3HGc4F4oo/2eQAjTSNJ0bfxyse3bH0nuVesCk+3IRLaMtG3H6w==}
 
-  postgres@3.4.4:
-    resolution: {integrity: sha512-IbyN+9KslkqcXa8AO9fxpk97PA4pzewvpi2B3Dwy9u4zpV32QicaEdgmF3eSQUzdRk7ttDHQejNgAEr4XoeH4A==}
+  postgres@3.4.5:
+    resolution: {integrity: sha512-cDWgoah1Gez9rN3H4165peY9qfpEo+SA61oQv65O3cRUE1pOEoJWwddwcqKE8XZYjbblOJlYDlLV4h67HrEVDg==}
     engines: {node: '>=12'}
 
   preact@10.24.3:
@@ -8326,10 +8326,6 @@ packages:
     resolution: {integrity: sha512-PElTlVMwpblvbNqQ82d2n6RjStvdSoNe9FG28kNfz3WiXilJm4DdNkEzRhCZuIDwY8U08WVihhGR5iRqAwfDiw==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
-
-  utf-8-validate@6.0.4:
-    resolution: {integrity: sha512-xu9GQDeFp+eZ6LnCywXN/zBancWvOpUMzgjLPSjy4BRHSmTelvn2E0DG0o1sTiw5hkCKBHo8rwSKncfRfv2EEQ==}
-    engines: {node: '>=6.14.2'}
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
@@ -10506,7 +10502,7 @@ snapshots:
       text-table: 0.2.0
       url-join: 4.0.0
       wrap-ansi: 7.0.0
-      ws: 8.18.0(bufferutil@4.0.8)(utf-8-validate@6.0.4)
+      ws: 8.18.0(bufferutil@4.0.8)
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -11068,14 +11064,14 @@ snapshots:
       hls.js: 1.5.17
       mux-embed: 5.2.1
 
-  '@neondatabase/serverless@0.10.0':
+  '@neondatabase/serverless@0.10.1':
     dependencies:
       '@types/pg': 8.11.6
-    optional: true
 
   '@neondatabase/serverless@0.9.5':
     dependencies:
       '@types/pg': 8.11.6
+    optional: true
 
   '@next/env@14.2.15': {}
 
@@ -13022,13 +13018,14 @@ snapshots:
       is-plain-object: 5.0.0
       undici: 5.28.4
 
-  '@vercel/postgres@0.10.0(utf-8-validate@6.0.4)':
+  '@vercel/postgres@0.10.0':
     dependencies:
       '@neondatabase/serverless': 0.9.5
       bufferutil: 4.0.8
-      ws: 8.18.0(bufferutil@4.0.8)(utf-8-validate@6.0.4)
+      ws: 8.18.0(bufferutil@4.0.8)
     transitivePeerDependencies:
       - utf-8-validate
+    optional: true
 
   '@web3-storage/multipart-parser@1.0.0': {}
 
@@ -13458,6 +13455,7 @@ snapshots:
   bufferutil@4.0.8:
     dependencies:
       node-gyp-build: 4.8.2
+    optional: true
 
   builtins@1.0.3: {}
 
@@ -14002,21 +14000,21 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.35.1(@neondatabase/serverless@0.10.0)(@opentelemetry/api@1.9.0)(@planetscale/database@1.19.0)(@types/pg@8.11.10)(@types/react@18.3.11)(@vercel/postgres@0.10.0(utf-8-validate@6.0.4))(mysql2@3.11.3)(postgres@3.4.4)(react@18.3.1):
+  drizzle-orm@0.35.1(@neondatabase/serverless@0.10.1)(@opentelemetry/api@1.9.0)(@planetscale/database@1.19.0)(@types/pg@8.11.10)(@types/react@18.3.11)(@vercel/postgres@0.10.0)(mysql2@3.11.3)(postgres@3.4.5)(react@18.3.1):
     optionalDependencies:
-      '@neondatabase/serverless': 0.10.0
+      '@neondatabase/serverless': 0.10.1
       '@opentelemetry/api': 1.9.0
       '@planetscale/database': 1.19.0
       '@types/pg': 8.11.10
       '@types/react': 18.3.11
-      '@vercel/postgres': 0.10.0(utf-8-validate@6.0.4)
+      '@vercel/postgres': 0.10.0
       mysql2: 3.11.3
-      postgres: 3.4.4
+      postgres: 3.4.5
       react: 18.3.1
 
-  drizzle-zod@0.5.1(drizzle-orm@0.35.1(@neondatabase/serverless@0.10.0)(@opentelemetry/api@1.9.0)(@planetscale/database@1.19.0)(@types/pg@8.11.10)(@types/react@18.3.11)(@vercel/postgres@0.10.0(utf-8-validate@6.0.4))(mysql2@3.11.3)(postgres@3.4.4)(react@18.3.1))(zod@3.23.8):
+  drizzle-zod@0.5.1(drizzle-orm@0.35.1(@neondatabase/serverless@0.10.1)(@opentelemetry/api@1.9.0)(@planetscale/database@1.19.0)(@types/pg@8.11.10)(@types/react@18.3.11)(@vercel/postgres@0.10.0)(mysql2@3.11.3)(postgres@3.4.5)(react@18.3.1))(zod@3.23.8):
     dependencies:
-      drizzle-orm: 0.35.1(@neondatabase/serverless@0.10.0)(@opentelemetry/api@1.9.0)(@planetscale/database@1.19.0)(@types/pg@8.11.10)(@types/react@18.3.11)(@vercel/postgres@0.10.0(utf-8-validate@6.0.4))(mysql2@3.11.3)(postgres@3.4.4)(react@18.3.1)
+      drizzle-orm: 0.35.1(@neondatabase/serverless@0.10.1)(@opentelemetry/api@1.9.0)(@planetscale/database@1.19.0)(@types/pg@8.11.10)(@types/react@18.3.11)(@vercel/postgres@0.10.0)(mysql2@3.11.3)(postgres@3.4.5)(react@18.3.1)
       zod: 3.23.8
 
   eastasianwidth@0.2.0: {}
@@ -16588,6 +16586,14 @@ snapshots:
       camelcase-css: 2.0.1
       postcss: 8.4.47
 
+  postcss-load-config@4.0.2(postcss@8.4.47):
+    dependencies:
+      lilconfig: 3.1.2
+      yaml: 2.6.0
+    optionalDependencies:
+      postcss: 8.4.47
+    optional: true
+
   postcss-load-config@4.0.2(postcss@8.4.47)(ts-node@10.9.2(@types/node@20.16.11)(typescript@5.6.3)):
     dependencies:
       lilconfig: 3.1.2
@@ -16640,7 +16646,7 @@ snapshots:
 
   postgres-range@1.1.4: {}
 
-  postgres@3.4.4:
+  postgres@3.4.5:
     optional: true
 
   preact@10.24.3: {}
@@ -17635,7 +17641,7 @@ snapshots:
       postcss: 8.4.47
       postcss-import: 15.1.0(postcss@8.4.47)
       postcss-js: 4.0.1(postcss@8.4.47)
-      postcss-load-config: 4.0.2(postcss@8.4.47)(ts-node@10.9.2(@types/node@22.7.5)(typescript@5.6.3))
+      postcss-load-config: 4.0.2(postcss@8.4.47)
       postcss-nested: 6.2.0(postcss@8.4.47)
       postcss-selector-parser: 6.1.2
       resolve: 1.22.8
@@ -18080,11 +18086,6 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  utf-8-validate@6.0.4:
-    dependencies:
-      node-gyp-build: 4.8.2
-    optional: true
-
   util-deprecate@1.0.2: {}
 
   util@0.12.5:
@@ -18244,10 +18245,9 @@ snapshots:
     optionalDependencies:
       bufferutil: 4.0.8
 
-  ws@8.18.0(bufferutil@4.0.8)(utf-8-validate@6.0.4):
+  ws@8.18.0(bufferutil@4.0.8):
     optionalDependencies:
       bufferutil: 4.0.8
-      utf-8-validate: 6.0.4
 
   xcode@3.0.1:
     dependencies:
