@@ -47,16 +47,48 @@ export default function AddVideoButton() {
   const { mutateAsync: addVideo } = api.videos.create.useMutation();
   const [open, setOpen] = React.useState(false);
 
+  function getVideoDuration(url: string) {
+    return new Promise<number>((resolve, reject) => {
+      // Create a URL for the File object
+      const video = document.createElement("video");
+
+      // Set the video source to the File URL
+      video.src = url;
+
+      // Listen for the loadedmetadata event to get video duration
+      video.onloadedmetadata = () => {
+        // The duration is in seconds
+        const duration = video.duration;
+        URL.revokeObjectURL(url); // Clean up the URL
+        console.log("duratoin", duration);
+        resolve(duration);
+      };
+
+      // Handle errors if any
+      video.onerror = () => {
+        URL.revokeObjectURL(url); // Clean up the URL in case of an error
+        reject(new Error("Failed to load video metadata"));
+      };
+    });
+  }
+
   async function onSubmitVideo(values: z.infer<typeof addVideoSchema>) {
     try {
+      let duration = await getVideoDuration(
+        `https://utfs.io/f/${values.fileKey}`,
+      );
+
+      if (isNaN(duration)) return null;
       await addVideo({
         title: values.title,
         description: values.description,
         chapterId: params.chapter_id as string,
         ut_fileKey: values.fileKey,
         isPublished: true,
+        duration: duration,
       });
       setOpen(false);
+
       utils.videos.invalidate();
       utils.chapters.invalidate();
       form.reset();

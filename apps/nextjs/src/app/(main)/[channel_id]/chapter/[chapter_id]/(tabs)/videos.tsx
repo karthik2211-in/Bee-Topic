@@ -16,6 +16,7 @@ import {
 } from "date-fns";
 import { PlayCircleIcon, SearchXIcon } from "lucide-react";
 
+import { Badge } from "@bt/ui/badge";
 import { Button } from "@bt/ui/button";
 import {
   Card,
@@ -51,6 +52,21 @@ export function Videos() {
     },
     [searchParams],
   );
+
+  function formatDuration(seconds: number) {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+
+    // Format the result based on duration length
+    if (hrs > 0) {
+      // Format as "H:MM:SS"
+      return `${hrs}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    } else {
+      // Format as "M:SS"
+      return `${mins}:${String(secs).padStart(2, "0")}`;
+    }
+  }
 
   if (isLoading)
     return (
@@ -109,14 +125,17 @@ export function Videos() {
         <Link
           href={`/${video.chapters.channel.id}/chapter/${video.chapterId}/v/${video.id}`}
         >
-          <Card className="w-full overflow-hidden rounded-md active:scale-[98%]">
-            <CardContent className="flex h-44 items-center justify-center bg-primary/20 p-0">
+          <Card className="w-full overflow-hidden rounded-md hover:bg-accent/10 active:scale-[98%]">
+            <CardContent className="relative flex h-44 items-center justify-center bg-primary/20 p-0">
               <PlayCircleIcon className="size-10" />
+              <Badge className="absolute bottom-3 right-3 bg-black/50 font-normal text-white shadow-none">
+                {formatDuration(video.duration)}
+              </Badge>
             </CardContent>
             <CardHeader className="p-4">
               <CardTitle className="text-base">{video.title}</CardTitle>
               <CardDescription className="text-xs">
-                20 min • 20k views •{" "}
+                {/* 20 min •{" "} */}
                 {formatDistanceToNowStrict(video.createdAt, {
                   addSuffix: true,
                 })}
