@@ -11,6 +11,8 @@
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo run clean",
     "db:push": "turbo -F @bt/db push",
+    "db:generate": "turbo -F @bt/db db-generate",
+    "db:migrate": "turbo -F @bt/db migrate",
     "db:studio": "turbo -F @bt/db studio",
     "dev": "turbo watch dev --continue",
     "dev:next": "turbo watch dev -F @bt/nextjs...",
