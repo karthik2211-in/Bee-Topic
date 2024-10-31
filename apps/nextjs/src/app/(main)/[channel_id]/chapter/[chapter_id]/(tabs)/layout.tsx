@@ -17,7 +17,9 @@ async function ChapterDetails({ chapter_id }: { chapter_id: string }) {
   return (
     <div className="space-y-1">
       <h1 className="text-3xl font-bold">{chapter?.title}</h1>
-      <p className="text-sm text-muted-foreground">{chapter?.description}</p>
+      <p className="line-clamp-2 max-w-2xl text-sm text-muted-foreground">
+        {chapter?.description}
+      </p>
     </div>
   );
 }
