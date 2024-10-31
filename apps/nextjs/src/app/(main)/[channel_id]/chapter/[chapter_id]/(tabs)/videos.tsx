@@ -8,7 +8,7 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
-import { PlayCircleIcon } from "lucide-react";
+import { PlayCircleIcon, SearchXIcon } from "lucide-react";
 
 import { Button } from "@bt/ui/button";
 import {
@@ -61,7 +61,7 @@ export function Videos() {
         aria-label="Channels Empty"
         className="flex flex-col items-center gap-3 py-40"
       >
-        <PlayCircleIcon className="size-10" strokeWidth={1.25} />
+        <SearchXIcon className="size-10" strokeWidth={1.25} />
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
           No Results
         </h4>
