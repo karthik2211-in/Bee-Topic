@@ -1,10 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 
 import { cn } from "@bt/ui";
-import { ThemeProvider, ThemeToggle } from "@bt/ui/theme";
+import { ThemeProvider } from "@bt/ui/theme";
 import { Toaster } from "@bt/ui/toast";
 
 import { TRPCReactProvider } from "~/trpc/react";
@@ -16,6 +15,7 @@ import { extractRouterConfig } from "uploadthing/server";
 
 import { env } from "~/env";
 import { ourFileRouter } from "./api/uploadthing/core";
+import Providers from "./providers";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -55,13 +55,13 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           GeistMono.variable,
         )}
       >
-        <ClerkProvider>
-          <ThemeProvider
-            enableColorScheme
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-          >
+        <ThemeProvider
+          enableColorScheme
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+        >
+          <Providers>
             <NextSSRPlugin
               /**
                * The `extractRouterConfig` will extract **only** the route configs
@@ -74,8 +74,8 @@ export default function RootLayout(props: { children: React.ReactNode }) {
             <TRPCReactProvider>{props.children}</TRPCReactProvider>
 
             <Toaster richColors />
-          </ThemeProvider>
-        </ClerkProvider>
+          </Providers>
+        </ThemeProvider>
       </body>
     </html>
   );

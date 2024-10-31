@@ -19,6 +19,7 @@
     "@bt/ui": "workspace:*",
     "@bt/validators": "workspace:*",
     "@clerk/nextjs": "catalog:",
+    "@clerk/themes": "^2.1.39",
     "@t3-oss/env-nextjs": "^0.11.1",
     "@tanstack/react-query": "catalog:",
     "@trpc/client": "catalog:",
