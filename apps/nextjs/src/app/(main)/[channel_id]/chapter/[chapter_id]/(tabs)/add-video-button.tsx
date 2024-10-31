@@ -78,7 +78,7 @@ export default function AddVideoButton() {
           Add New
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-2/5 sm:max-w-xl">
+      <SheetContent className="w-2/5 overflow-y-auto sm:max-w-xl">
         <SheetHeader>
           <SheetTitle>New Video</SheetTitle>
           <SheetDescription>
