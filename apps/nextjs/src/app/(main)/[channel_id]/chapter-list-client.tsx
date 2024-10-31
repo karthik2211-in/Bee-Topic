@@ -46,7 +46,7 @@ export function ChaptersList() {
     return (
       <div className="flex flex-col gap-2">
         {Array.from({ length: 10 }).map((_, index) => (
-          <Skeleton key={index} className="h-9 w-full rounded-md" />
+          <Skeleton key={index} className="h-12 w-full rounded-md" />
         ))}
       </div>
     );
@@ -91,7 +91,7 @@ export function ChaptersList() {
           key={chapter.id}
           href={`/${params.channel_id}/chapter/${chapter.id}`}
         >
-          <ChapterItem chapter={chapter} />
+          <ChapterItem key={chapter.id} chapter={chapter} />
         </Link>
       ))}
     </div>

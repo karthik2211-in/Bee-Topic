@@ -2,7 +2,12 @@ import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
 import { and, desc, eq, ilike, sql } from "@bt/db";
-import { Chapters, CreateChapterSchema, Videos } from "@bt/db/schema";
+import {
+  Chapters,
+  CreateChapterSchema,
+  UpdateChapterSchema,
+  Videos,
+} from "@bt/db/schema";
 
 import { protectedProcedure } from "../trpc";
 
@@ -47,6 +52,17 @@ export const ChaptersRouter = {
     .input(CreateChapterSchema)
     .mutation(({ ctx, input }) => {
       return ctx.db.insert(Chapters).values(input);
+    }),
+
+  update: protectedProcedure
+    .input(UpdateChapterSchema)
+    .mutation(({ ctx, input }) => {
+      const { id, channelId, ...values } = input;
+      return ctx.db
+        .update(Chapters)
+        .set(values)
+        .where(eq(Chapters.id, id!))
+        .returning();
     }),
 
   delete: protectedProcedure.input(z.string()).mutation(({ ctx, input }) => {

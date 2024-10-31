@@ -1,9 +1,11 @@
 import React from "react";
+import { Plus } from "lucide-react";
 
+import { Button } from "@bt/ui/button";
 import { TooltipProvider } from "@bt/ui/tooltip";
 
 import { ChaptersList } from "./chapter-list-client";
-import { CreateChapterButton } from "./create-chapter";
+import { CreateChapterDialog } from "./create-chapter";
 import SearchChapter from "./search-chapter";
 
 export default function ChannelLayout({
@@ -23,7 +25,15 @@ export default function ChannelLayout({
             <p className="text-sm text-muted-foreground">All chapters</p>
             <div className="flex gap-2">
               <SearchChapter />
-              <CreateChapterButton />
+              <CreateChapterDialog>
+                <Button
+                  size={"icon"}
+                  className="size-8 w-10"
+                  variant={"secondary"}
+                >
+                  <Plus className="size-5" />
+                </Button>
+              </CreateChapterDialog>
             </div>
 
             <ChaptersList />

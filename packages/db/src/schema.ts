@@ -34,7 +34,9 @@ export const Chapters = pgTable("chapters", (t) => ({
   title: t.varchar({ length: 256 }).notNull(),
   description: t.text(),
   createdAt: t.timestamp().defaultNow().notNull(),
-  updatedAt: t.timestamp().$onUpdateFn(() => sql`now()`),
+  updatedAt: t
+    .timestamp({ mode: "date", withTimezone: true })
+    .$onUpdate(() => new Date()),
 }));
 
 export const CreateChapterSchema = createInsertSchema(Chapters, {
@@ -43,6 +45,16 @@ export const CreateChapterSchema = createInsertSchema(Chapters, {
   channelId: z.string().min(1),
 }).omit({
   id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const UpdateChapterSchema = createInsertSchema(Chapters, {
+  id: z.string().min(1),
+  title: z.string().max(256),
+  description: z.string(),
+  channelId: z.string().min(1),
+}).omit({
   createdAt: true,
   updatedAt: true,
 });
