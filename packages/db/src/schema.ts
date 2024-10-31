@@ -82,7 +82,7 @@ export const Videos = pgTable("videos", (t) => ({
   ut_fileKey: t.text().notNull(),
   isPublished: t.boolean().default(false),
   createdAt: t.timestamp().defaultNow().notNull(),
-  updatedAt: t.timestamp().$onUpdateFn(() => sql`now()`),
+  updatedAt: t.timestamp().$onUpdate(() => new Date()),
 }));
 
 export const CreateVideoSchema = createInsertSchema(Videos, {
@@ -92,6 +92,17 @@ export const CreateVideoSchema = createInsertSchema(Videos, {
   chapterId: z.string().min(1),
 }).omit({
   id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const UpdateVideoSchema = createInsertSchema(Videos, {
+  title: z.string().max(256),
+  description: z.string(),
+  id: z.string().min(1),
+}).omit({
+  ut_fileKey: true,
+  chapterId: true,
   createdAt: true,
   updatedAt: true,
 });

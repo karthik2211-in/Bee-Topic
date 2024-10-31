@@ -2,7 +2,7 @@ import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
 import { asc, eq } from "@bt/db";
-import { CreateVideoSchema, Videos } from "@bt/db/schema";
+import { CreateVideoSchema, UpdateVideoSchema, Videos } from "@bt/db/schema";
 
 import { protectedProcedure } from "../trpc";
 
@@ -43,6 +43,17 @@ export const VideosRouter = {
     .input(CreateVideoSchema)
     .mutation(({ ctx, input }) => {
       return ctx.db.insert(Videos).values(input);
+    }),
+
+  update: protectedProcedure
+    .input(UpdateVideoSchema)
+    .mutation(({ ctx, input }) => {
+      const { id, ...values } = input;
+      return ctx.db
+        .update(Videos)
+        .set(values)
+        .where(eq(Videos.id, id!))
+        .returning();
     }),
 
   delete: protectedProcedure.input(z.string()).mutation(({ ctx, input }) => {

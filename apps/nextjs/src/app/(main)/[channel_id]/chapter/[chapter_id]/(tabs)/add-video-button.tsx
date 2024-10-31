@@ -58,6 +58,7 @@ export default function AddVideoButton() {
       });
       setOpen(false);
       utils.videos.invalidate();
+      utils.chapters.invalidate();
       form.reset();
       toast.success("Video added successfully");
     } catch (e) {
