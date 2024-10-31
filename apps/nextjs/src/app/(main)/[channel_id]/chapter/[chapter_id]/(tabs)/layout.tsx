@@ -1,11 +1,14 @@
 import React from "react";
-import { Edit2 } from "lucide-react";
+import { Edit2, Trash } from "lucide-react";
 
 import { Button } from "@bt/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@bt/ui/tabs";
 
 import { api } from "~/trpc/server";
-import { EditChapterDialog } from "../../../create-chapter";
+import {
+  DeleteChapterDialog,
+  EditChapterDialog,
+} from "../../../create-chapter";
 import { ChapterTabs } from "./chapter-tabs";
 
 export default async function ChannelLayout({
@@ -25,11 +28,23 @@ export default async function ChannelLayout({
             {chapter?.description}
           </p>
         </div>
-        <EditChapterDialog chapterId={params.chapter_id}>
-          <Button size={"icon"} variant={"outline"}>
-            <Edit2 className="size-4" />
-          </Button>
-        </EditChapterDialog>
+        <div className="space-x-2">
+          <EditChapterDialog chapterId={params.chapter_id}>
+            <Button size={"sm"} variant={"outline"}>
+              <Edit2 className="size-4" /> Edit
+            </Button>
+          </EditChapterDialog>
+          <DeleteChapterDialog chapterId={params.chapter_id}>
+            <Button
+              size={"sm"}
+              className="text-destructive"
+              variant={"outline"}
+            >
+              <Trash className="size-4" />
+              Remove
+            </Button>
+          </DeleteChapterDialog>
+        </div>
       </div>
 
       <div className="px-6">

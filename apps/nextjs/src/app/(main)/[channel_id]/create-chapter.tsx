@@ -5,11 +5,21 @@ import { useParams, useRouter } from "next/navigation";
 import { Loader2, Plus, PlusCircleIcon } from "lucide-react";
 import { z } from "zod";
 
-import { Button } from "@bt/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@bt/ui/alert-dialog";
+import { Button, buttonVariants } from "@bt/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -269,5 +279,63 @@ export function EditChapterDialog({
         </Form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+export function DeleteChapterDialog({
+  chapterId,
+  children,
+}: {
+  chapterId: string;
+  children: React.ReactNode;
+}) {
+  const params = useParams();
+  const [open, onChangeOpen] = React.useState(false);
+
+  const router = useRouter();
+
+  const utils = api.useUtils();
+
+  const { mutateAsync: deleteChapter, isPending } =
+    api.chapters.delete.useMutation({
+      onError(error) {
+        toast.error(error.message);
+      },
+      onSuccess() {
+        toast.success("Chapter deleted");
+        router.push(`/${params.channel_id}`);
+        router.refresh();
+        utils.chapters.invalidate();
+        onChangeOpen(false);
+      },
+    });
+
+  async function handleDelete() {
+    await deleteChapter(chapterId);
+  }
+
+  return (
+    <AlertDialog open={open} onOpenChange={onChangeOpen}>
+      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+      <AlertDialogContent className="top-[35%]">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete your
+            chapter and remove your content within your chapter
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <Button
+            onClick={handleDelete}
+            isLoading={isPending}
+            variant={"destructive"}
+          >
+            Remove
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
