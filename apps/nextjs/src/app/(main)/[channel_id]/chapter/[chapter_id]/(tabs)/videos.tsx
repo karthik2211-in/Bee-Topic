@@ -1,9 +1,16 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 import { PlayCircleIcon } from "lucide-react";
 
+import { Button } from "@bt/ui/button";
 import {
   Card,
   CardContent,
@@ -17,10 +24,27 @@ import { api } from "~/trpc/react";
 
 export function Videos() {
   const params = useParams();
-  console.log(params);
-  const { data: videos, isLoading } = api.videos.all.useQuery({
-    chapterId: params.chapter_id as string,
-  });
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+  const videoQuery = searchParams.get("video");
+  const { data: videos, isLoading } = api.videos.all.useQuery(
+    {
+      chapterId: params.chapter_id as string,
+      query: videoQuery,
+    },
+    { queryHash: `${params.chapter_id}-${videoQuery}` },
+  );
+
+  const deleteQueryString = React.useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete(name, value);
+
+      return params.toString();
+    },
+    [searchParams],
+  );
 
   if (isLoading)
     return (
@@ -29,6 +53,31 @@ export function Videos() {
           <Skeleton className="h-64 w-full rounded-md" key={index} />
         ))}
       </div>
+    );
+
+  if (videos?.length === 0 && videoQuery)
+    return (
+      <section
+        aria-label="Channels Empty"
+        className="flex flex-col items-center gap-3 py-40"
+      >
+        <PlayCircleIcon className="size-10" strokeWidth={1.25} />
+        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+          No Results
+        </h4>
+        <p className="w-1/3 text-center text-sm text-muted-foreground">
+          No videos exists in this title `{videoQuery}`
+        </p>
+        <Button
+          onClick={() =>
+            router.push(pathname + "?" + deleteQueryString("video", videoQuery))
+          }
+          variant={"link"}
+          className="text-indigo-600"
+        >
+          Clear search
+        </Button>
+      </section>
     );
 
   if (videos?.length === 0)

@@ -1,19 +1,29 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { asc, eq } from "@bt/db";
+import { and, asc, eq, ilike } from "@bt/db";
 import { CreateVideoSchema, UpdateVideoSchema, Videos } from "@bt/db/schema";
 
 import { protectedProcedure } from "../trpc";
 
 export const VideosRouter = {
   all: protectedProcedure
-    .input(z.object({ chapterId: z.string().min(1) }))
+    .input(
+      z.object({
+        chapterId: z.string().min(1),
+        query: z.string().nullable().optional(),
+      }),
+    )
     .query(({ ctx, input }) => {
       return ctx.db.query.Videos.findMany({
         orderBy: asc(Videos.createdAt),
         limit: 10,
-        where: eq(Videos.chapterId, input.chapterId),
+        where: input.query
+          ? and(
+              eq(Videos.chapterId, input.chapterId),
+              ilike(Videos.title, `%${input.query}%`),
+            )
+          : eq(Videos.chapterId, input.chapterId),
         with: {
           chapters: {
             columns: {
