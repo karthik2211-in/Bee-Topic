@@ -1,18 +1,19 @@
 import React from "react";
-import { View } from "react-native";
-import { useAuth } from "@clerk/clerk-expo";
+import { ScrollView, View } from "react-native";
+import { Tabs } from "expo-router";
 
-import { Button } from "~/components/ui/button";
-import { Text } from "~/components/ui/text";
+import { Home } from "~/lib/icons/Home";
 
 export default function Index() {
-  const { signOut } = useAuth();
   return (
-    <View className="p-4">
-      <Text>Index</Text>
-      <Button onPress={() => signOut()}>
-        <Text>Sign out</Text>
-      </Button>
-    </View>
+    <ScrollView className="p-4">
+      <Tabs.Screen
+        options={{
+          title: "Home",
+          headerTitle: "🐝 BeeTopic",
+          tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
+        }}
+      />
+    </ScrollView>
   );
 }
