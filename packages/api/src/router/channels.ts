@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { and, asc, desc, eq, gt, ilike, lt, sql } from "@bt/db";
+import { and, asc, desc, eq, gt, gte, ilike, lt, lte, sql } from "@bt/db";
 import {
   Channels,
   Chapters,
@@ -42,36 +42,33 @@ export const channelsRouter = {
     .input(
       z.object({
         limit: z.number().min(1).max(100).nullish(),
-        cursor: z.string().nullish(), // <-- "cursor" needs to exist, but can be any type
+        cursor: z.date().nullish(), // <-- "cursor" needs to exist, but can be any type
         direction: z.enum(["forward", "backward"]), // optional, useful for bi-directional query
       }),
     )
     .query(async ({ ctx, input }) => {
       const limit = input.limit ?? 50;
-      const { cursor, direction } = input;
+      const { cursor } = input;
 
-      const paginationCondition = cursor
-        ? direction === "forward"
-          ? gt(Channels.id, cursor) // Adjust this to match your query builder syntax
-          : lt(Channels.id, cursor) // Adjust if backward pagination is needed
-        : undefined;
+      console.log("Incoming Cursor", cursor);
 
       const items = await ctx.db.query.Channels.findMany({
+        orderBy: [asc(Channels.createdAt)],
+        where: cursor ? gte(Channels.createdAt, cursor) : undefined,
         limit: limit + 1,
-        where: paginationCondition,
         with: {
-          chapters: {
-            limit: 4,
-          },
+          chapters: true,
         },
-        orderBy: asc(Channels.createdAt),
       });
+
       let nextCursor: typeof cursor | undefined = undefined;
       if (items.length > limit) {
         const nextItem = items.pop();
-        nextCursor = nextItem!.id;
-        console.log("nextCursor", nextCursor);
+        nextCursor = nextItem!.createdAt;
+        console.log("Next Cursor", nextCursor);
       }
+
+      console.log("items", items.length, items);
 
       return {
         items,

@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Text } from "~/components/ui/text";
-import { Lead } from "~/components/ui/typography";
+import { Large, Lead, Muted } from "~/components/ui/typography";
 import { Hash } from "~/lib/icons/Hash";
 import { Home } from "~/lib/icons/Home";
 import { api } from "~/utils/api";
@@ -27,8 +27,9 @@ export default function Index() {
     fetchNextPage,
     hasNextPage,
   } = api.channels.infinite.useInfiniteQuery(
-    { limit: 2 },
+    { limit: 5 },
     {
+      initialCursor: undefined,
       getNextPageParam: (lastPage) => {
         console.log("lastPage", lastPage.nextCursor);
         return lastPage.nextCursor;
@@ -52,7 +53,7 @@ export default function Index() {
         <FlashList
           data={data?.pages.flatMap((page) => page.items)}
           keyExtractor={(item, index) => item.id + index}
-          estimatedItemSize={100}
+          estimatedItemSize={400}
           StickyHeaderComponent={() => (
             <Lead>Let's learn something new today 🧠</Lead>
           )}
@@ -74,28 +75,39 @@ export default function Index() {
                 </Button>
               </CardHeader>
               <CardContent className="flex-row flex-wrap justify-between p-0 py-4">
-                {channel.chapters.map((chapter) => (
-                  <Card
-                    key={chapter.id}
-                    className="my-2 aspect-square w-[48%] overflow-hidden"
-                  >
-                    <CardContent className="border-b-hairline h-32 items-center justify-center bg-primary/20 p-0">
-                      <Hash size={42} className="text-foreground/30" />
-                    </CardContent>
-                    <CardHeader className="p-3">
-                      <CardTitle
-                        numberOfLines={1}
-                        ellipsizeMode="tail"
-                        className="text-base"
-                      >
-                        {chapter.title}
-                      </CardTitle>
-                      <CardDescription className="text-xs">
-                        10 videos
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
-                ))}
+                {channel.chapters?.length === 0 ? (
+                  <View className="border-hairline aspect-square h-32 w-full items-center justify-center gap-2 rounded-md border-dashed border-border">
+                    <Hash size={32} className="text-muted-foreground" />
+                    <Lead>No chapters yet</Lead>
+                    <Muted className="w-1/2 text-center">
+                      Subscribe to get all notification about this channel
+                      updates
+                    </Muted>
+                  </View>
+                ) : (
+                  channel.chapters.map((chapter) => (
+                    <Card
+                      key={chapter.id}
+                      className="my-2.5 aspect-square w-[48%] overflow-hidden"
+                    >
+                      <CardContent className="border-b-hairline h-32 items-center justify-center bg-primary/20 p-0">
+                        <Hash size={42} className="text-foreground/30" />
+                      </CardContent>
+                      <CardHeader className="p-3">
+                        <CardTitle
+                          numberOfLines={1}
+                          ellipsizeMode="tail"
+                          className="text-base"
+                        >
+                          {chapter.title}
+                        </CardTitle>
+                        <CardDescription className="text-xs">
+                          10 videos
+                        </CardDescription>
+                      </CardHeader>
+                    </Card>
+                  ))
+                )}
               </CardContent>
             </Card>
           )}
