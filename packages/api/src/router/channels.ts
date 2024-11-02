@@ -1,12 +1,13 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { and, asc, desc, eq, gt, gte, ilike, lt, lte, sql } from "@bt/db";
+import { and, asc, count, desc, eq, gte, ilike, sql } from "@bt/db";
 import {
   Channels,
   Chapters,
   CreateChannelSchema,
   UpdateChannelSchema,
+  Videos,
 } from "@bt/db/schema";
 
 import { protectedProcedure } from "../trpc";
@@ -57,21 +58,54 @@ export const channelsRouter = {
         where: cursor ? gte(Channels.createdAt, cursor) : undefined,
         limit: limit + 1,
         with: {
-          chapters: true,
+          chapters: {
+            limit: 4,
+          },
         },
       });
 
+      const channelsWithTotalChapters = await Promise.all(
+        items.map(async (channelItem) => {
+          //find the chapters count
+          const item = await ctx.db
+            .select({ totalChapters: count(Chapters.channelId) })
+            .from(Chapters)
+            .where(eq(Chapters.channelId, channelItem.id))
+            .groupBy(Chapters.channelId);
+
+          //find videos count
+          const chapters = await Promise.all(
+            channelItem.chapters.map(async (chapter) => {
+              const chapterItem = await ctx.db
+                .select({ totalVideos: count(Videos.chapterId) })
+                .from(Videos)
+                .where(eq(Videos.chapterId, chapter.id))
+                .groupBy(Videos.chapterId);
+
+              return {
+                ...chapter,
+                totalVideos: chapterItem.at(0)?.totalVideos ?? 0,
+              };
+            }),
+          );
+
+          return {
+            ...channelItem,
+            chapters,
+            totalChapters: item?.at(0)?.totalChapters ?? 0,
+          };
+        }),
+      );
+
       let nextCursor: typeof cursor | undefined = undefined;
-      if (items.length > limit) {
-        const nextItem = items.pop();
+      if (channelsWithTotalChapters.length > limit) {
+        const nextItem = channelsWithTotalChapters.pop();
         nextCursor = nextItem!.createdAt;
         console.log("Next Cursor", nextCursor);
       }
 
-      console.log("items", items.length, items);
-
       return {
-        items,
+        items: channelsWithTotalChapters,
         nextCursor,
       };
     }),

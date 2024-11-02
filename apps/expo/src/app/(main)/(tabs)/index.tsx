@@ -67,7 +67,7 @@ export default function Index() {
                 <View>
                   <CardTitle className="text-base">{channel.title}</CardTitle>
                   <CardDescription className="text-sm">
-                    10 Chapters • 200 Subscribers
+                    {channel.totalChapters} Chapters • 200 Subscribers
                   </CardDescription>
                 </View>
                 <Button size={"sm"} className="rounded-full">
@@ -102,7 +102,7 @@ export default function Index() {
                           {chapter.title}
                         </CardTitle>
                         <CardDescription className="text-xs">
-                          10 videos
+                          {chapter.totalVideos} videos
                         </CardDescription>
                       </CardHeader>
                     </Card>
