@@ -1,6 +1,6 @@
 import React from "react";
-import { ActivityIndicator, View } from "react-native";
-import { Tabs } from "expo-router";
+import { ActivityIndicator, TouchableNativeFeedback, View } from "react-native";
+import { Link, Tabs } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 
 import { Button } from "~/components/ui/button";
@@ -61,7 +61,7 @@ export default function Index() {
           renderItem={({ item: channel }) => (
             <Card
               key={channel.id}
-              className="my-6 border-0 bg-transparent shadow-none"
+              className="my-7 border-0 bg-transparent shadow-none"
             >
               <CardHeader className="flex-row items-center justify-between p-0">
                 <View>
@@ -86,26 +86,30 @@ export default function Index() {
                   </View>
                 ) : (
                   channel.chapters.map((chapter) => (
-                    <Card
-                      key={chapter.id}
-                      className="my-2.5 aspect-square w-[48%] overflow-hidden"
-                    >
-                      <CardContent className="border-b-hairline h-32 items-center justify-center bg-primary/20 p-0">
-                        <Hash size={42} className="text-foreground/30" />
-                      </CardContent>
-                      <CardHeader className="p-3">
-                        <CardTitle
-                          numberOfLines={1}
-                          ellipsizeMode="tail"
-                          className="text-base"
+                    <Link asChild href={`/chapters/${chapter.id}`}>
+                      <TouchableNativeFeedback>
+                        <Card
+                          key={chapter.id}
+                          className="my-3 aspect-square w-[48%] overflow-hidden border-border/25"
                         >
-                          {chapter.title}
-                        </CardTitle>
-                        <CardDescription className="text-xs">
-                          {chapter.totalVideos} videos
-                        </CardDescription>
-                      </CardHeader>
-                    </Card>
+                          <CardContent className="border-b-hairline h-32 items-center justify-center bg-primary/20 p-0">
+                            <Hash size={42} className="text-foreground/30" />
+                          </CardContent>
+                          <CardHeader className="p-3">
+                            <CardTitle
+                              numberOfLines={1}
+                              ellipsizeMode="tail"
+                              className="text-base"
+                            >
+                              {chapter.title}
+                            </CardTitle>
+                            <CardDescription className="text-xs">
+                              {chapter.totalVideos} videos
+                            </CardDescription>
+                          </CardHeader>
+                        </Card>
+                      </TouchableNativeFeedback>
+                    </Link>
                   ))
                 )}
               </CardContent>
