@@ -76,7 +76,7 @@ export default function Index() {
               </CardHeader>
               <CardContent className="flex-row flex-wrap justify-between p-0 py-4">
                 {channel.chapters?.length === 0 ? (
-                  <View className="border-hairline aspect-square h-32 w-full items-center justify-center gap-2 rounded-md border-dashed border-border">
+                  <View className="aspect-square h-32 w-full items-center justify-center gap-2 rounded-md border border-dashed border-border">
                     <Hash size={32} className="text-muted-foreground" />
                     <Lead>No chapters yet</Lead>
                     <Muted className="w-1/2 text-center">
@@ -90,9 +90,9 @@ export default function Index() {
                       <TouchableNativeFeedback>
                         <Card
                           key={chapter.id}
-                          className="my-3 aspect-square w-[48%] overflow-hidden border-border/25"
+                          className="my-3 aspect-square w-[48%] overflow-hidden"
                         >
-                          <CardContent className="border-b-hairline h-32 items-center justify-center bg-primary/20 p-0">
+                          <CardContent className="h-32 items-center justify-center border-b border-b-border bg-primary/5 p-0">
                             <Hash size={42} className="text-foreground/30" />
                           </CardContent>
                           <CardHeader className="p-3">

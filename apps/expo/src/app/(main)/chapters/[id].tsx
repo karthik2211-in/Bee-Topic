@@ -1,6 +1,10 @@
 import React from "react";
 import { ActivityIndicator, View } from "react-native";
-import { Stack, useLocalSearchParams } from "expo-router";
+import {
+  Stack,
+  useGlobalSearchParams,
+  useLocalSearchParams,
+} from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 
 import { Button } from "~/components/ui/button";
@@ -14,15 +18,13 @@ import {
 import { Text } from "~/components/ui/text";
 import { Hash } from "~/lib/icons/Hash";
 import { PlayCircle } from "~/lib/icons/PlayCircle";
-import { Tv } from "~/lib/icons/Tv";
+import { Sprout } from "~/lib/icons/Sprout";
 import { api } from "~/utils/api";
 
 export default function Chapter() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: chapter } = api.chapters.byId.useQuery(
-    { id },
-    { queryHash: `${id}` },
-  );
+  const params = useLocalSearchParams<{ id: string }>();
+  const chapterId = params.id;
+  const { data: chapter } = api.chapters.byId.useQuery({ id: chapterId });
   const {
     data: videos,
     isRefetching,
@@ -32,11 +34,24 @@ export default function Chapter() {
     fetchNextPage,
     isFetchingNextPage,
   } = api.videos.infinite.useInfiniteQuery(
-    { limit: 5, chapterId: id },
-    { getNextPageParam: (lastPage) => lastPage.nextCursor, queryHash: `${id}` },
+    { limit: 5, chapterId },
+    { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
-  console.log(videos?.pages.flatMap((page) => page.items));
+  function formatDuration(seconds: number) {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+
+    // Format the result based on duration length
+    if (hrs > 0) {
+      // Format as "H:MM:SS"
+      return `${hrs}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    } else {
+      // Format as "M:SS"
+      return `${mins}:${String(secs).padStart(2, "0")}`;
+    }
+  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -52,26 +67,32 @@ export default function Chapter() {
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
-          <ActivityIndicator size={40} />
+          <ActivityIndicator size={"large"} />
         </View>
       ) : (
         <FlashList
+          data={videos?.pages?.flatMap((page) => page.items) || []}
+          estimatedItemSize={2}
+          contentContainerStyle={{ padding: 12 }}
+          keyExtractor={(item, index) => item.id}
           ListHeaderComponent={
             <Card
               key={chapter?.id}
-              className="border-b-hairline overflow-hidden rounded-none border-border"
+              className="border-b-hairline mb-3 overflow-hidden border-border"
             >
-              <CardContent className="border-b-hairline h-52 items-center justify-center bg-primary/20 p-0">
-                <Hash size={42} className="text-foreground/30" />
+              <CardContent className="h-52 items-center justify-center border-b border-border bg-primary/5 p-0">
+                <Hash size={42} className="text-foreground/20" />
               </CardContent>
-              <CardHeader className="p-3">
+              <CardHeader className="gap-2 p-3">
                 <CardTitle>{chapter?.title}</CardTitle>
-                <CardDescription className="p-0 text-foreground/70">
-                  {chapter?.description}
-                </CardDescription>
+                {chapter?.description && (
+                  <CardDescription className="p-0 text-foreground/70">
+                    {chapter?.description}
+                  </CardDescription>
+                )}
                 <Card className="flex flex-row items-center overflow-hidden rounded-none border-0">
-                  <CardContent className="border-hairline aspect-video h-16 w-20 items-center justify-center rounded-lg bg-primary/20 p-0">
-                    <Tv size={18} className="text-foreground/30" />
+                  <CardContent className="aspect-video h-16 w-20 items-center justify-center rounded-lg border border-border bg-primary/5 p-0">
+                    <Sprout size={18} className="text-foreground/30" />
                   </CardContent>
                   <CardHeader className="w-full flex-shrink flex-row items-center justify-between p-3">
                     <View className="justify-between">
@@ -90,27 +111,27 @@ export default function Chapter() {
               </CardHeader>
             </Card>
           }
-          data={videos?.pages?.flatMap((page) => page.items) || []}
-          keyExtractor={(item, index) => item.id}
-          estimatedItemSize={2}
           renderItem={({ item: video }) => (
-            <Card className="mb-2 flex flex-shrink flex-row items-center overflow-hidden p-3">
+            <Card className="mb-3 flex flex-shrink flex-row items-center overflow-hidden p-3">
               <CardContent className="items-center justify-center rounded-sm p-0">
-                <PlayCircle size={32} className="text-primary" />
+                <PlayCircle
+                  size={32}
+                  className="text-card-foreground/50"
+                  strokeWidth={1}
+                />
               </CardContent>
-              <CardHeader className="h-full w-full flex-shrink flex-row items-start justify-between p-3">
-                <View>
+              <CardHeader className="h-full w-full flex-shrink flex-row items-start justify-between px-3 py-0">
+                <View className="gap-1">
                   <CardTitle className="text-base">{video?.title}</CardTitle>
                   <CardDescription className="p-0 text-xs text-foreground/70">
-                    {video?.description}
+                    {formatDuration(video.duration)}
                   </CardDescription>
                 </View>
               </CardHeader>
             </Card>
           )}
           onEndReached={() => {
-            console.log("Reached", hasNextPage);
-            fetchNextPage();
+            if (hasNextPage) fetchNextPage();
           }}
           onRefresh={() => refetch()}
           refreshing={isRefetching}

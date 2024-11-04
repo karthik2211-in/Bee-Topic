@@ -1,4 +1,5 @@
 import type { TRPCRouterRecord } from "@trpc/server";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { and, asc, eq, gte, ilike } from "@bt/db";
@@ -47,20 +48,26 @@ export const VideosRouter = {
         limit: z.number().min(1).max(100).nullish(),
         cursor: z.string().nullish(), // <-- "cursor" needs to exist, but can be any type
         direction: z.enum(["forward", "backward"]), // optional, useful for bi-directional query
-        chapterId: z.string().min(1),
       }),
     )
+    .input(z.object({ chapterId: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
       const limit = input.limit ?? 50;
       const { cursor, chapterId } = input;
 
-      console.log("Incoming Cursor", cursor);
+      if (!chapterId)
+        throw new TRPCError({
+          message: "No chapter ID mentioned",
+          code: "BAD_REQUEST",
+        });
+
+      console.log("Incoming Cursor", chapterId);
 
       const items = await ctx.db.query.Videos.findMany({
         orderBy: [asc(Videos.title)],
         where: cursor
           ? and(eq(Videos.chapterId, chapterId), gte(Videos.title, cursor))
-          : undefined,
+          : eq(Videos.chapterId, chapterId),
         limit: limit + 1,
       });
 
