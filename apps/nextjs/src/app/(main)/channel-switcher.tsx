@@ -7,6 +7,7 @@ import {
   ChevronsUpDownIcon,
   ShellIcon,
   SlashIcon,
+  Sprout,
 } from "lucide-react";
 
 import { cn } from "@bt/ui";
@@ -50,7 +51,7 @@ export default function ChannelSwitcher() {
           <Button
             isLoading={isLoading}
             loadingText=""
-            variant="ghost"
+            variant="outline"
             role="combobox"
             size={"sm"}
             aria-expanded={open}
@@ -58,7 +59,7 @@ export default function ChannelSwitcher() {
           >
             {params.channel_id ? (
               <div className="flex items-center gap-3">
-                <ShellIcon className="size-4" />
+                <Sprout className="size-5 text-foreground/80" />
                 {
                   channels.find(
                     (channel) => channel.value === params.channel_id,
@@ -86,7 +87,7 @@ export default function ChannelSwitcher() {
                       setOpen(false);
                     }}
                   >
-                    <ShellIcon />
+                    <Sprout />
                     {channel.label}
                     <CheckIcon
                       className={cn(

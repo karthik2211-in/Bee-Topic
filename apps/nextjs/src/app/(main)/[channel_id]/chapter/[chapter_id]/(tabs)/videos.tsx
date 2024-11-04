@@ -125,10 +125,10 @@ export function Videos() {
         <Link
           href={`/${video.chapters.channel.id}/chapter/${video.chapterId}/v/${video.id}`}
         >
-          <Card className="w-full overflow-hidden rounded-md hover:bg-accent/10 active:scale-[98%]">
-            <CardContent className="relative flex h-44 items-center justify-center bg-primary/20 p-0">
-              <PlayCircleIcon className="size-10" />
-              <Badge className="absolute bottom-3 right-3 bg-black/50 font-normal text-white shadow-none">
+          <Card className="w-full overflow-hidden rounded-md hover:bg-accent active:scale-[98%]">
+            <CardContent className="relative flex h-44 items-center justify-center border-b bg-primary/5 p-0">
+              <PlayCircleIcon className="size-10 text-primary/60" />
+              <Badge className="absolute bottom-3 right-3 bg-black/50 font-normal text-white shadow-none hover:bg-black/50">
                 {formatDuration(video.duration)}
               </Badge>
             </CardContent>

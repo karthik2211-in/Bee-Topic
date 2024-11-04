@@ -37,8 +37,8 @@ export default function ChapterItem({
         params.chapter_id === chapter.id && "bg-accent/30",
       )}
     >
-      <CardContent className="flex size-12 items-center justify-center border-r bg-primary/20 p-2">
-        <HashIcon strokeWidth={1} />
+      <CardContent className="flex size-12 items-center justify-center border-r bg-primary/5 p-2">
+        <HashIcon className="text-foreground/50" />
       </CardContent>
       <CardHeader className="flex w-full flex-row items-center justify-between gap-1 space-y-0 p-0 px-2">
         <div>
