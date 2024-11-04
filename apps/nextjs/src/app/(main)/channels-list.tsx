@@ -7,7 +7,7 @@ import { formatDistanceToNowStrict } from "date-fns";
 import {
   MoreHorizontalIcon,
   SearchXIcon,
-  ShellIcon,
+  Sprout,
   TvMinimal,
 } from "lucide-react";
 
@@ -106,10 +106,10 @@ export function ChannelsListClient() {
   return (
     <section aria-label="Channels Grid" className="grid grid-cols-4 gap-4">
       {channels.data?.map((channel) => (
-        <Card className="overflow-hidden rounded-lg transition-all duration-200 hover:cursor-pointer hover:bg-accent/60">
+        <Card className="overflow-hidden rounded-lg transition-all duration-200 hover:cursor-pointer hover:bg-accent/80">
           <Link key={channel.id} href={`/${channel.id}`}>
-            <CardContent className="flex h-44 items-center justify-center border-b bg-primary/15">
-              <ShellIcon className="size-20 text-primary" strokeWidth={1.3} />
+            <CardContent className="flex h-44 items-center justify-center border-b bg-primary/5">
+              <Sprout className="size-16 text-primary/60" strokeWidth={1.5} />
             </CardContent>
           </Link>
           <CardHeader className="w-full flex-row justify-between p-4">

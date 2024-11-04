@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { and, asc, eq, ilike } from "@bt/db";
+import { and, asc, eq, gte, ilike } from "@bt/db";
 import { CreateVideoSchema, UpdateVideoSchema, Videos } from "@bt/db/schema";
 
 import { protectedProcedure } from "../trpc";
@@ -39,6 +39,42 @@ export const VideosRouter = {
           },
         },
       });
+    }),
+
+  infinite: protectedProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).nullish(),
+        cursor: z.string().nullish(), // <-- "cursor" needs to exist, but can be any type
+        direction: z.enum(["forward", "backward"]), // optional, useful for bi-directional query
+        chapterId: z.string().min(1),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const limit = input.limit ?? 50;
+      const { cursor, chapterId } = input;
+
+      console.log("Incoming Cursor", cursor);
+
+      const items = await ctx.db.query.Videos.findMany({
+        orderBy: [asc(Videos.title)],
+        where: cursor
+          ? and(eq(Videos.chapterId, chapterId), gte(Videos.title, cursor))
+          : undefined,
+        limit: limit + 1,
+      });
+
+      let nextCursor: typeof cursor | undefined = undefined;
+      if (items.length > limit) {
+        const nextItem = items.pop();
+        nextCursor = nextItem!.title;
+        console.log("Next Cursor", nextCursor);
+      }
+
+      return {
+        items,
+        nextCursor,
+      };
     }),
 
   byId: protectedProcedure

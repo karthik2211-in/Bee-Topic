@@ -51,8 +51,8 @@ export default function Index() {
         <ActivityIndicator size="large" color="#4CAF50" />
       ) : (
         <FlashList
-          data={data?.pages.flatMap((page) => page.items)}
-          keyExtractor={(item, index) => item.id + index}
+          data={data?.pages?.flatMap((page) => page.items) || []}
+          keyExtractor={(item, index) => item.id}
           estimatedItemSize={400}
           StickyHeaderComponent={() => (
             <Lead>Let's learn something new today 🧠</Lead>
