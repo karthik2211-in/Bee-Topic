@@ -52,7 +52,7 @@ export const channelsRouter = {
       const limit = input.limit ?? 50;
       const { cursor } = input;
 
-      console.log("Incoming Cursor", cursor);
+      // console.log("Incoming Cursor", cursor);
 
       const items = await ctx.db.query.Channels.findMany({
         orderBy: [asc(Channels.createdAt)],
