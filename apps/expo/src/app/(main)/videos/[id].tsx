@@ -20,6 +20,7 @@ import { StatusBar } from "expo-status-bar";
 import Slider from "@react-native-community/slider";
 import { ArrowLeft, Minimize2 } from "lucide-react-native";
 
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -307,7 +308,9 @@ export default function VideoPlayer() {
           {!isFullScreen && (
             <View className="gap-3 p-4">
               <H4>{videoDetails?.title}</H4>
-              <Muted>{videoDetails?.description}</Muted>
+              {videoDetails?.description && (
+                <Muted>{videoDetails?.description}</Muted>
+              )}
               <Card className="flex flex-row items-center gap-2 overflow-hidden p-3">
                 <CardContent className="aspect-video h-16 w-20 items-center justify-center rounded-lg border border-border bg-primary/5 p-0">
                   <Sprout size={18} className="text-foreground/30" />
@@ -326,6 +329,24 @@ export default function VideoPlayer() {
                   </Button>
                 </CardHeader>
               </Card>
+              <View className="flex-row items-center gap-2">
+                <Avatar className="size-6" alt="Channel Creator">
+                  <AvatarImage
+                    source={{
+                      uri: videoDetails?.chapters.channel.createdByUserImage,
+                    }}
+                  />
+                  <AvatarFallback className="items-center justify-center">
+                    <Text>
+                      {videoDetails?.chapters.channel.createdBy?.charAt(0)}
+                    </Text>
+                  </AvatarFallback>
+                </Avatar>
+                <Muted>
+                  {videoDetails?.chapters.channel.createdBy} • Creator of this
+                  channel{" "}
+                </Muted>
+              </View>
             </View>
           )}
         </>

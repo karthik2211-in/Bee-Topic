@@ -1,4 +1,5 @@
 import type { TRPCRouterRecord } from "@trpc/server";
+import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -86,8 +87,8 @@ export const VideosRouter = {
 
   byId: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(({ ctx, input }) => {
-      return ctx.db.query.Videos.findFirst({
+    .query(async ({ ctx, input }) => {
+      const data = await ctx.db.query.Videos.findFirst({
         where: eq(Videos.id, input.id),
         with: {
           chapters: {
@@ -97,6 +98,25 @@ export const VideosRouter = {
           },
         },
       });
+
+      const clerk = await clerkClient();
+      const user = await clerk.users.getUser(
+        data?.chapters.channel.createdByClerkUserId ?? "",
+      );
+
+      const mappedData = {
+        ...data,
+        chapters: {
+          ...data?.chapters,
+          channel: {
+            ...data?.chapters?.channel,
+            createdBy: user.fullName,
+            createdByUserImage: user.imageUrl,
+          },
+        },
+      };
+
+      return mappedData;
     }),
 
   create: protectedProcedure
