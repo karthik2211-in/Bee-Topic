@@ -1,6 +1,7 @@
 import React from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, TouchableNativeFeedback, View } from "react-native";
 import {
+  Link,
   Stack,
   useGlobalSearchParams,
   useLocalSearchParams,
@@ -81,7 +82,7 @@ export default function Chapter() {
               className="border-b-hairline mb-3 overflow-hidden border-border"
             >
               <CardContent className="h-52 items-center justify-center border-b border-border bg-primary/5 p-0">
-                <Hash size={42} className="text-foreground/20" />
+                <Hash size={54} className="text-foreground/20" />
               </CardContent>
               <CardHeader className="gap-2 p-3">
                 <CardTitle>{chapter?.title}</CardTitle>
@@ -112,23 +113,29 @@ export default function Chapter() {
             </Card>
           }
           renderItem={({ item: video }) => (
-            <Card className="mb-3 flex flex-shrink flex-row items-center overflow-hidden p-3">
-              <CardContent className="items-center justify-center rounded-sm p-0">
-                <PlayCircle
-                  size={32}
-                  className="text-card-foreground/50"
-                  strokeWidth={1}
-                />
-              </CardContent>
-              <CardHeader className="h-full w-full flex-shrink flex-row items-start justify-between px-3 py-0">
-                <View className="gap-1">
-                  <CardTitle className="text-base">{video?.title}</CardTitle>
-                  <CardDescription className="p-0 text-xs text-foreground/70">
-                    {formatDuration(video.duration)}
-                  </CardDescription>
-                </View>
-              </CardHeader>
-            </Card>
+            <Link href={`/videos/${video.id}`} asChild>
+              <TouchableNativeFeedback>
+                <Card className="mb-3 flex flex-shrink flex-row items-center overflow-hidden p-3">
+                  <CardContent className="items-center justify-center rounded-sm p-0">
+                    <PlayCircle
+                      size={32}
+                      className="text-card-foreground/50"
+                      strokeWidth={1}
+                    />
+                  </CardContent>
+                  <CardHeader className="h-full w-full flex-shrink flex-row items-start justify-between px-3 py-0">
+                    <View className="gap-1">
+                      <CardTitle className="text-base">
+                        {video?.title}
+                      </CardTitle>
+                      <CardDescription className="p-0 text-xs text-foreground/70">
+                        {formatDuration(video.duration)}
+                      </CardDescription>
+                    </View>
+                  </CardHeader>
+                </Card>
+              </TouchableNativeFeedback>
+            </Link>
           )}
           onEndReached={() => {
             if (hasNextPage) fetchNextPage();

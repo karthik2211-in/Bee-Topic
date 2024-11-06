@@ -37,5 +37,19 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     tsconfigPaths: true,
     typedRoutes: true,
   },
-  plugins: ["expo-router"],
+  plugins: [
+    "expo-router",
+    [
+      "react-native-video",
+      {
+        enableNotificationControls: true,
+        androidExtensions: {
+          useExoplayerRtsp: false,
+          useExoplayerSmoothStreaming: false,
+          useExoplayerHls: false,
+          useExoplayerDash: false,
+        },
+      },
+    ],
+  ],
 });

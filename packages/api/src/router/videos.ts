@@ -89,6 +89,9 @@ export const VideosRouter = {
     .query(({ ctx, input }) => {
       return ctx.db.query.Videos.findFirst({
         where: eq(Videos.id, input.id),
+        with: {
+          chapters: true,
+        },
       });
     }),
 
