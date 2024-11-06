@@ -20,7 +20,7 @@ import Slider from "@react-native-community/slider";
 import { ArrowLeft, Minimize2 } from "lucide-react-native";
 
 import { Text } from "~/components/ui/text";
-import { Muted } from "~/components/ui/typography";
+import { H4, Muted } from "~/components/ui/typography";
 import { Maximize2 } from "~/lib/icons/Maximize2";
 import { PauseCircle } from "~/lib/icons/PauseCircle";
 import { PlayCircle } from "~/lib/icons/PlayCircle";
@@ -134,98 +134,115 @@ export default function VideoPlayer() {
       {isLoading ? (
         <ActivityIndicator size={"large"} />
       ) : (
-        <TouchableOpacity
-          style={{
-            position: "relative",
-            backgroundColor: "black",
-            flex: isFullScreen ? 1 : undefined,
-          }}
-          activeOpacity={1}
-          onPress={() => setShowControls(!showControls)}
-        >
-          <View
+        <>
+          <TouchableOpacity
             style={{
+              position: "relative",
               backgroundColor: "black",
-              height: isFullScreen ? "100%" : undefined,
-              width: isFullScreen ? "100%" : undefined,
+              flex: isFullScreen ? 1 : undefined,
             }}
+            activeOpacity={1}
+            onPress={() => setShowControls(!showControls)}
           >
-            <Video
-              source={{
-                uri: `https://utfs.io/f/${videoDetails?.ut_fileKey}`,
-              }}
+            <View
               style={{
-                width: "100%",
-                height: isFullScreen ? "100%" : (70 * 19) / 6,
+                backgroundColor: "black",
+                height: isFullScreen ? "100%" : undefined,
+                width: isFullScreen ? "100%" : undefined,
               }}
-              controls={false}
-              ref={videoRef}
-              paused={paused}
-              onLoad={handleLoad}
-              onProgress={handleProgress}
-              onEnd={handleEnd}
-              resizeMode="contain"
-            />
-            {showControls && (
-              <TouchableOpacity
-                onPress={() => setShowControls(!showControls)}
-                activeOpacity={1}
-                style={{ position: "absolute" }}
-                className="h-full w-full items-center justify-between bg-black/60"
-              >
-                {/**Header */}
-                <View className="w-full flex-row items-center justify-between p-5">
-                  <TouchableOpacity
-                    onPress={() =>
-                      isFullScreen ? exitFullScreen() : router.back()
-                    }
-                  >
-                    <ArrowLeft size={24} color={"#ffff"} strokeWidth={1.25} />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() =>
-                      isFullScreen ? exitFullScreen() : enterFullScreen()
-                    }
-                  >
-                    {isFullScreen ? (
-                      <Minimize2 size={24} color={"#ffff"} strokeWidth={1.25} />
+            >
+              <Video
+                source={{
+                  uri: `https://utfs.io/f/${videoDetails?.ut_fileKey}`,
+                }}
+                style={{
+                  width: "100%",
+                  height: isFullScreen ? "100%" : (70 * 19) / 6,
+                }}
+                controls={false}
+                ref={videoRef}
+                paused={paused}
+                onLoad={handleLoad}
+                onProgress={handleProgress}
+                onEnd={handleEnd}
+                resizeMode="contain"
+              />
+              {showControls && (
+                <TouchableOpacity
+                  onPress={() => setShowControls(!showControls)}
+                  activeOpacity={1}
+                  style={{ position: "absolute" }}
+                  className="h-full w-full items-center justify-between bg-black/60"
+                >
+                  {/**Header */}
+                  <View className="w-full flex-row items-center justify-between p-5">
+                    <TouchableOpacity
+                      onPress={() =>
+                        isFullScreen ? exitFullScreen() : router.back()
+                      }
+                    >
+                      <ArrowLeft size={24} color={"#ffff"} strokeWidth={1.25} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() =>
+                        isFullScreen ? exitFullScreen() : enterFullScreen()
+                      }
+                    >
+                      {isFullScreen ? (
+                        <Minimize2
+                          size={24}
+                          color={"#ffff"}
+                          strokeWidth={1.25}
+                        />
+                      ) : (
+                        <Maximize2
+                          size={24}
+                          color={"#ffff"}
+                          strokeWidth={1.25}
+                        />
+                      )}
+                    </TouchableOpacity>
+                  </View>
+
+                  {/**Middle */}
+                  <TouchableOpacity onPress={togglePlayPause}>
+                    {paused ? (
+                      <PlayCircle strokeWidth={1} size={44} color={"#ffff"} />
                     ) : (
-                      <Maximize2 size={24} color={"#ffff"} strokeWidth={1.25} />
+                      <PauseCircle strokeWidth={1} size={44} color={"#ffff"} />
                     )}
                   </TouchableOpacity>
-                </View>
 
-                {/**Middle */}
-                <TouchableOpacity onPress={togglePlayPause}>
-                  {paused ? (
-                    <PlayCircle strokeWidth={1} size={44} color={"#ffff"} />
-                  ) : (
-                    <PauseCircle strokeWidth={1} size={44} color={"#ffff"} />
-                  )}
-                </TouchableOpacity>
-
-                {/**Footer */}
-                <View className="w-full flex-shrink flex-row items-center justify-between px-3 py-2">
-                  <View className="w-full flex-shrink">
-                    <Text className="mr-4 self-end">
-                      {formatTime(currentTime)} / {formatTime(duration)}
-                    </Text>
-                    <Slider
-                      style={{ width: "100%", flexShrink: 1 }}
-                      minimumValue={0}
-                      maximumValue={duration}
-                      value={currentTime}
-                      onValueChange={(time) => handleSeek(time)}
-                      minimumTrackTintColor="green"
-                      maximumTrackTintColor="green"
-                      thumbTintColor="green"
-                    />
+                  {/**Footer */}
+                  <View className="w-full flex-shrink flex-row items-center justify-between px-3 py-2">
+                    <View className="w-full flex-shrink">
+                      <Text className="mr-4 self-end">
+                        {formatTime(currentTime)} / {formatTime(duration)}
+                      </Text>
+                      <Slider
+                        style={{ width: "100%", flexShrink: 1 }}
+                        minimumValue={0}
+                        maximumValue={duration}
+                        value={currentTime}
+                        onValueChange={(time) => handleSeek(time)}
+                        minimumTrackTintColor="green"
+                        maximumTrackTintColor="green"
+                        thumbTintColor="green"
+                      />
+                    </View>
                   </View>
-                </View>
-              </TouchableOpacity>
-            )}
-          </View>
-        </TouchableOpacity>
+                </TouchableOpacity>
+              )}
+            </View>
+          </TouchableOpacity>
+
+          {!isFullScreen && (
+            <View className="p-4">
+              <H4>{videoDetails?.title}</H4>
+              <Muted>{videoDetails?.description}</Muted>
+            </View>
+          )}
+        </>
       )}
     </SafeAreaView>
   );
