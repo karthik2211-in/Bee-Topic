@@ -17,6 +17,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Text } from "~/components/ui/text";
+import { Muted } from "~/components/ui/typography";
 import { Hash } from "~/lib/icons/Hash";
 import { PlayCircle } from "~/lib/icons/PlayCircle";
 import { Sprout } from "~/lib/icons/Sprout";
@@ -115,24 +116,27 @@ export default function Chapter() {
           renderItem={({ item: video }) => (
             <Link href={`/videos/${video.id}`} asChild>
               <TouchableNativeFeedback>
-                <Card className="mb-3 flex flex-shrink flex-row items-center overflow-hidden p-3">
-                  <CardContent className="items-center justify-center rounded-sm p-0">
-                    <PlayCircle
-                      size={32}
-                      className="text-card-foreground/50"
-                      strokeWidth={1}
-                    />
-                  </CardContent>
-                  <CardHeader className="h-full w-full flex-shrink flex-row items-start justify-between px-3 py-0">
-                    <View className="gap-1">
-                      <CardTitle className="text-base">
-                        {video?.title}
-                      </CardTitle>
-                      <CardDescription className="p-0 text-xs text-foreground/70">
-                        {formatDuration(video.duration)}
-                      </CardDescription>
-                    </View>
-                  </CardHeader>
+                <Card className="mb-3 flex gap-2 overflow-hidden p-3">
+                  <View className="flex-shrink flex-row items-center">
+                    <CardContent className="items-center justify-center rounded-sm p-0">
+                      <PlayCircle
+                        size={32}
+                        className="text-card-foreground/50"
+                        strokeWidth={1}
+                      />
+                    </CardContent>
+                    <CardHeader className="h-full w-full flex-shrink items-start justify-between px-3 py-0">
+                      <View className="gap-1">
+                        <CardTitle className="text-base">
+                          {video?.title}
+                        </CardTitle>
+                        <CardDescription className="p-0 text-xs text-foreground/70">
+                          {formatDuration(video.duration)}
+                        </CardDescription>
+                      </View>
+                    </CardHeader>
+                  </View>
+                  {video.description && <Muted>{video.description}</Muted>}
                 </Card>
               </TouchableNativeFeedback>
             </Link>
