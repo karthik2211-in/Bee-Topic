@@ -45,6 +45,9 @@ export const ChaptersRouter = {
     .query(({ ctx, input }) => {
       return ctx.db.query.Chapters.findFirst({
         where: eq(Chapters.id, input.id),
+        with: {
+          channel: true,
+        },
       });
     }),
 

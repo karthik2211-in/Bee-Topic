@@ -20,11 +20,20 @@ import { StatusBar } from "expo-status-bar";
 import Slider from "@react-native-community/slider";
 import { ArrowLeft, Minimize2 } from "lucide-react-native";
 
+import { Button } from "~/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import { Text } from "~/components/ui/text";
 import { H4, Muted } from "~/components/ui/typography";
 import { Maximize2 } from "~/lib/icons/Maximize2";
 import { PauseCircle } from "~/lib/icons/PauseCircle";
 import { PlayCircle } from "~/lib/icons/PlayCircle";
+import { Sprout } from "~/lib/icons/Sprout";
 import { api } from "~/utils/api";
 
 export default function VideoPlayer() {
@@ -32,7 +41,7 @@ export default function VideoPlayer() {
   const { data: videoDetails, isLoading } = api.videos.byId.useQuery({ id });
   const videoRef = useRef<VideoRef>(null);
   const router = useRouter();
-  const [paused, setPaused] = useState(false);
+  const [paused, setPaused] = useState(true);
   const [duration, setDuration] = useState(0);
   const { width } = Dimensions.get("screen");
   const [currentTime, setCurrentTime] = useState(0);
@@ -296,9 +305,27 @@ export default function VideoPlayer() {
           </TouchableOpacity>
 
           {!isFullScreen && (
-            <View className="p-4">
+            <View className="gap-3 p-4">
               <H4>{videoDetails?.title}</H4>
               <Muted>{videoDetails?.description}</Muted>
+              <Card className="flex flex-row items-center gap-2 overflow-hidden p-3">
+                <CardContent className="aspect-video h-16 w-20 items-center justify-center rounded-lg border border-border bg-primary/5 p-0">
+                  <Sprout size={18} className="text-foreground/30" />
+                </CardContent>
+                <CardHeader className="w-full flex-shrink flex-row items-center justify-between p-0">
+                  <View className="justify-between">
+                    <CardTitle className="text-base">
+                      {videoDetails?.chapters.channel?.title}
+                    </CardTitle>
+                    <CardDescription className="p-0 text-xs text-foreground/70">
+                      200 Subscribers
+                    </CardDescription>
+                  </View>
+                  <Button size={"sm"} className="rounded-full">
+                    <Text>Subscribe</Text>
+                  </Button>
+                </CardHeader>
+              </Card>
             </View>
           )}
         </>

@@ -99,7 +99,7 @@ export default function Chapter() {
                   <CardHeader className="w-full flex-shrink flex-row items-center justify-between p-3">
                     <View className="justify-between">
                       <CardTitle className="text-base">
-                        {chapter?.title}
+                        {chapter?.channel?.title}
                       </CardTitle>
                       <CardDescription className="p-0 text-xs text-foreground/70">
                         200 Subscribers

@@ -90,7 +90,11 @@ export const VideosRouter = {
       return ctx.db.query.Videos.findFirst({
         where: eq(Videos.id, input.id),
         with: {
-          chapters: true,
+          chapters: {
+            with: {
+              channel: true,
+            },
+          },
         },
       });
     }),
