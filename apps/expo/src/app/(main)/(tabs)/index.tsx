@@ -1,19 +1,19 @@
-import React from "react";
-import { ActivityIndicator, TouchableNativeFeedback, View } from "react-native";
-import { Link, Tabs } from "expo-router";
+import { ActivityIndicator, Image, View } from "react-native";
+import { Tabs } from "expo-router";
+import { useClerk } from "@clerk/clerk-expo";
 import { FlashList } from "@shopify/flash-list";
 
-import { Button } from "~/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
 import { Text } from "~/components/ui/text";
-import { Large, Lead, Muted } from "~/components/ui/typography";
-import { Hash } from "~/lib/icons/Hash";
+import { H1, Muted } from "~/components/ui/typography";
 import { Home } from "~/lib/icons/Home";
 import { api } from "~/utils/api";
 
@@ -54,67 +54,56 @@ export default function Index() {
           data={data?.pages?.flatMap((page) => page.items) || []}
           keyExtractor={(item, index) => item.id}
           estimatedItemSize={400}
-          StickyHeaderComponent={() => (
-            <Lead>Let's learn something new today 🧠</Lead>
+          ListHeaderComponent={() => (
+            <H1 className="my-3 font-mono leading-snug tracking-widest">
+              Let's learn something new today{" "}
+            </H1>
           )}
           contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 10 }}
-          renderItem={({ item: channel }) => (
-            <Card
-              key={channel.id}
-              className="my-7 border-0 bg-transparent shadow-none"
-            >
-              <CardHeader className="flex-row items-center justify-between p-0">
-                <View>
-                  <CardTitle className="text-base">{channel.title}</CardTitle>
+          renderItem={({ item: channel }) => {
+            return (
+              <Card
+                key={channel.id}
+                style={{ position: "relative" }}
+                className="my-3 min-h-52 overflow-hidden rounded-3xl"
+              >
+                <Image
+                  source={require("../../../../assets/honey.png")}
+                  style={{
+                    height: 200,
+                    width: 200,
+                    position: "absolute",
+                    right: -60,
+                    top: -60,
+                    opacity: 0.8,
+                  }}
+                />
+                <CardHeader className="">
+                  <CardTitle>{channel.title}</CardTitle>
                   <CardDescription className="text-sm">
                     {channel.totalChapters} Chapters • 200 Subscribers
                   </CardDescription>
-                </View>
-                <Button size={"sm"} className="rounded-full">
-                  <Text>Subscribe</Text>
-                </Button>
-              </CardHeader>
-              <CardContent className="flex-row flex-wrap justify-between p-0 py-4">
-                {channel.chapters?.length === 0 ? (
-                  <View className="aspect-square h-32 w-full items-center justify-center gap-2 rounded-md border border-dashed border-border">
-                    <Hash size={32} className="text-muted-foreground" />
-                    <Lead>No chapters yet</Lead>
-                    <Muted className="w-1/2 text-center">
-                      Subscribe to get all notification about this channel
-                      updates
-                    </Muted>
+                </CardHeader>
+                <CardContent className="flex-row flex-wrap justify-between p-0 py-4"></CardContent>
+                <CardFooter className="w-full flex-col items-start gap-2">
+                  <Muted>Created by</Muted>
+                  <View className="flex-row items-center gap-2">
+                    <Avatar className="size-6" alt="Channel Creator">
+                      <AvatarImage
+                        source={{
+                          uri: channel?.createdByImageUrl,
+                        }}
+                      />
+                      <AvatarFallback className="items-center justify-center">
+                        <Text>{channel?.createdBy?.charAt(0)}</Text>
+                      </AvatarFallback>
+                    </Avatar>
+                    <Muted>{channel?.createdBy}</Muted>
                   </View>
-                ) : (
-                  channel.chapters.map((chapter) => (
-                    <Link asChild href={`/chapters/${chapter.id}`}>
-                      <TouchableNativeFeedback>
-                        <Card
-                          key={chapter.id}
-                          className="my-3 aspect-square w-[48%] overflow-hidden"
-                        >
-                          <CardContent className="h-32 items-center justify-center border-b border-b-border bg-primary/5 p-0">
-                            <Hash size={42} className="text-foreground/30" />
-                          </CardContent>
-                          <CardHeader className="p-3">
-                            <CardTitle
-                              numberOfLines={1}
-                              ellipsizeMode="tail"
-                              className="text-base"
-                            >
-                              {chapter.title}
-                            </CardTitle>
-                            <CardDescription className="text-xs">
-                              {chapter.totalVideos} videos
-                            </CardDescription>
-                          </CardHeader>
-                        </Card>
-                      </TouchableNativeFeedback>
-                    </Link>
-                  ))
-                )}
-              </CardContent>
-            </Card>
-          )}
+                </CardFooter>
+              </Card>
+            );
+          }}
           onEndReached={() => {
             console.log("Reached", hasNextPage);
             fetchNextPage();

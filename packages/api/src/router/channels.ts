@@ -1,4 +1,5 @@
 import type { TRPCRouterRecord } from "@trpc/server";
+import { clerkClient } from "@clerk/nextjs/server";
 import { z } from "zod";
 
 import { and, asc, count, desc, eq, gte, ilike, sql } from "@bt/db";
@@ -89,8 +90,15 @@ export const channelsRouter = {
             }),
           );
 
+          const clerk = await clerkClient();
+          const user = await clerk.users.getUser(
+            channelItem.createdByClerkUserId,
+          );
+
           return {
             ...channelItem,
+            createdBy: user.fullName,
+            createdByImageUrl: user.imageUrl,
             chapters,
             totalChapters: item?.at(0)?.totalChapters ?? 0,
           };
