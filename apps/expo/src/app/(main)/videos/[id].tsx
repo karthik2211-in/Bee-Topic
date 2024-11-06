@@ -42,7 +42,7 @@ export default function VideoPlayer() {
   const { data: videoDetails, isLoading } = api.videos.byId.useQuery({ id });
   const videoRef = useRef<VideoRef>(null);
   const router = useRouter();
-  const [paused, setPaused] = useState(true);
+  const [paused, setPaused] = useState(false);
   const [duration, setDuration] = useState(0);
   const { width } = Dimensions.get("screen");
   const [currentTime, setCurrentTime] = useState(0);
@@ -145,7 +145,17 @@ export default function VideoPlayer() {
         hideTransitionAnimation="fade"
       />
       {isLoading ? (
-        <ActivityIndicator size={"large"} />
+        <View
+          style={{
+            flex: 1,
+            height: "100%",
+            width: "auto",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <ActivityIndicator size={"large"} />
+        </View>
       ) : (
         <>
           <TouchableOpacity
@@ -195,112 +205,74 @@ export default function VideoPlayer() {
                   <ActivityIndicator size={"large"} color={"white"} />
                 </View>
               ) : (
-                <>
-                  {showControls ? (
-                    <>
-                      <TouchableOpacity
-                        onPress={() => setShowControls(!showControls)}
-                        activeOpacity={1}
-                        style={{ position: "absolute" }}
-                        className="h-full w-full items-center justify-between bg-black/60"
-                      >
-                        {/**Header */}
-                        <View className="w-full flex-row items-center justify-between p-5">
-                          <TouchableOpacity
-                            onPress={() =>
-                              isFullScreen ? exitFullScreen() : router.back()
-                            }
-                          >
-                            <ArrowLeft
-                              size={24}
-                              color={"#ffff"}
-                              strokeWidth={1.25}
-                            />
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            onPress={() =>
-                              isFullScreen
-                                ? exitFullScreen()
-                                : enterFullScreen()
-                            }
-                          >
-                            {isFullScreen ? (
-                              <Minimize2
-                                size={24}
-                                color={"#ffff"}
-                                strokeWidth={1.25}
-                              />
-                            ) : (
-                              <Maximize2
-                                size={24}
-                                color={"#ffff"}
-                                strokeWidth={1.25}
-                              />
-                            )}
-                          </TouchableOpacity>
-                        </View>
-
-                        {/**Middle */}
-                        <TouchableOpacity onPress={togglePlayPause}>
-                          {paused ? (
-                            <PlayCircle
-                              strokeWidth={1}
-                              size={44}
-                              color={"#ffff"}
-                            />
-                          ) : (
-                            <PauseCircle
-                              strokeWidth={1}
-                              size={44}
-                              color={"#ffff"}
-                            />
-                          )}
-                        </TouchableOpacity>
-
-                        {/**Footer */}
-                        <View className="w-full flex-shrink flex-row items-center justify-between px-3 py-2">
-                          <View className="w-full flex-shrink">
-                            <Text className="mr-4 self-end text-white">
-                              {formatTime(currentTime)} / {formatTime(duration)}
-                            </Text>
-                            <Slider
-                              style={{ width: "auto", flexShrink: 1 }}
-                              minimumValue={0}
-                              maximumValue={duration}
-                              value={currentTime}
-                              onValueChange={(time) => handleSeek(time)}
-                              minimumTrackTintColor="green"
-                              maximumTrackTintColor="green"
-                              thumbTintColor="green"
-                            />
-                          </View>
-                        </View>
-                      </TouchableOpacity>
-                    </>
-                  ) : (
-                    <>
-                      {!isFullScreen && (
-                        <Slider
-                          style={{
-                            width: width,
-                            position: "absolute",
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            height: 4,
-                          }}
-                          minimumValue={0}
-                          maximumValue={duration}
-                          value={currentTime}
-                          onValueChange={(time) => handleSeek(time)}
-                          minimumTrackTintColor="green"
-                          maximumTrackTintColor="white"
-                          thumbTintColor="transparent"
+                <TouchableOpacity
+                  onPress={() => setShowControls(!showControls)}
+                  activeOpacity={1}
+                  style={{
+                    position: "absolute",
+                    opacity: showControls ? 1 : 0,
+                    pointerEvents: showControls ? "auto" : "none",
+                  }}
+                  className="h-full w-full items-center justify-between bg-black/60"
+                >
+                  {/**Header */}
+                  <View className="w-full flex-row items-center justify-between p-5">
+                    <TouchableOpacity
+                      onPress={() =>
+                        isFullScreen ? exitFullScreen() : router.back()
+                      }
+                    >
+                      <ArrowLeft size={24} color={"#ffff"} strokeWidth={1.25} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() =>
+                        isFullScreen ? exitFullScreen() : enterFullScreen()
+                      }
+                    >
+                      {isFullScreen ? (
+                        <Minimize2
+                          size={24}
+                          color={"#ffff"}
+                          strokeWidth={1.25}
+                        />
+                      ) : (
+                        <Maximize2
+                          size={24}
+                          color={"#ffff"}
+                          strokeWidth={1.25}
                         />
                       )}
-                    </>
-                  )}
-                </>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/**Middle */}
+                  <TouchableOpacity onPress={togglePlayPause}>
+                    {paused ? (
+                      <PlayCircle strokeWidth={1} size={64} color={"#ffff"} />
+                    ) : (
+                      <PauseCircle strokeWidth={1} size={64} color={"#ffff"} />
+                    )}
+                  </TouchableOpacity>
+
+                  {/**Footer */}
+                  <View className="w-full flex-shrink flex-row items-center justify-between px-3 py-2">
+                    <View className="w-full flex-shrink">
+                      <Text className="mr-4 self-end text-white">
+                        {formatTime(currentTime)} / {formatTime(duration)}
+                      </Text>
+                      <Slider
+                        style={{ width: "auto", flexShrink: 1 }}
+                        minimumValue={0}
+                        maximumValue={duration}
+                        value={currentTime}
+                        onValueChange={(time) => handleSeek(time)}
+                        minimumTrackTintColor="green"
+                        maximumTrackTintColor="green"
+                        thumbTintColor="green"
+                      />
+                    </View>
+                  </View>
+                </TouchableOpacity>
               )}
             </View>
           </TouchableOpacity>
@@ -316,8 +288,12 @@ export default function VideoPlayer() {
                   <Sprout size={18} className="text-foreground/30" />
                 </CardContent>
                 <CardHeader className="w-full flex-shrink flex-row items-center justify-between p-0">
-                  <View className="justify-between">
-                    <CardTitle className="text-base">
+                  <View className="w-1/2 justify-between">
+                    <CardTitle
+                      className="text-base"
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
                       {videoDetails?.chapters.channel?.title}
                     </CardTitle>
                     <CardDescription className="p-0 text-xs text-foreground/70">
