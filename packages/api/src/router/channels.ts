@@ -120,13 +120,29 @@ export const channelsRouter = {
 
   byId: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(({ ctx, input }) => {
-      return ctx.db.query.Channels.findFirst({
+    .query(async ({ ctx, input }) => {
+      const item = await ctx.db.query.Channels.findFirst({
         where: and(
           eq(Channels.id, input.id),
           eq(Channels.createdByClerkUserId, ctx.session.userId),
         ),
       });
+
+      const agregate = await ctx.db
+        .select({ totalChapters: count(Chapters.channelId) })
+        .from(Chapters)
+        .where(eq(Chapters.channelId, input.id))
+        .groupBy(Chapters.channelId);
+
+      const clerk = await clerkClient();
+      const user = await clerk.users.getUser(item?.createdByClerkUserId ?? "");
+
+      return {
+        totalChapters: agregate.at(0)?.totalChapters,
+        createdBy: user.fullName,
+        createdByImageUrl: user.imageUrl,
+        ...item,
+      };
     }),
 
   create: protectedProcedure

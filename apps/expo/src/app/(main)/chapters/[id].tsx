@@ -97,8 +97,14 @@ export default function Chapter() {
                     <Sprout size={18} className="text-foreground/30" />
                   </CardContent>
                   <CardHeader className="w-full flex-shrink flex-row items-center justify-between p-3">
-                    <View className="justify-between">
-                      <CardTitle className="text-base">
+                    <View className="w-1/2 justify-between gap-1">
+                      <CardTitle
+                        className="text-sm"
+                        ellipsizeMode="tail"
+                        style={{ width: "auto" }}
+                        numberOfLines={1}
+                        textBreakStrategy="simple"
+                      >
                         {chapter?.channel?.title}
                       </CardTitle>
                       <CardDescription className="p-0 text-xs text-foreground/70">

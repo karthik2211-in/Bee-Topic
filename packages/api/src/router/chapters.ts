@@ -1,7 +1,8 @@
 import type { TRPCRouterRecord } from "@trpc/server";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { and, asc, desc, eq, ilike, sql } from "@bt/db";
+import { and, asc, count, desc, eq, gte, ilike, sql } from "@bt/db";
 import {
   Chapters,
   CreateChapterSchema,
@@ -49,6 +50,65 @@ export const ChaptersRouter = {
           channel: true,
         },
       });
+    }),
+
+  infinite: protectedProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).nullish(),
+        cursor: z.string().nullish(), // <-- "cursor" needs to exist, but can be any type
+        direction: z.enum(["forward", "backward"]), // optional, useful for bi-directional query
+      }),
+    )
+    .input(z.object({ channelId: z.string().min(1) }))
+    .query(async ({ ctx, input }) => {
+      const limit = input.limit ?? 50;
+      const { cursor, channelId } = input;
+
+      if (!channelId)
+        throw new TRPCError({
+          message: "No channel ID mentioned",
+          code: "BAD_REQUEST",
+        });
+
+      // console.log("Incoming Cursor", channelId);
+
+      const items = await ctx.db.query.Chapters.findMany({
+        orderBy: [asc(Chapters.title)],
+        where: cursor
+          ? and(eq(Chapters.channelId, channelId), gte(Chapters.title, cursor))
+          : eq(Chapters.channelId, channelId),
+        limit: limit + 1,
+        with: {
+          channel: true,
+        },
+      });
+
+      const mappedItems = await Promise.all(
+        items.map(async (chapter) => {
+          const data = await ctx.db
+            .select({ totalVideos: count(Videos.chapterId) })
+            .from(Videos)
+            .where(eq(Videos.chapterId, chapter.id))
+            .groupBy(Videos.chapterId);
+          return {
+            totalVideos: data.at(0)?.totalVideos ?? 0,
+            ...chapter,
+          };
+        }),
+      );
+
+      let nextCursor: typeof cursor | undefined = undefined;
+      if (mappedItems.length > limit) {
+        const nextItem = items.pop();
+        nextCursor = nextItem!.title;
+        console.log("Next Cursor", nextCursor);
+      }
+
+      return {
+        items: mappedItems,
+        nextCursor,
+      };
     }),
 
   create: protectedProcedure

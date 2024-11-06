@@ -1,5 +1,10 @@
-import { ActivityIndicator, Image, View } from "react-native";
-import { Tabs } from "expo-router";
+import {
+  ActivityIndicator,
+  Image,
+  TouchableNativeFeedback,
+  View,
+} from "react-native";
+import { Link, Tabs } from "expo-router";
 import { useClerk } from "@clerk/clerk-expo";
 import { FlashList } from "@shopify/flash-list";
 
@@ -13,7 +18,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Text } from "~/components/ui/text";
-import { H1, Muted } from "~/components/ui/typography";
+import { H1, Lead, Muted } from "~/components/ui/typography";
 import { Home } from "~/lib/icons/Home";
 import { api } from "~/utils/api";
 
@@ -59,6 +64,11 @@ export default function Index() {
               Let's learn something new today{" "}
             </H1>
           )}
+          ListEmptyComponent={
+            <View className="h-full w-full flex-1 items-center justify-center">
+              <Lead>No Channels Created Yet</Lead>
+            </View>
+          }
           contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 10 }}
           renderItem={({ item: channel }) => {
             return (
@@ -67,40 +77,46 @@ export default function Index() {
                 style={{ position: "relative" }}
                 className="my-3 min-h-52 overflow-hidden rounded-3xl"
               >
-                <Image
-                  source={require("../../../../assets/honey.png")}
-                  style={{
-                    height: 200,
-                    width: 200,
-                    position: "absolute",
-                    right: -60,
-                    top: -60,
-                    opacity: 0.8,
-                  }}
-                />
-                <CardHeader className="">
-                  <CardTitle>{channel.title}</CardTitle>
-                  <CardDescription className="text-sm">
-                    {channel.totalChapters} Chapters • 200 Subscribers
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex-row flex-wrap justify-between p-0 py-4"></CardContent>
-                <CardFooter className="w-full flex-col items-start gap-2">
-                  <Muted>Created by</Muted>
-                  <View className="flex-row items-center gap-2">
-                    <Avatar className="size-6" alt="Channel Creator">
-                      <AvatarImage
-                        source={{
-                          uri: channel?.createdByImageUrl,
+                <Link asChild href={`/channels/${channel.id}`}>
+                  <TouchableNativeFeedback style={{ borderRadius: 40 }}>
+                    <View className="flex-1">
+                      <Image
+                        source={require("../../../../assets/honey.png")}
+                        style={{
+                          height: 200,
+                          width: 200,
+                          position: "absolute",
+                          right: -60,
+                          top: -60,
+                          opacity: 0.3,
                         }}
                       />
-                      <AvatarFallback className="items-center justify-center">
-                        <Text>{channel?.createdBy?.charAt(0)}</Text>
-                      </AvatarFallback>
-                    </Avatar>
-                    <Muted>{channel?.createdBy}</Muted>
-                  </View>
-                </CardFooter>
+                      <CardHeader className="">
+                        <CardTitle>{channel.title}</CardTitle>
+                        <CardDescription className="text-sm">
+                          {channel.totalChapters} Chapters • 200 Subscribers
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="flex-row flex-wrap justify-between p-0 py-4"></CardContent>
+                      <CardFooter className="w-full flex-col items-start gap-2">
+                        <Muted>Created by</Muted>
+                        <View className="flex-row items-center gap-2">
+                          <Avatar className="size-6" alt="Channel Creator">
+                            <AvatarImage
+                              source={{
+                                uri: channel?.createdByImageUrl,
+                              }}
+                            />
+                            <AvatarFallback className="items-center justify-center">
+                              <Text>{channel?.createdBy?.charAt(0)}</Text>
+                            </AvatarFallback>
+                          </Avatar>
+                          <Muted>{channel?.createdBy}</Muted>
+                        </View>
+                      </CardFooter>
+                    </View>
+                  </TouchableNativeFeedback>
+                </Link>
               </Card>
             );
           }}
