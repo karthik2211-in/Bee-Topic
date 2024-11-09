@@ -86,6 +86,18 @@ export const Videos = pgTable("videos", (t) => ({
   updatedAt: t.timestamp().$onUpdate(() => new Date()),
 }));
 
+export const Subscriptions = pgTable("subscriptions", (t) => ({
+  id: t.uuid().notNull().primaryKey().defaultRandom(),
+  channelId: t
+    .uuid()
+    .references(() => Channels.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    })
+    .notNull(),
+  clerkUserId: t.text().notNull(),
+}));
+
 export const CreateVideoSchema = createInsertSchema(Videos, {
   title: z.string().max(256),
   description: z.string(),

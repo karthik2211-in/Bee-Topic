@@ -7,6 +7,7 @@ import {
   Channels,
   Chapters,
   CreateChannelSchema,
+  Subscriptions,
   UpdateChannelSchema,
   Videos,
 } from "@bt/db/schema";
@@ -95,12 +96,19 @@ export const channelsRouter = {
             channelItem.createdByClerkUserId,
           );
 
+          const subscriptionsAgregate = await ctx.db
+            .select({ subscriptionsCount: count(Subscriptions.channelId) })
+            .from(Subscriptions)
+            .where(eq(Subscriptions.channelId, channelItem.id))
+            .groupBy(Subscriptions.channelId);
           return {
             ...channelItem,
             createdBy: user.fullName,
             createdByImageUrl: user.imageUrl,
             chapters,
             totalChapters: item?.at(0)?.totalChapters ?? 0,
+            subscriptionCount:
+              subscriptionsAgregate.at(0)?.subscriptionsCount ?? 0,
           };
         }),
       );
@@ -137,8 +145,24 @@ export const channelsRouter = {
       const clerk = await clerkClient();
       const user = await clerk.users.getUser(item?.createdByClerkUserId ?? "");
 
+      const subscription = await ctx.db.query.Subscriptions.findFirst({
+        where: and(
+          eq(Subscriptions.channelId, input.id),
+          eq(Subscriptions.clerkUserId, ctx.session.userId),
+        ),
+      });
+
+      const subscriptionsAgregate = await ctx.db
+        .select({ subscriptionsCount: count(Subscriptions.channelId) })
+        .from(Subscriptions)
+        .where(eq(Subscriptions.channelId, input.id))
+        .groupBy(Subscriptions.channelId);
+
       return {
         totalChapters: agregate.at(0)?.totalChapters,
+        subscriptionsCount:
+          subscriptionsAgregate.at(0)?.subscriptionsCount ?? 0,
+        isSubscribed: !!subscription?.id,
         createdBy: user.fullName,
         createdByImageUrl: user.imageUrl,
         ...item,

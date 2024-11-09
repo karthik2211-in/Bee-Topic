@@ -14,6 +14,7 @@ import "../styles.css";
 import React from "react";
 import { ClerkLoaded, ClerkProvider, useAuth } from "@clerk/clerk-expo";
 
+import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
 
@@ -49,11 +50,13 @@ function InitialLayout() {
       const theme = await AsyncStorage.getItem("theme");
 
       if (!theme) {
+        setAndroidNavigationBar(colorScheme);
         AsyncStorage.setItem("theme", colorScheme);
         setIsColorSchemeLoaded(true);
         return;
       }
       const colorTheme = theme === "dark" ? "dark" : "light";
+      setAndroidNavigationBar(colorTheme);
       if (colorTheme !== colorScheme) {
         setColorScheme(colorTheme);
 

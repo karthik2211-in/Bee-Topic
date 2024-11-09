@@ -94,7 +94,8 @@ export default function Index() {
                       <CardHeader className="">
                         <CardTitle>{channel.title}</CardTitle>
                         <CardDescription className="text-sm">
-                          {channel.totalChapters} Chapters • 200 Subscribers
+                          {channel.totalChapters} Chapters •{" "}
+                          {channel.subscriptionCount} Subscribers
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="flex-row flex-wrap justify-between p-0 py-4"></CardContent>
