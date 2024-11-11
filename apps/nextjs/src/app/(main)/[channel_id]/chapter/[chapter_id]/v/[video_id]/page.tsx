@@ -103,6 +103,13 @@ export default function Page() {
     id: params.video_id as string,
   });
   const utils = api.useUtils();
+  const form = useForm({
+    schema: videoDetailsSchema,
+    defaultValues: {
+      title: "",
+      description: "",
+    },
+  });
   const { mutateAsync: updateVideo } = api.videos.update.useMutation({
     onError(error) {
       toast.error(error.message);
@@ -111,6 +118,10 @@ export default function Page() {
       toast.success("Video details saved");
       router.refresh();
       utils.videos.invalidate();
+      form.reset({
+        title: data[0]?.title,
+        description: data[0]?.description ?? "",
+      });
     },
   });
 
@@ -119,14 +130,6 @@ export default function Page() {
   async function onSubmitVideo(values: z.infer<typeof videoDetailsSchema>) {
     await updateVideo({ id: params.video_id as string, ...values });
   }
-
-  const form = useForm({
-    schema: videoDetailsSchema,
-    defaultValues: {
-      title: "",
-      description: "",
-    },
-  });
 
   React.useEffect(() => {
     form.reset({ title: video?.title, description: video?.description ?? "" });
@@ -165,7 +168,11 @@ export default function Page() {
                   Remove
                 </Button>
               </DeleteVideoDialog>
-              <Button isLoading={form.formState.isSubmitting} size={"lg"}>
+              <Button
+                disabled={!form.formState.isDirty}
+                isLoading={form.formState.isSubmitting}
+                size={"lg"}
+              >
                 Save
               </Button>
             </div>

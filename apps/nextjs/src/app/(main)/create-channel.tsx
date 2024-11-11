@@ -180,7 +180,12 @@ export function EditChannelDialog({
                 )}
               />
               <DialogFooter>
-                <Button isLoading={form.formState.isSubmitting}>Save</Button>
+                <Button
+                  disabled={!form.formState.isDirty}
+                  isLoading={form.formState.isSubmitting}
+                >
+                  Save
+                </Button>
               </DialogFooter>
             </form>
           </Form>

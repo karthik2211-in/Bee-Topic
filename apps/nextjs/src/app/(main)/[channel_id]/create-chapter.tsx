@@ -270,7 +270,10 @@ export function EditChapterDialog({
                 )}
               />
               <DialogFooter>
-                <Button isLoading={form.formState.isSubmitting}>
+                <Button
+                  disabled={!form.formState.isDirty}
+                  isLoading={form.formState.isSubmitting}
+                >
                   Save Details
                 </Button>
               </DialogFooter>
