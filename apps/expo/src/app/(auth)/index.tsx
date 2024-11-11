@@ -13,7 +13,7 @@ export default function Index() {
       <View className="h-full w-full items-center justify-center gap-8 bg-background p-4">
         <H1>BeeTopic</H1>
         <Lead className="text-center text-3xl leading-snug">
-          Where students collects the knowledge like bees 🐝 gathering honey 🍯
+          Where Every Bee Gathers Sweet Knowledge 🍯
         </Lead>
         <View className="mt-44 w-full items-center gap-3">
           <Muted className="text-base">continue with one click</Muted>
