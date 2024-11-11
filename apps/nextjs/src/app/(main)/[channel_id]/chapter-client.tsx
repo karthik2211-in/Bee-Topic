@@ -40,7 +40,7 @@ export default function ChapterItem({
   return (
     <Card
       className={cn(
-        "group flex overflow-hidden rounded-md border-0 bg-transparent text-foreground/60 shadow-none transition-all duration-150 hover:cursor-pointer hover:bg-accent",
+        "group flex overflow-hidden rounded-md border-0 bg-transparent text-foreground/60 shadow-none transition-all duration-150 hover:cursor-pointer hover:bg-accent hover:text-foreground",
         params.chapter_id === chapter.id && "bg-accent text-foreground",
       )}
     >
