@@ -18,6 +18,7 @@ import {
 } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import Slider from "@react-native-community/slider";
+import { formatDistanceToNowStrict } from "date-fns";
 import { ArrowLeft, Minimize2 } from "lucide-react-native";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -30,21 +31,42 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Text } from "~/components/ui/text";
-import { H4, Muted } from "~/components/ui/typography";
+import { H3, H4, Muted } from "~/components/ui/typography";
 import { Maximize2 } from "~/lib/icons/Maximize2";
 import { PauseCircle } from "~/lib/icons/PauseCircle";
 import { PlayCircle } from "~/lib/icons/PlayCircle";
 import { Sprout } from "~/lib/icons/Sprout";
 import { api } from "~/utils/api";
+import { cn } from "~/utils/cn";
 
 export default function VideoPlayer() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const utils = api.useUtils();
   const { data: videoDetails, isLoading } = api.videos.byId.useQuery({ id });
+  const { mutate: incrementView } = api.videos.incrementView.useMutation();
+  const { mutate: subscribe, isPending: isSubscribing } =
+    api.subscriptions.create.useMutation({
+      onSuccess(data, variables, context) {
+        console.log(data, variables, context);
+      },
+      onSettled() {
+        utils.invalidate();
+      },
+    });
+  const { mutate: unSubscribe, isPending: isUnSubscribing } =
+    api.subscriptions.delete.useMutation({
+      onSuccess(data, variables, context) {
+        console.log(data, variables, context);
+      },
+      onSettled() {
+        utils.invalidate();
+      },
+    });
+  const [viewRecorded, setViewRecorded] = useState(false);
   const videoRef = useRef<VideoRef>(null);
   const router = useRouter();
   const [paused, setPaused] = useState(false);
   const [duration, setDuration] = useState(0);
-  const { width } = Dimensions.get("screen");
   const [currentTime, setCurrentTime] = useState(0);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [showControls, setShowControls] = useState(false);
@@ -60,12 +82,15 @@ export default function VideoPlayer() {
   };
 
   const handleProgress: ReactVideoEvents["onProgress"] = (progress) => {
+    if (progress.currentTime >= 1 && !viewRecorded && videoDetails?.id) {
+      incrementView(videoDetails.id);
+      setViewRecorded(true); // Ensure it only triggers once
+    }
     setCurrentTime(progress.currentTime);
   };
 
   const handleEnd = () => {
     setPaused(true);
-    videoRef.current?.seek(0);
   };
 
   const handleSeek = (time: number) => {
@@ -144,7 +169,7 @@ export default function VideoPlayer() {
         animated
         hideTransitionAnimation="fade"
       />
-      {isLoading ? (
+      {isLoading && !videoDetails ? (
         <View
           style={{
             flex: 1,
@@ -255,7 +280,12 @@ export default function VideoPlayer() {
                   </TouchableOpacity>
 
                   {/**Footer */}
-                  <View className="w-full flex-shrink flex-row items-center justify-between px-3 py-2">
+                  <View
+                    className={cn(
+                      "w-full flex-shrink flex-row items-center justify-between px-3 py-2",
+                      isFullScreen && "py-5",
+                    )}
+                  >
                     <View className="w-full flex-shrink">
                       <Text className="mr-4 self-end text-white">
                         {formatTime(currentTime)} / {formatTime(duration)}
@@ -265,7 +295,7 @@ export default function VideoPlayer() {
                         minimumValue={0}
                         maximumValue={duration}
                         value={currentTime}
-                        onValueChange={(time) => handleSeek(time)}
+                        onSlidingComplete={(time) => handleSeek(time)}
                         minimumTrackTintColor="green"
                         maximumTrackTintColor="green"
                         thumbTintColor="green"
@@ -279,7 +309,16 @@ export default function VideoPlayer() {
 
           {!isFullScreen && (
             <View className="gap-3 p-4">
-              <H4>{videoDetails?.title}</H4>
+              <H3>{videoDetails?.title}</H3>
+              <Muted className="text-xs">
+                {videoDetails?.viewCount &&
+                  formatViewCount(videoDetails.viewCount)}{" "}
+                views •{" "}
+                {videoDetails?.createdAt &&
+                  formatDistanceToNowStrict(videoDetails?.createdAt, {
+                    addSuffix: true,
+                  })}
+              </Muted>
               {videoDetails?.description && (
                 <Muted>{videoDetails?.description}</Muted>
               )}
@@ -290,18 +329,42 @@ export default function VideoPlayer() {
                 <CardHeader className="w-full flex-shrink flex-row items-center justify-between p-0">
                   <View className="w-1/2 justify-between">
                     <CardTitle
-                      className="text-base"
+                      className="text-sm"
                       numberOfLines={1}
                       ellipsizeMode="tail"
                     >
                       {videoDetails?.chapters.channel?.title}
                     </CardTitle>
                     <CardDescription className="p-0 text-xs text-foreground/70">
-                      200 Subscribers
+                      {videoDetails?.chapters.channel.subscriptionsCount}{" "}
+                      Subscribers
                     </CardDescription>
                   </View>
-                  <Button size={"sm"} className="rounded-full">
-                    <Text>Subscribe</Text>
+                  <Button
+                    size={"sm"}
+                    disabled={isSubscribing || isUnSubscribing}
+                    onPress={() =>
+                      videoDetails?.chapters?.channel?.isSubscribed
+                        ? unSubscribe({
+                            channelId: videoDetails?.chapters?.channelId ?? "",
+                          })
+                        : subscribe({
+                            channelId: videoDetails?.chapters?.channelId ?? "",
+                          })
+                    }
+                    variant={
+                      videoDetails?.chapters?.channel?.isSubscribed
+                        ? "secondary"
+                        : "default"
+                    }
+                    // disabled
+                    className="rounded-full"
+                  >
+                    <Text>
+                      {videoDetails?.chapters?.channel?.isSubscribed
+                        ? "Subscribed"
+                        : "Subscribe to Watch"}
+                    </Text>
                   </Button>
                 </CardHeader>
               </Card>
@@ -309,7 +372,7 @@ export default function VideoPlayer() {
                 <Avatar className="size-6" alt="Channel Creator">
                   <AvatarImage
                     source={{
-                      uri: videoDetails?.chapters.channel.createdByUserImage,
+                      uri: videoDetails?.chapters.channel.createdByImageUrl,
                     }}
                   />
                   <AvatarFallback className="items-center justify-center">
@@ -337,3 +400,14 @@ const formatTime = (time: number) => {
   const seconds = Math.floor(time % 60);
   return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
 };
+
+export function formatViewCount(number: number) {
+  if (number >= 1_000_000_000) {
+    return (number / 1_000_000_000).toFixed(1).replace(/\.0$/, "") + "B";
+  } else if (number >= 1_000_000) {
+    return (number / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+  } else if (number >= 1_000) {
+    return (number / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+  }
+  return number.toString();
+}

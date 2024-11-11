@@ -17,6 +17,7 @@ import { Hash } from "~/lib/icons/Hash";
 import { PlayCircle } from "~/lib/icons/PlayCircle";
 import { Sprout } from "~/lib/icons/Sprout";
 import { api } from "~/utils/api";
+import { formatViewCount } from "../videos/[id]";
 
 export default function Chapter() {
   const params = useLocalSearchParams<{ id: string }>();
@@ -35,6 +36,7 @@ export default function Chapter() {
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
   const utils = api.useUtils();
+
   const { mutate: subscribe, isPending: isSubscribing } =
     api.subscriptions.create.useMutation({
       onSuccess(data, variables, context) {
@@ -150,34 +152,38 @@ export default function Chapter() {
               </CardHeader>
             </Card>
           }
-          renderItem={({ item: video }) => (
-            <Link href={`/videos/${video.id}`} asChild>
-              <TouchableNativeFeedback>
-                <Card className="mb-3 flex gap-2 overflow-hidden p-3">
-                  <View className="flex-shrink flex-row items-center">
-                    <CardContent className="items-center justify-center rounded-sm p-0">
-                      <PlayCircle
-                        size={32}
-                        className="text-card-foreground/50"
-                        strokeWidth={1}
-                      />
-                    </CardContent>
-                    <CardHeader className="h-full w-full flex-shrink items-start justify-between px-3 py-0">
-                      <View className="gap-1">
-                        <CardTitle className="text-base">
-                          {video?.title}
-                        </CardTitle>
-                        <CardDescription className="p-0 text-xs text-foreground/70">
-                          {formatDuration(video.duration)}
-                        </CardDescription>
-                      </View>
-                    </CardHeader>
-                  </View>
-                  {video.description && <Muted>{video.description}</Muted>}
-                </Card>
-              </TouchableNativeFeedback>
-            </Link>
-          )}
+          renderItem={({ item: video }) => {
+            utils.videos.byId.prefetch({ id: video.id }); //prefetch the video details to avoid the loading screen on video screen
+            return (
+              <Link href={`/videos/${video.id}`} asChild>
+                <TouchableNativeFeedback>
+                  <Card className="mb-3 flex gap-2 overflow-hidden p-3">
+                    <View className="flex-shrink flex-row items-center">
+                      <CardContent className="items-center justify-center rounded-sm p-0">
+                        <PlayCircle
+                          size={32}
+                          className="text-card-foreground/50"
+                          strokeWidth={1}
+                        />
+                      </CardContent>
+                      <CardHeader className="h-full w-full flex-shrink items-start justify-between px-3 py-0">
+                        <View className="gap-1">
+                          <CardTitle className="text-base">
+                            {video?.title}
+                          </CardTitle>
+                          <CardDescription className="p-0 text-xs text-foreground/70">
+                            {formatDuration(video.duration)} •{" "}
+                            {formatViewCount(video.viewCount ?? 0)} views
+                          </CardDescription>
+                        </View>
+                      </CardHeader>
+                    </View>
+                    {video.description && <Muted>{video.description}</Muted>}
+                  </Card>
+                </TouchableNativeFeedback>
+              </Link>
+            );
+          }}
           onEndReached={() => {
             if (hasNextPage) fetchNextPage();
           }}

@@ -3,10 +3,11 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { and, asc, eq, gte, ilike } from "@bt/db";
+import { and, asc, eq, gte, ilike, sql } from "@bt/db";
 import { CreateVideoSchema, UpdateVideoSchema, Videos } from "@bt/db/schema";
 
 import { protectedProcedure } from "../trpc";
+import { getChannelById } from "./channels";
 
 export const VideosRouter = {
   all: protectedProcedure
@@ -99,19 +100,14 @@ export const VideosRouter = {
         },
       });
 
-      const clerk = await clerkClient();
-      const user = await clerk.users.getUser(
-        data?.chapters.channel.createdByClerkUserId ?? "",
-      );
+      const channel = await getChannelById(data?.chapters.channelId ?? "", ctx);
 
       const mappedData = {
         ...data,
         chapters: {
           ...data?.chapters,
           channel: {
-            ...data?.chapters?.channel,
-            createdBy: user.fullName,
-            createdByUserImage: user.imageUrl,
+            ...channel,
           },
         },
       };
@@ -124,6 +120,15 @@ export const VideosRouter = {
     .mutation(({ ctx, input }) => {
       return ctx.db.insert(Videos).values(input);
     }),
+
+  incrementView: protectedProcedure
+    .input(z.string())
+    .mutation(({ ctx, input }) =>
+      ctx.db
+        .update(Videos)
+        .set({ viewCount: sql`${Videos.viewCount}+1` })
+        .where(eq(Videos.id, input)),
+    ),
 
   update: protectedProcedure
     .input(UpdateVideoSchema)

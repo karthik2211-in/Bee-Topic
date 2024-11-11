@@ -81,6 +81,7 @@ export const Videos = pgTable("videos", (t) => ({
   description: t.text(),
   duration: t.real().notNull(),
   ut_fileKey: t.text().notNull(),
+  viewCount: t.integer().default(0),
   isPublished: t.boolean().default(false),
   createdAt: t.timestamp().defaultNow().notNull(),
   updatedAt: t.timestamp().$onUpdate(() => new Date()),
@@ -125,6 +126,13 @@ export const UpdateVideoSchema = createInsertSchema(Videos, {
 //Relations
 export const ChannelsRelations = relations(Channels, ({ many }) => ({
   chapters: many(Chapters),
+}));
+
+export const SubscriptionsRelations = relations(Subscriptions, ({ one }) => ({
+  channel: one(Channels, {
+    fields: [Subscriptions.channelId],
+    references: [Channels.id],
+  }),
 }));
 
 export const ChaptersRelations = relations(Chapters, ({ one, many }) => ({
