@@ -22,7 +22,7 @@ export default function ChannelLayout({
           className="sticky inset-0 hidden h-screen w-60 flex-shrink-0 flex-col gap-3 border-r bg-secondary/25 p-2 backdrop-blur-xl lg:flex 2xl:w-72"
         >
           <nav className="shadow-overflow relative flex w-full flex-col gap-3 overflow-y-auto overflow-x-hidden px-3 py-3 lg:pr-0">
-            <p className="text-sm text-muted-foreground">All chapters</p>
+            <p className="text-sm font-semibold">CHAPTERS</p>
             <div className="flex gap-2">
               <SearchChapter />
               <CreateChapterDialog>
