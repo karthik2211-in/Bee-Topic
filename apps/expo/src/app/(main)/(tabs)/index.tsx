@@ -19,7 +19,6 @@ import {
 } from "~/components/ui/card";
 import { Text } from "~/components/ui/text";
 import { H1, Lead, Muted } from "~/components/ui/typography";
-import { Home } from "~/lib/icons/Home";
 import { api } from "~/utils/api";
 
 export default function Index() {
@@ -48,7 +47,6 @@ export default function Index() {
         options={{
           title: "Home",
           headerTitle: "🐝 BeeTopic",
-          tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
         }}
       />
 
