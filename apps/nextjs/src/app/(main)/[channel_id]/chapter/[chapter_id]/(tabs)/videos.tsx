@@ -133,9 +133,11 @@ export function Videos() {
               </Badge>
             </CardContent>
             <CardHeader className="p-4">
-              <CardTitle className="text-base">{video.title}</CardTitle>
+              <CardTitle className="truncate text-base">
+                {video.title}
+              </CardTitle>
               <CardDescription className="text-xs">
-                {/* 20 min •{" "} */}
+                {formatViewCount(video.viewCount ?? 0)} views •{" "}
                 {formatDistanceToNowStrict(video.createdAt, {
                   addSuffix: true,
                 })}
@@ -146,4 +148,15 @@ export function Videos() {
       ))}
     </div>
   );
+}
+
+export function formatViewCount(number: number) {
+  if (number >= 1_000_000_000) {
+    return (number / 1_000_000_000).toFixed(1).replace(/\.0$/, "") + "B";
+  } else if (number >= 1_000_000) {
+    return (number / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+  } else if (number >= 1_000) {
+    return (number / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+  }
+  return number.toString();
 }
