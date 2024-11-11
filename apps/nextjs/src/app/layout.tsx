@@ -20,21 +20,21 @@ import Providers from "./providers";
 export const metadata: Metadata = {
   metadataBase: new URL(
     env.VERCEL_ENV === "production"
-      ? "https://turbo.t3.gg"
+      ? "https://beetopic.com"
       : "http://localhost:3000",
   ),
-  title: "Create T3 Turbo",
-  description: "Simple monorepo with shared backend for web & mobile apps",
+  title: "BeeTopic",
+  description: "Where Every Bee Gathers Sweet Knowledge.",
   openGraph: {
-    title: "Create T3 Turbo",
-    description: "Simple monorepo with shared backend for web & mobile apps",
-    url: "https://create-t3-turbo.vercel.app",
-    siteName: "Create T3 Turbo",
+    title: "BeeTopic",
+    description: "Where Every Bee Gathers Sweet Knowledge.",
+    url: "https://beetopic.com",
+    siteName: "BeeTopic",
   },
   twitter: {
     card: "summary_large_image",
-    site: "@jullerino",
-    creator: "@jullerino",
+    site: "https://beetopic.com",
+    creator: "@jbportals",
   },
 };
 
