@@ -2,8 +2,6 @@ import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack } from "expo-router";
 
-import { Button } from "~/components/ui/button";
-import { Text } from "~/components/ui/text";
 import { H1, Lead, Muted } from "~/components/ui/typography";
 import { GoogleSignInButton } from "~/utils/auth";
 

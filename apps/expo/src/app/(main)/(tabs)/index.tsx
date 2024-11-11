@@ -5,7 +5,7 @@ import {
   View,
 } from "react-native";
 import { Link, Tabs } from "expo-router";
-import { useClerk } from "@clerk/clerk-expo";
+import { useClerk, useUser } from "@clerk/clerk-expo";
 import { FlashList } from "@shopify/flash-list";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -22,6 +22,7 @@ import { H1, Lead, Muted } from "~/components/ui/typography";
 import { api } from "~/utils/api";
 
 export default function Index() {
+  const { user } = useUser();
   const {
     data,
     isLoading,
@@ -38,6 +39,7 @@ export default function Index() {
         console.log("lastPage", lastPage.nextCursor);
         return lastPage.nextCursor;
       },
+      enabled: !!user?.id,
     },
   );
 
