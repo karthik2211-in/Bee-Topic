@@ -1,11 +1,6 @@
 import React from "react";
 import { ActivityIndicator, TouchableNativeFeedback, View } from "react-native";
-import {
-  Link,
-  Stack,
-  useGlobalSearchParams,
-  useLocalSearchParams,
-} from "expo-router";
+import { Link, Stack, useLocalSearchParams } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 
 import { Button } from "~/components/ui/button";
@@ -39,6 +34,25 @@ export default function Chapter() {
     { limit: 5, chapterId },
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
+  const utils = api.useUtils();
+  const { mutate: subscribe, isPending: isSubscribing } =
+    api.subscriptions.create.useMutation({
+      onSuccess(data, variables, context) {
+        console.log(data, variables, context);
+      },
+      onSettled() {
+        utils.chapters.invalidate();
+      },
+    });
+  const { mutate: unSubscribe, isPending: isUnSubscribing } =
+    api.subscriptions.delete.useMutation({
+      onSuccess(data, variables, context) {
+        console.log(data, variables, context);
+      },
+      onSettled() {
+        utils.chapters.invalidate();
+      },
+    });
 
   function formatDuration(seconds: number) {
     const hrs = Math.floor(seconds / 3600);
@@ -108,11 +122,28 @@ export default function Chapter() {
                         {chapter?.channel?.title}
                       </CardTitle>
                       <CardDescription className="p-0 text-xs text-foreground/70">
-                        200 Subscribers
+                        {chapter?.channel.subscriptionsCount} Subscribers
                       </CardDescription>
                     </View>
-                    <Button size={"sm"} className="rounded-full">
-                      <Text>Subscribe</Text>
+                    <Button
+                      size={"sm"}
+                      disabled={isSubscribing || isUnSubscribing}
+                      onPress={() =>
+                        chapter?.channel?.isSubscribed
+                          ? unSubscribe({ channelId: chapter.channelId })
+                          : subscribe({ channelId: chapter?.channelId ?? "" })
+                      }
+                      variant={
+                        chapter?.channel?.isSubscribed ? "secondary" : "default"
+                      }
+                      // disabled
+                      className="rounded-full"
+                    >
+                      <Text>
+                        {chapter?.channel?.isSubscribed
+                          ? "Subscribed"
+                          : "Subscribe to Watch"}
+                      </Text>
                     </Button>
                   </CardHeader>
                 </Card>

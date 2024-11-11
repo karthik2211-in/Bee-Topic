@@ -11,6 +11,7 @@ import {
 } from "@bt/db/schema";
 
 import { protectedProcedure } from "../trpc";
+import { getChannelById } from "./channels";
 
 export const ChaptersRouter = {
   all: protectedProcedure
@@ -43,13 +44,18 @@ export const ChaptersRouter = {
 
   byId: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(({ ctx, input }) => {
-      return ctx.db.query.Chapters.findFirst({
+    .query(async ({ ctx, input }) => {
+      const chapter = await ctx.db.query.Chapters.findFirst({
         where: eq(Chapters.id, input.id),
-        with: {
-          channel: true,
-        },
       });
+
+      if (!chapter) return null;
+
+      const channel = await getChannelById(chapter.channelId, ctx);
+      return {
+        ...chapter,
+        channel,
+      };
     }),
 
   infinite: protectedProcedure

@@ -3,6 +3,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { z } from "zod";
 
 import { and, asc, count, desc, eq, gte, ilike, sql } from "@bt/db";
+import { db as DataBase } from "@bt/db/client";
 import {
   Channels,
   Chapters,
@@ -12,7 +13,47 @@ import {
   Videos,
 } from "@bt/db/schema";
 
-import { protectedProcedure } from "../trpc";
+import { Context, protectedProcedure } from "../trpc";
+
+export async function getChannelById(id: string, ctx: Context) {
+  const item = await ctx.db.query.Channels.findFirst({
+    where: and(
+      eq(Channels.id, id),
+      eq(Channels.createdByClerkUserId, ctx.session.userId ?? ""),
+    ),
+  });
+
+  const agregate = await ctx.db
+    .select({ totalChapters: count(Chapters.channelId) })
+    .from(Chapters)
+    .where(eq(Chapters.channelId, id))
+    .groupBy(Chapters.channelId);
+
+  const clerk = await clerkClient();
+  const user = await clerk.users.getUser(item?.createdByClerkUserId ?? "");
+
+  const subscription = await ctx.db.query.Subscriptions.findFirst({
+    where: and(
+      eq(Subscriptions.channelId, id),
+      eq(Subscriptions.clerkUserId, ctx.session.userId ?? ""),
+    ),
+  });
+
+  const subscriptionsAgregate = await ctx.db
+    .select({ subscriptionsCount: count(Subscriptions.channelId) })
+    .from(Subscriptions)
+    .where(eq(Subscriptions.channelId, id))
+    .groupBy(Subscriptions.channelId);
+
+  return {
+    totalChapters: agregate.at(0)?.totalChapters,
+    subscriptionsCount: subscriptionsAgregate.at(0)?.subscriptionsCount ?? 0,
+    isSubscribed: !!subscription?.id,
+    createdBy: user.fullName,
+    createdByImageUrl: user.imageUrl,
+    ...item,
+  };
+}
 
 export const channelsRouter = {
   all: protectedProcedure
@@ -128,46 +169,7 @@ export const channelsRouter = {
 
   byId: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const item = await ctx.db.query.Channels.findFirst({
-        where: and(
-          eq(Channels.id, input.id),
-          eq(Channels.createdByClerkUserId, ctx.session.userId),
-        ),
-      });
-
-      const agregate = await ctx.db
-        .select({ totalChapters: count(Chapters.channelId) })
-        .from(Chapters)
-        .where(eq(Chapters.channelId, input.id))
-        .groupBy(Chapters.channelId);
-
-      const clerk = await clerkClient();
-      const user = await clerk.users.getUser(item?.createdByClerkUserId ?? "");
-
-      const subscription = await ctx.db.query.Subscriptions.findFirst({
-        where: and(
-          eq(Subscriptions.channelId, input.id),
-          eq(Subscriptions.clerkUserId, ctx.session.userId),
-        ),
-      });
-
-      const subscriptionsAgregate = await ctx.db
-        .select({ subscriptionsCount: count(Subscriptions.channelId) })
-        .from(Subscriptions)
-        .where(eq(Subscriptions.channelId, input.id))
-        .groupBy(Subscriptions.channelId);
-
-      return {
-        totalChapters: agregate.at(0)?.totalChapters,
-        subscriptionsCount:
-          subscriptionsAgregate.at(0)?.subscriptionsCount ?? 0,
-        isSubscribed: !!subscription?.id,
-        createdBy: user.fullName,
-        createdByImageUrl: user.imageUrl,
-        ...item,
-      };
-    }),
+    .query(async ({ ctx, input }) => getChannelById(input.id, ctx)),
 
   create: protectedProcedure
     .input(CreateChannelSchema)
