@@ -20,7 +20,7 @@ export function ChapterTabs() {
             ? "study-materials"
             : undefined
       }
-      className="w-full"
+      className="w-full border-b-0"
     >
       <TabsList className="w-full justify-start">
         <TabsTrigger
@@ -28,6 +28,7 @@ export function ChapterTabs() {
             router.push(`/${params.channel_id}/chapter/${params.chapter_id}`)
           }
           value="videos"
+          className="py-5"
         >
           Videos
         </TabsTrigger>
@@ -39,6 +40,7 @@ export function ChapterTabs() {
               `/${params.channel_id}/chapter/${params.chapter_id}/study-materials`,
             )
           }
+          className="py-5"
         >
           Study Materials
         </TabsTrigger>
