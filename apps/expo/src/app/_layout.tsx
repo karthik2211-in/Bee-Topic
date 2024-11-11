@@ -85,7 +85,14 @@ function InitialLayout() {
   return (
     <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
       <Slot screenOptions={{ headerShown: false }} />
-      <StatusBar />
+      <StatusBar
+        style={"auto"}
+        backgroundColor={
+          isDarkColorScheme
+            ? DARK_THEME.colors.background
+            : LIGHT_THEME.colors.background
+        }
+      />
     </ThemeProvider>
   );
 }
