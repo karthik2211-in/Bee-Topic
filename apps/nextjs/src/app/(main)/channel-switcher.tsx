@@ -40,9 +40,9 @@ export default function ChannelSwitcher() {
     })) ?? [];
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex h-full items-center gap-3 overflow-hidden">
       <Link href={"/"}>
-        <div className="flex items-center">
+        <div className="flex h-full items-center overflow-hidden">
           <Image src={"/BeeTopic-Logo.svg"} alt="Logo" width={52} height={52} />
           {!params.channel_id && (
             <svg
