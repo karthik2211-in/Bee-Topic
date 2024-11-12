@@ -19,6 +19,7 @@ import {
 } from "~/components/ui/card";
 import { Text } from "~/components/ui/text";
 import { H1, Lead, Muted } from "~/components/ui/typography";
+import { useColorScheme } from "~/lib/useColorScheme";
 import { api } from "~/utils/api";
 
 export default function Index() {
@@ -42,13 +43,27 @@ export default function Index() {
       enabled: !!user?.id,
     },
   );
+  const { isDarkColorScheme } = useColorScheme();
 
   return (
     <View className="flex-1">
       <Tabs.Screen
         options={{
-          title: "Home",
-          headerTitle: "🐝 BeeTopic",
+          headerTitle(props) {
+            return (
+              <Image
+                source={
+                  isDarkColorScheme
+                    ? require("assets/VerticalLogoDark.png")
+                    : require("assets/VerticalLogoLight.png")
+                }
+                style={{
+                  height: 100,
+                  width: 140,
+                }}
+              />
+            );
+          },
         }}
       />
 
@@ -81,7 +96,7 @@ export default function Index() {
                   <TouchableNativeFeedback style={{ borderRadius: 40 }}>
                     <View className="flex-1">
                       <Image
-                        source={require("../../../../assets/honey.png")}
+                        source={require("assets/honey.png")}
                         style={{
                           height: 200,
                           width: 200,
@@ -91,8 +106,10 @@ export default function Index() {
                           opacity: 0.3,
                         }}
                       />
-                      <CardHeader className="">
-                        <CardTitle>{channel.title}</CardTitle>
+                      <CardHeader className="gap-2">
+                        <CardTitle className="leading-snug">
+                          {channel.title}
+                        </CardTitle>
                         <CardDescription className="text-sm">
                           {channel.totalChapters} Chapters •{" "}
                           {channel.subscriptionCount} Subscribers

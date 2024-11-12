@@ -8,7 +8,7 @@ export default function Profile() {
       <Tabs.Screen
         options={{
           title: "Profile",
-          headerTitle: "🐝 BeeTopic",
+          headerTitle: "Profile",
         }}
       />
       <Text>Profile</Text>
