@@ -19,12 +19,13 @@ import {
 } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Text } from "~/components/ui/text";
-import { H1, Lead, Muted } from "~/components/ui/typography";
+import { H1, H2, H3, Lead, Muted } from "~/components/ui/typography";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { api } from "~/utils/api";
 
 export default function Index() {
   const { userId } = useAuth();
+  const utils = api.useUtils();
   const {
     data,
     isLoading,
@@ -80,9 +81,9 @@ export default function Index() {
           keyExtractor={(item, index) => item.id}
           estimatedItemSize={400}
           ListHeaderComponent={() => (
-            <H1 className="my-3 font-mono leading-snug tracking-widest text-foreground/70">
+            <H3 className="my-3 w-2/3 font-mono leading-snug tracking-widest text-foreground/70">
               Let's learn something new today{" "}
-            </H1>
+            </H3>
           )}
           ListEmptyComponent={
             <View className="h-full w-full flex-1 items-center justify-center">
@@ -91,6 +92,7 @@ export default function Index() {
           }
           contentContainerStyle={{ paddingHorizontal: 12, paddingVertical: 12 }}
           renderItem={({ item: channel }) => {
+            utils.channels.byId.prefetch({ id: channel.id });
             return (
               <Card
                 key={channel.id}
