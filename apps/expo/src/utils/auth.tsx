@@ -1,5 +1,4 @@
 import React from "react";
-import { ActivityIndicator } from "react-native";
 import Svg, { ClipPath, Defs, G, Path, Rect } from "react-native-svg";
 import * as Linking from "expo-linking";
 import * as Browser from "expo-web-browser";
@@ -7,7 +6,7 @@ import { useOAuth } from "@clerk/clerk-expo";
 
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
-import { useColorScheme } from "~/lib/useColorScheme";
+import { ActivityIndicator } from "~/lib/activity-indicator";
 
 export const useWarmUpBrowser = () => {
   React.useEffect(() => {
@@ -26,7 +25,6 @@ export const GoogleSignInButton = () => {
   void useWarmUpBrowser();
   const [isLoading, setIsLoading] = React.useState(false);
   const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
-  const { isDarkColorScheme } = useColorScheme();
 
   const onPress = React.useCallback(async () => {
     setIsLoading(true);
@@ -87,9 +85,7 @@ export const GoogleSignInButton = () => {
       </Svg>
 
       <Text className="font-semibold">Continue with Google</Text>
-      {isLoading && (
-        <ActivityIndicator color={isDarkColorScheme ? "white" : "black"} />
-      )}
+      {isLoading && <ActivityIndicator />}
     </Button>
   );
 };

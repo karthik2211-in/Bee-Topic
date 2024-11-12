@@ -5,7 +5,7 @@ import {
   View,
 } from "react-native";
 import { Link, Tabs } from "expo-router";
-import { useClerk, useUser } from "@clerk/clerk-expo";
+import { useAuth, useClerk, useUser } from "@clerk/clerk-expo";
 import { FlashList } from "@shopify/flash-list";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -24,7 +24,7 @@ import { useColorScheme } from "~/lib/useColorScheme";
 import { api } from "~/utils/api";
 
 export default function Index() {
-  const { user } = useUser();
+  const { userId } = useAuth();
   const {
     data,
     isLoading,
@@ -41,7 +41,7 @@ export default function Index() {
         console.log("lastPage", lastPage.nextCursor);
         return lastPage.nextCursor;
       },
-      enabled: !!user?.id,
+      enabled: !!userId,
     },
   );
   const { isDarkColorScheme } = useColorScheme();
@@ -68,7 +68,7 @@ export default function Index() {
         }}
       />
 
-      {false ? (
+      {isLoading ? (
         <View className="gap-3 p-3">
           {Array.from({ length: 5 }).map((_, i) => (
             <Skeleton key={i} className={"h-56 w-full rounded-2xl"} />
