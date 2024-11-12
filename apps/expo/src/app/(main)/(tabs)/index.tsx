@@ -17,6 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { Skeleton } from "~/components/ui/skeleton";
 import { Text } from "~/components/ui/text";
 import { H1, Lead, Muted } from "~/components/ui/typography";
 import { useColorScheme } from "~/lib/useColorScheme";
@@ -58,8 +59,8 @@ export default function Index() {
                     : require("assets/VerticalLogoLight.png")
                 }
                 style={{
-                  height: 100,
-                  width: 140,
+                  height: 60,
+                  width: 130,
                 }}
               />
             );
@@ -67,8 +68,12 @@ export default function Index() {
         }}
       />
 
-      {isLoading ? (
-        <ActivityIndicator size="large" color="#4CAF50" />
+      {false ? (
+        <View className="gap-3 p-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className={"h-56 w-full rounded-2xl"} />
+          ))}
+        </View>
       ) : (
         <FlashList
           data={data?.pages?.flatMap((page) => page.items) || []}
@@ -84,13 +89,13 @@ export default function Index() {
               <Lead>No Channels Created Yet</Lead>
             </View>
           }
-          contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 10 }}
+          contentContainerStyle={{ paddingHorizontal: 12, paddingVertical: 12 }}
           renderItem={({ item: channel }) => {
             return (
               <Card
                 key={channel.id}
                 style={{ position: "relative" }}
-                className="my-3 min-h-52 overflow-hidden rounded-3xl"
+                className="my-3 min-h-52 overflow-hidden rounded-2xl"
               >
                 <Link asChild href={`/channels/${channel.id}`}>
                   <TouchableNativeFeedback style={{ borderRadius: 40 }}>
@@ -147,7 +152,10 @@ export default function Index() {
           onEndReachedThreshold={0.8} // Adjust threshold for when to load more data
           ListFooterComponent={
             isFetchingNextPage ? (
-              <ActivityIndicator size="small" color="#4CAF50" />
+              <ActivityIndicator
+                size="small"
+                color={isDarkColorScheme ? "black" : "white"}
+              />
             ) : (
               <View style={{ height: 50 }} />
             )

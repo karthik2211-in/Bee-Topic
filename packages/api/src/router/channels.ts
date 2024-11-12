@@ -15,18 +15,28 @@ import {
 
 import { Context, protectedProcedure } from "../trpc";
 
-export async function getChannelById(id: string, ctx: Context) {
+export async function getChannelById({
+  channelId,
+  fetchByUser = false,
+  ctx,
+}: {
+  channelId: string;
+  fetchByUser?: boolean;
+  ctx: Context;
+}) {
   const item = await ctx.db.query.Channels.findFirst({
     where: and(
-      eq(Channels.id, id),
-      eq(Channels.createdByClerkUserId, ctx.session.userId ?? ""),
+      eq(Channels.id, channelId),
+      fetchByUser
+        ? eq(Channels.createdByClerkUserId, ctx.session.userId ?? "")
+        : undefined,
     ),
   });
 
   const agregate = await ctx.db
     .select({ totalChapters: count(Chapters.channelId) })
     .from(Chapters)
-    .where(eq(Chapters.channelId, id))
+    .where(eq(Chapters.channelId, channelId))
     .groupBy(Chapters.channelId);
 
   const clerk = await clerkClient();
@@ -34,7 +44,7 @@ export async function getChannelById(id: string, ctx: Context) {
 
   const subscription = await ctx.db.query.Subscriptions.findFirst({
     where: and(
-      eq(Subscriptions.channelId, id),
+      eq(Subscriptions.channelId, channelId),
       eq(Subscriptions.clerkUserId, ctx.session.userId ?? ""),
     ),
   });
@@ -42,7 +52,7 @@ export async function getChannelById(id: string, ctx: Context) {
   const subscriptionsAgregate = await ctx.db
     .select({ subscriptionsCount: count(Subscriptions.channelId) })
     .from(Subscriptions)
-    .where(eq(Subscriptions.channelId, id))
+    .where(eq(Subscriptions.channelId, channelId))
     .groupBy(Subscriptions.channelId);
 
   return {
@@ -169,7 +179,9 @@ export const channelsRouter = {
 
   byId: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ ctx, input }) => getChannelById(input.id, ctx)),
+    .query(async ({ ctx, input }) =>
+      getChannelById({ channelId: input.id, ctx }),
+    ),
 
   create: protectedProcedure
     .input(CreateChannelSchema)

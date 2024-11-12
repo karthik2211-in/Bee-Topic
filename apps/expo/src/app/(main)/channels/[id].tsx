@@ -18,6 +18,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { Skeleton } from "~/components/ui/skeleton";
 import { Text } from "~/components/ui/text";
 import { H3, Lead, Muted } from "~/components/ui/typography";
 import { Hash } from "~/lib/icons/Hash";
@@ -72,10 +73,25 @@ export default function Chapter() {
         }}
       />
       {isLoading ? (
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <ActivityIndicator size={"large"} />
+        <View className="gap-4 p-3">
+          <View className="relative h-64 min-h-64 gap-2 px-2 py-4">
+            <Skeleton className="h-6 w-4/5 rounded-full" />
+            <Skeleton className="h-6 w-4/6 rounded-full" />
+            <Skeleton className={"h-3 w-1/2"} />
+            <View className="mt-auto items-end gap-4">
+              <View className="mt-auto w-full flex-col gap-2">
+                <Muted>Created by</Muted>
+                <View className="flex-row items-center gap-2">
+                  <Skeleton className={"size-6 rounded-full"} />
+                  <Skeleton className={"h-3 w-1/4"} />
+                </View>
+              </View>
+              <Skeleton className={"h-12 w-full rounded-full"} />
+            </View>
+          </View>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className={"h-24 w-full"} />
+          ))}
         </View>
       ) : (
         <FlashList

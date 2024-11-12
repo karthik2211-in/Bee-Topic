@@ -51,7 +51,11 @@ export const ChaptersRouter = {
 
       if (!chapter) return null;
 
-      const channel = await getChannelById(chapter.channelId, ctx);
+      const channel = await getChannelById({
+        channelId: chapter.channelId,
+        ctx,
+      });
+
       return {
         ...chapter,
         channel,

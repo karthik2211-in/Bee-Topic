@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import { Skeleton } from "~/components/ui/skeleton";
 import { Text } from "~/components/ui/text";
 import { Muted } from "~/components/ui/typography";
 import { Hash } from "~/lib/icons/Hash";
@@ -82,10 +83,35 @@ export default function Chapter() {
         }}
       />
       {isLoading ? (
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <ActivityIndicator size={"large"} />
+        <View className="gap-2 p-3">
+          <Card
+            key={chapter?.id}
+            className="border-b-hairline mb-2 overflow-hidden border-border"
+          >
+            <CardContent className="h-52 items-center justify-center border-b border-border bg-primary/5 p-0">
+              <Hash size={54} className="text-foreground/20" />
+            </CardContent>
+            <CardHeader className="gap-2 p-3">
+              <Skeleton className={"h-6 w-4/5 rounded-full"} />
+              <Skeleton className={"mt-1 h-2 w-5/6 rounded-full"} />
+              <Skeleton className={"mt-0.5 h-2 w-4/6 rounded-full"} />
+              <Card className="flex flex-row items-center overflow-hidden rounded-none border-0">
+                <CardContent className="aspect-video h-16 w-20 items-center justify-center rounded-lg border border-border bg-primary/5 p-0">
+                  <Sprout size={18} className="text-foreground/30" />
+                </CardContent>
+                <CardHeader className="w-full flex-shrink flex-row items-center justify-between p-3">
+                  <View className="w-1/2 justify-between gap-1">
+                    <Skeleton className={"h-3 w-full rounded-full"} />
+                    <Skeleton className={"mt-1 h-2 w-1/2 rounded-full"} />
+                  </View>
+                  <Skeleton className={"h-8 w-1/3 rounded-full"} />
+                </CardHeader>
+              </Card>
+            </CardHeader>
+          </Card>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className={"h-24 w-full"} />
+          ))}
         </View>
       ) : (
         <FlashList

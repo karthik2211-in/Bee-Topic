@@ -100,7 +100,10 @@ export const VideosRouter = {
         },
       });
 
-      const channel = await getChannelById(data?.chapters.channelId ?? "", ctx);
+      const channel = await getChannelById({
+        channelId: data?.chapters.channelId ?? "",
+        ctx,
+      });
 
       const mappedData = {
         ...data,
