@@ -57,12 +57,13 @@ function InitialLayout() {
       }
       const colorTheme = theme === "dark" ? "dark" : "light";
       setAndroidNavigationBar(colorTheme);
+
       if (colorTheme !== colorScheme) {
         setColorScheme(colorTheme);
-
         setIsColorSchemeLoaded(true);
         return;
       }
+
       setIsColorSchemeLoaded(true);
     })().finally(() => {
       if (isLoaded) {
