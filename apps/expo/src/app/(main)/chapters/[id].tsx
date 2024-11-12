@@ -13,7 +13,7 @@ import {
 } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Text } from "~/components/ui/text";
-import { Muted } from "~/components/ui/typography";
+import { Lead, Muted } from "~/components/ui/typography";
 import { Hash } from "~/lib/icons/Hash";
 import { PlayCircle } from "~/lib/icons/PlayCircle";
 import { Sprout } from "~/lib/icons/Sprout";
@@ -177,6 +177,15 @@ export default function Chapter() {
                 </Card>
               </CardHeader>
             </Card>
+          }
+          ListEmptyComponent={
+            <View className="border-t-hairline h-60 flex-1 items-center justify-center border-t-border px-10">
+              <Lead>No Videos</Lead>
+              <Muted className="text-center">
+                If the creator of this channel uploads any new videos will be
+                seen here and we will notify you about that.
+              </Muted>
+            </View>
           }
           renderItem={({ item: video }) => {
             utils.videos.byId.prefetch({ id: video.id }); //prefetch the video details to avoid the loading screen on video screen
