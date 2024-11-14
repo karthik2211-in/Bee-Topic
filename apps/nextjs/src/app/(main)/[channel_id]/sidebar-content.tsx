@@ -35,7 +35,7 @@ export default function SideBarContent() {
           <Button
             size={"lg"}
             variant={"ghost"}
-            className="h-11 w-full justify-start gap-6 px-3 text-sm"
+            className="h-11 justify-start gap-6 px-3 text-sm"
           >
             <ArrowLeft strokeWidth={1.25} />
             Chapter content
@@ -44,7 +44,7 @@ export default function SideBarContent() {
         <div className="py-1">
           <div className="text-base font-semibold">Your Video</div>
           <p className="truncate text-sm text-muted-foreground">
-            {data?.title}
+            {data?.title ?? "..."}
           </p>
         </div>
         <div className="flex w-full flex-col space-y-2">
