@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import { format } from "date-fns";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
@@ -18,6 +19,13 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@bt/ui/chart";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@bt/ui/select";
 
 import { api } from "~/trpc/react";
 
@@ -31,10 +39,11 @@ const chartConfig = {
 export default function Page() {
   const params = useParams();
   const videoId = params.video_id as string;
+  const [filterType, setFilterType] = useState<"month" | "week">("week");
 
-  const { data, trpc } = api.analytics.getVideoWatchTime.useQuery({
+  const { data } = api.analytics.getVideoWatchTime.useQuery({
     videoId,
-    range: "month",
+    range: filterType,
   });
 
   return (
@@ -50,7 +59,18 @@ export default function Page() {
             <CardDescription>{"Watch time (minutes)"}</CardDescription>
             <CardTitle className="text-2xl">{data?.totalWatchTime}</CardTitle>
           </div>
-          <Button variant={"ghost"}>2024</Button>
+          <Select
+            value={filterType}
+            onValueChange={(value: "month" | "week") => setFilterType(value)}
+          >
+            <SelectTrigger className="w-[140px] justify-center gap-5">
+              <SelectValue placeholder="Select a filter" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="week">This Week</SelectItem>
+              <SelectItem value="month">This Month</SelectItem>
+            </SelectContent>
+          </Select>
         </CardHeader>
         <CardContent>
           <ChartContainer
@@ -78,7 +98,7 @@ export default function Page() {
                 dataKey="date"
                 tickLine={false}
                 tickMargin={10}
-                tickCount={100}
+                tickCount={10}
                 axisLine={false}
                 tickFormatter={(value) => format(value as Date, "LLL, d")}
               />
