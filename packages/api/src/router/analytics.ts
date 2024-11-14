@@ -7,7 +7,9 @@ import { protectedProcedure } from "../trpc";
 export const AnalyticsRouter = {
   create: protectedProcedure
     .input(CreateVideosAnalytics)
-    .query(({ ctx, input }) => {
-      return ctx.db.insert(VideosAnalytics).values(input);
+    .mutation(({ ctx, input }) => {
+      return ctx.db
+        .insert(VideosAnalytics)
+        .values({ ...input, clerkUserId: ctx.session.userId });
     }),
 } satisfies TRPCRouterRecord;

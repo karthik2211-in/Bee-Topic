@@ -137,10 +137,10 @@ export const UpdateVideoSchema = createInsertSchema(Videos, {
 
 export const CreateVideosAnalytics = createInsertSchema(VideosAnalytics, {
   videoId: z.string().min(1, "Video Id is missing"),
-  clerkUserId: z.string().min(1, "clerk user id is missing"),
   from: z.number(),
   to: z.number(),
 }).omit({
+  clerkUserId: true,
   id: true,
   watchedAt: true,
 });

@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   BackHandler,
-  Dimensions,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -31,7 +30,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Text } from "~/components/ui/text";
-import { H3, H4, Muted } from "~/components/ui/typography";
+import { H3, Muted } from "~/components/ui/typography";
 import { Maximize2 } from "~/lib/icons/Maximize2";
 import { PauseCircle } from "~/lib/icons/PauseCircle";
 import { PlayCircle } from "~/lib/icons/PlayCircle";
@@ -40,9 +39,12 @@ import { api } from "~/utils/api";
 import { cn } from "~/utils/cn";
 
 export default function VideoPlayer() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id: videoId } = useLocalSearchParams<{ id: string }>();
   const utils = api.useUtils();
-  const { data: videoDetails, isLoading } = api.videos.byId.useQuery({ id });
+  const navigation = useNavigation();
+  const { data: videoDetails, isLoading } = api.videos.byId.useQuery({
+    id: videoId,
+  });
   const { mutate: incrementView } = api.videos.incrementView.useMutation();
   const { mutate: subscribe, isPending: isSubscribing } =
     api.subscriptions.create.useMutation({
@@ -53,6 +55,8 @@ export default function VideoPlayer() {
         utils.invalidate();
       },
     });
+
+  const { mutate: createAnalytic } = api.analytics.create.useMutation({});
   const { mutate: unSubscribe, isPending: isUnSubscribing } =
     api.subscriptions.delete.useMutation({
       onSuccess(data, variables, context) {
@@ -67,11 +71,17 @@ export default function VideoPlayer() {
   const router = useRouter();
   const [paused, setPaused] = useState(false);
   const [duration, setDuration] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0); // in seconds
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [controlsTimeout, setControlsTimeout] = useState<NodeJS.Timeout>();
+  //Segments of the video watched by the user
+  const [watchSegments, setWatchSegments] = useState<
+    { from: number; to: number }[] | never
+  >([]);
+  const [currentStartTime, setCurrentStartTime] = useState<null | number>(null);
+  const [currentEndTime, setCurrentEndTime] = useState<null | number>(null);
 
   const togglePlayPause = () => {
     setPaused(!paused);
@@ -89,11 +99,40 @@ export default function VideoPlayer() {
     setCurrentTime(progress.currentTime);
   };
 
+  // When the video starts playing, set the start time
+  const startSegment = (currentTime: number) => {
+    setCurrentStartTime(currentTime);
+  };
+
+  // When the video pauses or stops, capture the segment and reset start time
+  const endSegment = (currentTime: number) => {
+    if (currentStartTime !== null) {
+      setWatchSegments((segments) => [
+        ...segments,
+        { from: currentStartTime, to: currentTime },
+      ]);
+      setCurrentStartTime(null);
+    }
+  };
+
+  const onPlaybackStatusChange: ReactVideoEvents["onPlaybackStateChanged"] = (
+    status,
+  ) => {
+    if (status.isPlaying && currentStartTime === null) {
+      startSegment(currentTime); // Start a new segment if video is playing
+    } else if (!status.isPlaying && currentStartTime !== null) {
+      endSegment(currentEndTime ?? currentTime); // End the current segment if video stops or pauses
+      setCurrentEndTime(null); // after added make end time to null to detect again the another segment
+    }
+    console.log("Triggered", status);
+  };
+
   const handleEnd = () => {
     setPaused(true);
   };
 
   const handleSeek = (time: number) => {
+    setCurrentEndTime(currentTime); //detect the seek and store the end time before get seek
     videoRef.current?.seek(time);
     setCurrentTime(time);
   };
@@ -143,11 +182,36 @@ export default function VideoPlayer() {
     };
   }, [isFullScreen, controlsTimeout]);
 
+  //Changing the orientation of the screen
   useEffect(() => {
     if (!isFullScreen) {
       Orientation.lockToPortrait();
     }
   }, [isFullScreen]);
+
+  //create analytics data for watched segments
+  useEffect(() => {
+    const listner = navigation.addListener("beforeRemove", (e) => {
+      if (watchSegments.length > 0 && currentStartTime) {
+        [...watchSegments, { from: currentStartTime, to: currentTime }].forEach(
+          (segment) => {
+            createAnalytic({ ...segment, videoId });
+          },
+        );
+      } else {
+        createAnalytic({
+          from: currentStartTime ?? 0,
+          to: currentTime,
+          videoId,
+        });
+      }
+      console.log(watchSegments);
+    });
+
+    return () => {
+      listner();
+    };
+  }, [currentTime, watchSegments]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -215,6 +279,7 @@ export default function VideoPlayer() {
                 onEnd={handleEnd}
                 resizeMode="contain"
                 onBuffer={(e) => setIsBuffering(e.isBuffering)}
+                onPlaybackStateChanged={onPlaybackStatusChange}
               />
               {isBuffering ? (
                 <View
