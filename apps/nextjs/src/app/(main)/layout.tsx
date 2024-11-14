@@ -14,7 +14,7 @@ export default function MainLayout({
 }) {
   return (
     <main className="flex min-h-screen flex-col">
-      <div className="sticky inset-0 z-20 flex flex-col border-b bg-secondary/25 backdrop-blur-xl">
+      <div className="sticky inset-0 z-20 flex flex-col border-b bg-background/90 backdrop-blur-xl">
         <header className="flex h-16 items-center justify-between px-4">
           <ChannelSwitcher />
           <div className="flex items-center gap-3">

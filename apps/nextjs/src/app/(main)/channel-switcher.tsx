@@ -137,9 +137,8 @@ export default function ChannelSwitcher() {
               <Button
                 isLoading={isLoading}
                 loadingText=""
-                variant="outline"
+                variant="ghost"
                 role="combobox"
-                size={"sm"}
                 aria-expanded={open}
                 className="w-fit justify-between"
               >
