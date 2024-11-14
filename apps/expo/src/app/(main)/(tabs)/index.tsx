@@ -82,7 +82,7 @@ export default function Index() {
           estimatedItemSize={400}
           ListHeaderComponent={() => (
             <H3 className="my-3 w-2/3 font-mono leading-snug tracking-widest text-foreground/70">
-              Let's learn something new today{" "}
+              Let's learn something new today
             </H3>
           )}
           ListEmptyComponent={
