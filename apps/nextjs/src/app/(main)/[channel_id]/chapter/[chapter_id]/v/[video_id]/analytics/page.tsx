@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@bt/ui/select";
+import { Skeleton } from "@bt/ui/skeleton";
 
 import { api } from "~/trpc/react";
 
@@ -41,7 +42,7 @@ export default function Page() {
   const videoId = params.video_id as string;
   const [filterType, setFilterType] = useState<"month" | "week">("week");
 
-  const { data } = api.analytics.getVideoWatchTime.useQuery({
+  const { data, isLoading } = api.analytics.getVideoWatchTime.useQuery({
     videoId,
     range: filterType,
   });
@@ -57,7 +58,11 @@ export default function Page() {
         <CardHeader className="flex-row items-center justify-between">
           <div className="space-y-2">
             <CardDescription>{"Watch time (minutes)"}</CardDescription>
-            <CardTitle className="text-2xl">{data?.totalWatchTime}</CardTitle>
+            {isLoading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <CardTitle className="text-2xl">{data?.totalWatchTime}</CardTitle>
+            )}
           </div>
           <Select
             value={filterType}
@@ -73,53 +78,57 @@ export default function Page() {
           </Select>
         </CardHeader>
         <CardContent>
-          <ChartContainer
-            config={chartConfig}
-            className="h-96 min-h-[200] w-full"
-          >
-            <LineChart accessibilityLayer data={data?.rows}>
-              <CartesianGrid vertical={false} />
-              {/* <ChartLegend content={<ChartLegendContent />} /> */}
-              <ChartTooltip
-                label={"How"}
-                content={
-                  <ChartTooltipContent
-                    indicator="dashed"
-                    labelKey="date"
-                    labelFormatter={(label: Date, payload) => {
-                      const item = payload.at(0)?.payload;
-                      const date = item.date as Date;
-                      return format(date, "LLL, d");
-                    }}
-                  />
-                }
-              />
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                tickMargin={10}
-                tickCount={10}
-                axisLine={false}
-                tickFormatter={(value) => format(value as Date, "LLL, d")}
-              />
-              <YAxis
-                dataKey="watchtime"
-                tickLine={false}
-                tickMargin={10}
-                tickCount={10}
-                axisLine={false}
-                orientation="right"
-              />
-              <Line
-                isAnimationActive={false}
-                dot={false}
-                dataKey="watchtime"
-                stroke="var(--color-watchtime)"
-                strokeWidth={2}
-                type={"bump"}
-              />
-            </LineChart>
-          </ChartContainer>
+          {isLoading ? (
+            <Skeleton className="h-80 w-full" />
+          ) : (
+            <ChartContainer
+              config={chartConfig}
+              className="h-80 min-h-[200] w-full"
+            >
+              <LineChart accessibilityLayer data={data?.rows}>
+                <CartesianGrid vertical={false} />
+                {/* <ChartLegend content={<ChartLegendContent />} /> */}
+                <ChartTooltip
+                  label={"How"}
+                  content={
+                    <ChartTooltipContent
+                      indicator="dashed"
+                      labelKey="date"
+                      labelFormatter={(label: Date, payload) => {
+                        const item = payload.at(0)?.payload;
+                        const date = item.date as Date;
+                        return format(date, "LLL, d");
+                      }}
+                    />
+                  }
+                />
+                <XAxis
+                  dataKey="date"
+                  tickLine={false}
+                  tickMargin={10}
+                  tickCount={10}
+                  axisLine={false}
+                  tickFormatter={(value) => format(value as Date, "LLL, d")}
+                />
+                <YAxis
+                  dataKey="watchtime"
+                  tickLine={false}
+                  tickMargin={10}
+                  tickCount={10}
+                  axisLine={false}
+                  orientation="right"
+                />
+                <Line
+                  isAnimationActive={false}
+                  dot={false}
+                  dataKey="watchtime"
+                  stroke="var(--color-watchtime)"
+                  strokeWidth={2}
+                  type={"bump"}
+                />
+              </LineChart>
+            </ChartContainer>
+          )}
         </CardContent>
       </Card>
     </div>
