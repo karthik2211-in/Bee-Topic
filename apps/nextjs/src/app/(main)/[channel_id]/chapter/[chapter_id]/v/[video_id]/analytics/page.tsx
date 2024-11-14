@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
+import { useParams } from "next/navigation";
+import { format } from "date-fns";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 import type { ChartConfig } from "@bt/ui/chart";
 import { Button } from "@bt/ui/button";
@@ -14,38 +15,28 @@ import {
 } from "@bt/ui/card";
 import {
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@bt/ui/chart";
 
+import { api } from "~/trpc/react";
+
 const chartConfig = {
-  desktop: {
-    label: "Desktop",
-    color: "#2563eb",
-  },
-  mobile: {
-    label: "Mobile",
-    color: "#60a5fa",
+  watchtime: {
+    label: "Watch Time",
+    color: "hsl(47.9 95.8% 61%)",
   },
 } satisfies ChartConfig;
 
 export default function Page() {
-  const chartData = [
-    { month: "January", desktop: 186, mobile: 80 },
-    { month: "February", desktop: 305, mobile: 200 },
-    { month: "March", desktop: 237, mobile: 120 },
-    { month: "April", desktop: 73, mobile: 190 },
-    { month: "May", desktop: 209, mobile: 130 },
-    { month: "June", desktop: 214, mobile: 140 },
-    { month: "July", desktop: 214, mobile: 140 },
-    { month: "Agust", desktop: 214, mobile: 140 },
-    { month: "September", desktop: undefined, mobile: undefined },
-    { month: "October", desktop: undefined, mobile: undefined },
-    { month: "November", desktop: undefined, mobile: undefined },
-    { month: "December", desktop: undefined, mobile: undefined },
-  ];
+  const params = useParams();
+  const videoId = params.video_id as string;
+
+  const { data, trpc } = api.analytics.getVideoWatchTime.useQuery({
+    videoId,
+    range: "month",
+  });
+
   return (
     <div className="px-8 py-5">
       <div className="h-16">
@@ -56,40 +47,56 @@ export default function Page() {
       <Card className="shadow-none">
         <CardHeader className="flex-row items-center justify-between">
           <div className="space-y-2">
-            <CardDescription>{"Watch time (hours)"}</CardDescription>
-            <CardTitle className="text-2xl">34</CardTitle>
+            <CardDescription>{"Watch time (minutes)"}</CardDescription>
+            <CardTitle className="text-2xl">{data?.totalWatchTime}</CardTitle>
           </div>
           <Button variant={"ghost"}>2024</Button>
         </CardHeader>
         <CardContent>
           <ChartContainer
             config={chartConfig}
-            className="h-80 min-h-[100px] w-full"
+            className="h-96 min-h-[200] w-full"
           >
-            <LineChart accessibilityLayer data={chartData}>
+            <LineChart accessibilityLayer data={data?.rows}>
               <CartesianGrid vertical={false} />
-              <ChartLegend content={<ChartLegendContent />} />
-              <ChartTooltip content={<ChartTooltipContent />} />
+              {/* <ChartLegend content={<ChartLegendContent />} /> */}
+              <ChartTooltip
+                label={"How"}
+                content={
+                  <ChartTooltipContent
+                    indicator="dashed"
+                    labelKey="date"
+                    labelFormatter={(label: Date, payload) => {
+                      const item = payload.at(0)?.payload;
+                      const date = item.date as Date;
+                      return format(date, "LLL, d");
+                    }}
+                  />
+                }
+              />
               <XAxis
-                dataKey="month"
+                dataKey="date"
                 tickLine={false}
                 tickMargin={10}
+                tickCount={100}
                 axisLine={false}
-                tickFormatter={(value) => value.slice(0, 3)}
+                tickFormatter={(value) => format(value as Date, "LLL, d")}
+              />
+              <YAxis
+                dataKey="watchtime"
+                tickLine={false}
+                tickMargin={10}
+                tickCount={10}
+                axisLine={false}
+                orientation="right"
               />
               <Line
+                isAnimationActive={false}
                 dot={false}
-                dataKey="desktop"
-                stroke="var(--color-desktop)"
+                dataKey="watchtime"
+                stroke="var(--color-watchtime)"
                 strokeWidth={2}
-                type={"natural"}
-              />
-              <Line
-                dot={false}
-                dataKey="mobile"
-                stroke="var(--color-mobile)"
-                strokeWidth={2}
-                type={"natural"}
+                type={"bump"}
               />
             </LineChart>
           </ChartContainer>
