@@ -87,6 +87,18 @@ export const Videos = pgTable("videos", (t) => ({
   updatedAt: t.timestamp().$onUpdate(() => new Date()),
 }));
 
+export const VideosAnalytics = pgTable("videos_analytics", (t) => ({
+  id: t.uuid().notNull().primaryKey().defaultRandom(),
+  videoId: t
+    .uuid()
+    .references(() => Videos.id, { onDelete: "cascade", onUpdate: "cascade" })
+    .notNull(),
+  clerkUserId: t.text().notNull(),
+  from: t.real().notNull(),
+  to: t.real().notNull(),
+  watchedAt: t.timestamp().defaultNow().notNull(),
+}));
+
 export const Subscriptions = pgTable("subscriptions", (t) => ({
   id: t.uuid().notNull().primaryKey().defaultRandom(),
   channelId: t
@@ -123,6 +135,16 @@ export const UpdateVideoSchema = createInsertSchema(Videos, {
   duration: true,
 });
 
+export const CreateVideosAnalytics = createInsertSchema(VideosAnalytics, {
+  videoId: z.string().min(1, "Video Id is missing"),
+  clerkUserId: z.string().min(1, "clerk user id is missing"),
+  from: z.number(),
+  to: z.number(),
+}).omit({
+  id: true,
+  watchedAt: true,
+});
+
 //Relations
 export const ChannelsRelations = relations(Channels, ({ many }) => ({
   chapters: many(Chapters),
@@ -143,9 +165,20 @@ export const ChaptersRelations = relations(Chapters, ({ one, many }) => ({
   videos: many(Videos),
 }));
 
-export const VideosRelations = relations(Videos, ({ one }) => ({
+export const VideosRelations = relations(Videos, ({ one, many }) => ({
   chapters: one(Chapters, {
     fields: [Videos.chapterId],
     references: [Chapters.id],
   }),
+  analytics: many(VideosAnalytics),
 }));
+
+export const VideosAnalyticsRelations = relations(
+  VideosAnalytics,
+  ({ one }) => ({
+    video: one(Videos, {
+      fields: [VideosAnalytics.videoId],
+      references: [Videos.id],
+    }),
+  }),
+);
