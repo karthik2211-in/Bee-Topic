@@ -1,11 +1,12 @@
 import React from "react";
-import { Stack, Tabs } from "expo-router";
+import { Tabs, useSegments } from "expo-router";
 
 import { Text } from "~/components/ui/text";
 import { Home } from "~/lib/icons/Home";
 import { User } from "~/lib/icons/User";
 
 export default function TabsLayout() {
+  const segment = useSegments();
   return (
     <>
       <Tabs
@@ -14,6 +15,7 @@ export default function TabsLayout() {
             borderTopWidth: 0.2, // Remove top border
             elevation: 0, // Remove shadow for Android
             height: 54,
+            display: segment[3] === "videos" ? "none" : "flex",
           },
         }}
       >

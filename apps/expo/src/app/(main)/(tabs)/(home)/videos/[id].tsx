@@ -11,6 +11,7 @@ import Video, { ReactVideoEvents, VideoRef } from "react-native-video";
 import * as NavigationBar from "expo-navigation-bar";
 import {
   Stack,
+  Tabs,
   useLocalSearchParams,
   useNavigation,
   useRouter,
@@ -215,6 +216,7 @@ export default function VideoPlayer() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      <Tabs.Screen options={{ tabBarStyle: { display: "none" } }} />
       <Stack.Screen
         options={{
           title: videoDetails?.chapters.title ?? "",
