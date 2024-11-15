@@ -102,7 +102,7 @@ export default function Chapter() {
           ListHeaderComponent={
             <View className="relative h-64 min-h-64 px-2 py-4">
               <Image
-                source={require("../../../../assets/honey.png")}
+                source={require("assets/honey.png")}
                 style={{
                   height: 200,
                   width: 200,
