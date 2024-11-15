@@ -35,7 +35,7 @@ export default function SideBarContent() {
           <Button
             size={"lg"}
             variant={"ghost"}
-            className="h-11 justify-start gap-6 px-3 text-sm"
+            className="h-11 w-full justify-start gap-6 px-3 text-sm"
           >
             <ArrowLeft strokeWidth={1.25} />
             Chapter content
@@ -52,16 +52,15 @@ export default function SideBarContent() {
             href={`/${params.channel_id}/chapter/${params.chapter_id}/v/${params.video_id}`}
           >
             <Button
-              size={"lg"}
               variant={"ghost"}
               className={cn(
-                "h-11 w-full justify-start gap-6 px-3 text-base font-normal",
+                "h-11 w-full justify-start gap-6 px-4 text-sm text-foreground/70",
                 pathname ===
                   `/${params.channel_id}/chapter/${params.chapter_id}/v/${params.video_id}` &&
-                  "bg-accent font-medium",
+                  "bg-accent text-foreground",
               )}
             >
-              <Edit2Icon strokeWidth={1.25} />
+              <Edit2Icon strokeWidth={1.25} className="size-5" />
               Details
             </Button>
           </Link>
@@ -69,16 +68,15 @@ export default function SideBarContent() {
             href={`/${params.channel_id}/chapter/${params.chapter_id}/v/${params.video_id}/analytics`}
           >
             <Button
-              size={"lg"}
               variant={"ghost"}
               className={cn(
-                "h-11 w-full justify-start gap-6 px-3 text-base font-normal",
+                "h-11 w-full justify-start gap-6 px-4 text-sm text-foreground/70",
                 pathname ===
                   `/${params.channel_id}/chapter/${params.chapter_id}/v/${params.video_id}/analytics` &&
-                  "bg-accent font-medium",
+                  "bg-accent text-foreground",
               )}
             >
-              <LineChartIcon strokeWidth={1.25} />
+              <LineChartIcon strokeWidth={1.25} className="size-5" />
               Analytics
             </Button>
           </Link>

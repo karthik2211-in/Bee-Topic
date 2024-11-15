@@ -48,7 +48,7 @@ export default function Page() {
   });
 
   return (
-    <div className="px-8 py-5">
+    <div className="py-4 pl-10 pr-48">
       <div className="h-16">
         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
           Video Analytics

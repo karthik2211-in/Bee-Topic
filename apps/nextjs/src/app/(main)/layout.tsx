@@ -1,11 +1,10 @@
 import React from "react";
-import Image from "next/image";
-import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 
 import { ThemeToggle } from "@bt/ui/theme";
 
 import ChannelSwitcher from "./channel-switcher";
+import ProgresBarProvider from "./ProgressBarProvider";
 
 export default function MainLayout({
   children,
@@ -13,25 +12,28 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="flex min-h-screen flex-col">
-      <div className="sticky inset-0 z-20 flex flex-col border-b bg-background/90 backdrop-blur-xl">
-        <header className="flex h-16 items-center justify-between px-4">
-          <ChannelSwitcher />
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
+    <>
+      <ProgresBarProvider />
+      <main className="flex min-h-screen flex-col">
+        <div className="sticky inset-0 z-20 flex flex-col border-b bg-background/90 backdrop-blur-xl">
+          <header className="relative flex h-16 items-center justify-between px-4">
+            <ChannelSwitcher />
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
 
-            {/* <Button size={"icon"} variant={"outline"} className="rounded-full">
+              {/* <Button size={"icon"} variant={"outline"} className="rounded-full">
               <Bell className="size-5" strokeWidth={1.8} />
-            </Button> */}
-            <UserButton
-              appearance={{
-                elements: { userButtonAvatarBox: "border size-9" },
-              }}
-            />
-          </div>
-        </header>
-      </div>
-      {children}
-    </main>
+              </Button> */}
+              <UserButton
+                appearance={{
+                  elements: { userButtonAvatarBox: "border size-9" },
+                }}
+              />
+            </div>
+          </header>
+        </div>
+        {children}
+      </main>
+    </>
   );
 }
