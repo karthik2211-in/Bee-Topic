@@ -1,15 +1,69 @@
 import type { TRPCRouterRecord } from "@trpc/server";
+import { clerkClient } from "@clerk/nextjs/server";
 import { z } from "zod";
 
-import { and, desc, eq, ilike, sql } from "@bt/db";
+import { and, asc, count, desc, eq, gte, ilike, sql } from "@bt/db";
+import { db as DataBase } from "@bt/db/client";
 import {
   Channels,
   Chapters,
   CreateChannelSchema,
+  Subscriptions,
   UpdateChannelSchema,
+  Videos,
 } from "@bt/db/schema";
 
-import { protectedProcedure } from "../trpc";
+import { Context, protectedProcedure } from "../trpc";
+
+export async function getChannelById({
+  channelId,
+  fetchByUser = false,
+  ctx,
+}: {
+  channelId: string;
+  fetchByUser?: boolean;
+  ctx: Context;
+}) {
+  const item = await ctx.db.query.Channels.findFirst({
+    where: and(
+      eq(Channels.id, channelId),
+      fetchByUser
+        ? eq(Channels.createdByClerkUserId, ctx.session.userId ?? "")
+        : undefined,
+    ),
+  });
+
+  const agregate = await ctx.db
+    .select({ totalChapters: count(Chapters.channelId) })
+    .from(Chapters)
+    .where(eq(Chapters.channelId, channelId))
+    .groupBy(Chapters.channelId);
+
+  const clerk = await clerkClient();
+  const user = await clerk.users.getUser(item?.createdByClerkUserId ?? "");
+
+  const subscription = await ctx.db.query.Subscriptions.findFirst({
+    where: and(
+      eq(Subscriptions.channelId, channelId),
+      eq(Subscriptions.clerkUserId, ctx.session.userId ?? ""),
+    ),
+  });
+
+  const subscriptionsAgregate = await ctx.db
+    .select({ subscriptionsCount: count(Subscriptions.channelId) })
+    .from(Subscriptions)
+    .where(eq(Subscriptions.channelId, channelId))
+    .groupBy(Subscriptions.channelId);
+
+  return {
+    totalChapters: agregate.at(0)?.totalChapters,
+    subscriptionsCount: subscriptionsAgregate.at(0)?.subscriptionsCount ?? 0,
+    isSubscribed: !!subscription?.id,
+    createdBy: user.fullName,
+    createdByImageUrl: user.imageUrl,
+    ...item,
+  };
+}
 
 export const channelsRouter = {
   all: protectedProcedure
@@ -38,16 +92,96 @@ export const channelsRouter = {
         .orderBy(desc(Channels.createdAt));
     }),
 
+  infinite: protectedProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).nullish(),
+        cursor: z.date().nullish(), // <-- "cursor" needs to exist, but can be any type
+        direction: z.enum(["forward", "backward"]), // optional, useful for bi-directional query
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const limit = input.limit ?? 50;
+      const { cursor } = input;
+
+      // console.log("Incoming Cursor", cursor);
+
+      const items = await ctx.db.query.Channels.findMany({
+        orderBy: [asc(Channels.createdAt)],
+        where: cursor ? gte(Channels.createdAt, cursor) : undefined,
+        limit: limit + 1,
+        with: {
+          chapters: {
+            limit: 4,
+          },
+        },
+      });
+
+      const channelsWithTotalChapters = await Promise.all(
+        items.map(async (channelItem) => {
+          //find the chapters count
+          const item = await ctx.db
+            .select({ totalChapters: count(Chapters.channelId) })
+            .from(Chapters)
+            .where(eq(Chapters.channelId, channelItem.id))
+            .groupBy(Chapters.channelId);
+
+          //find videos count
+          const chapters = await Promise.all(
+            channelItem.chapters.map(async (chapter) => {
+              const chapterItem = await ctx.db
+                .select({ totalVideos: count(Videos.chapterId) })
+                .from(Videos)
+                .where(eq(Videos.chapterId, chapter.id))
+                .groupBy(Videos.chapterId);
+
+              return {
+                ...chapter,
+                totalVideos: chapterItem.at(0)?.totalVideos ?? 0,
+              };
+            }),
+          );
+
+          const clerk = await clerkClient();
+          const user = await clerk.users.getUser(
+            channelItem.createdByClerkUserId,
+          );
+
+          const subscriptionsAgregate = await ctx.db
+            .select({ subscriptionsCount: count(Subscriptions.channelId) })
+            .from(Subscriptions)
+            .where(eq(Subscriptions.channelId, channelItem.id))
+            .groupBy(Subscriptions.channelId);
+          return {
+            ...channelItem,
+            createdBy: user.fullName,
+            createdByImageUrl: user.imageUrl,
+            chapters,
+            totalChapters: item?.at(0)?.totalChapters ?? 0,
+            subscriptionCount:
+              subscriptionsAgregate.at(0)?.subscriptionsCount ?? 0,
+          };
+        }),
+      );
+
+      let nextCursor: typeof cursor | undefined = undefined;
+      if (channelsWithTotalChapters.length > limit) {
+        const nextItem = channelsWithTotalChapters.pop();
+        nextCursor = nextItem!.createdAt;
+        console.log("Next Cursor", nextCursor);
+      }
+
+      return {
+        items: channelsWithTotalChapters,
+        nextCursor,
+      };
+    }),
+
   byId: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(({ ctx, input }) => {
-      return ctx.db.query.Channels.findFirst({
-        where: and(
-          eq(Channels.id, input.id),
-          eq(Channels.createdByClerkUserId, ctx.session.userId),
-        ),
-      });
-    }),
+    .query(async ({ ctx, input }) =>
+      getChannelById({ channelId: input.id, ctx }),
+    ),
 
   create: protectedProcedure
     .input(CreateChannelSchema)

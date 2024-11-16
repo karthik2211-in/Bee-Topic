@@ -89,7 +89,7 @@ export function DeleteVideoDialog({
             isLoading={isPending}
             variant={"destructive"}
           >
-            Remove
+            Delete
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -103,6 +103,13 @@ export default function Page() {
     id: params.video_id as string,
   });
   const utils = api.useUtils();
+  const form = useForm({
+    schema: videoDetailsSchema,
+    defaultValues: {
+      title: "",
+      description: "",
+    },
+  });
   const { mutateAsync: updateVideo } = api.videos.update.useMutation({
     onError(error) {
       toast.error(error.message);
@@ -111,6 +118,10 @@ export default function Page() {
       toast.success("Video details saved");
       router.refresh();
       utils.videos.invalidate();
+      form.reset({
+        title: data[0]?.title,
+        description: data[0]?.description ?? "",
+      });
     },
   });
 
@@ -119,14 +130,6 @@ export default function Page() {
   async function onSubmitVideo(values: z.infer<typeof videoDetailsSchema>) {
     await updateVideo({ id: params.video_id as string, ...values });
   }
-
-  const form = useForm({
-    schema: videoDetailsSchema,
-    defaultValues: {
-      title: "",
-      description: "",
-    },
-  });
 
   React.useEffect(() => {
     form.reset({ title: video?.title, description: video?.description ?? "" });
@@ -143,49 +146,52 @@ export default function Page() {
     );
 
   return (
-    <div className="w-full p-4">
+    <div className="relative w-full">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmitVideo)}>
-          <div className="flex justify-between">
-            <Button
-              type="button"
-              onClick={() => {
-                router.back();
-              }}
-              size={"lg"}
-              variant={"outline"}
-            >
-              <ArrowLeft />
-              Chapter content
-            </Button>
+          <div className="sticky top-16 z-50 flex items-center justify-between bg-background/90 py-3 pl-10 pr-48 shadow-sm backdrop-blur-lg">
+            <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+              Video Details
+            </h4>
 
             <div className="space-x-3">
               <DeleteVideoDialog videoId={params.video_id as string}>
-                <Button type="button" size={"lg"} variant={"destructive"}>
-                  Remove
+                <Button
+                  type="button"
+                  variant={"ghost"}
+                  className="text-destructive hover:text-destructive"
+                >
+                  Delete
                 </Button>
               </DeleteVideoDialog>
-              <Button isLoading={form.formState.isSubmitting} size={"lg"}>
+              <Button
+                disabled={!form.formState.isDirty}
+                isLoading={form.formState.isSubmitting}
+              >
                 Save
               </Button>
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-4 px-52 py-10">
-            <Player
-              accentColor="hsl(45 100% 60%)"
-              className="aspect-video overflow-hidden rounded-lg border border-primary"
-              src={`https://utfs.io/f/${video?.ut_fileKey}`}
-            />
-            <div className="w-full space-y-6 py-4">
+          <div className="grid grid-cols-5 gap-5 py-10 pl-10 pr-48">
+            <div className="col-span-3 w-full space-y-6">
               <FormField
                 control={form.control}
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Video Title</FormLabel>
+                    <FormLabel>
+                      Video Title
+                      <span className="text-xs text-muted-foreground">
+                        {"(Required)"}
+                      </span>
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="Untitled" {...field} />
+                      <Textarea
+                        className="resize-none"
+                        placeholder="Untitled"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -198,7 +204,7 @@ export default function Page() {
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea {...field} />
+                      <Textarea className="resize-none" rows={10} {...field} />
                     </FormControl>
                     <FormDescription>Tell more about the video</FormDescription>
                     <FormMessage />
@@ -206,6 +212,11 @@ export default function Page() {
                 )}
               />
             </div>
+            <Player
+              accentColor="hsl(45 100% 60%)"
+              className="col-span-2 aspect-video overflow-hidden rounded-md border"
+              src={`https://utfs.io/f/${video?.ut_fileKey}`}
+            />
           </div>
         </form>
       </Form>

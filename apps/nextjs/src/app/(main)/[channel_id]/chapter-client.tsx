@@ -2,7 +2,15 @@
 
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
-import { Edit2, HashIcon, MoreVerticalIcon, Trash2 } from "lucide-react";
+import {
+  BookA,
+  Edit2,
+  Folder,
+  FolderOpen,
+  HashIcon,
+  MoreVerticalIcon,
+  Trash2,
+} from "lucide-react";
 
 import { RouterOutputs } from "@bt/api";
 import { cn } from "@bt/ui";
@@ -29,23 +37,26 @@ export default function ChapterItem({
   chapter: RouterOutputs["chapters"]["all"][number];
 }) {
   const params = useParams();
-  const [open, onChangeOpen] = useState(false);
   return (
     <Card
       className={cn(
-        "group flex overflow-hidden rounded-md shadow-none transition-all duration-150 hover:cursor-pointer hover:bg-accent/30",
-        params.chapter_id === chapter.id && "bg-accent/30",
+        "group flex overflow-hidden rounded-md border-0 bg-transparent text-foreground/60 shadow-none transition-all duration-150 hover:cursor-pointer hover:bg-accent hover:text-foreground",
+        params.chapter_id === chapter.id && "bg-accent text-foreground",
       )}
     >
-      <CardContent className="flex size-12 items-center justify-center border-r bg-primary/20 p-2">
-        <HashIcon strokeWidth={1} />
+      <CardContent className="flex size-12 items-center justify-center bg-transparent p-2">
+        {params.chapter_id === chapter.id ? (
+          <FolderOpen className="size-5 text-foreground" />
+        ) : (
+          <Folder className="size-5 text-foreground/60" />
+        )}
       </CardContent>
       <CardHeader className="flex w-full flex-row items-center justify-between gap-1 space-y-0 p-0 px-2">
         <div>
-          <CardTitle className="m-0 p-0 text-sm font-medium">
+          <CardTitle className="m-0 truncate p-0 text-sm font-medium">
             {chapter.title}
           </CardTitle>
-          <CardDescription className="m-0 p-0 font-mono text-xs">
+          <CardDescription className="m-0 p-0 font-mono text-[10px]">
             {chapter.videosCount} videos
           </CardDescription>
         </div>

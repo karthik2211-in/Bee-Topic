@@ -6,13 +6,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   slug: "bee-topic",
   scheme: "beetopic",
   version: "0.1.0",
-  orientation: "portrait",
+  orientation: "default",
   icon: "./assets/icon.png",
   userInterfaceStyle: "automatic",
   splash: {
-    image: "./assets/icon.png",
+    image: "./assets/splash.png",
     resizeMode: "contain",
-    backgroundColor: "#1F104A",
+    backgroundColor: "#EABD04",
   },
   updates: {
     fallbackToCacheTimeout: 0,
@@ -25,7 +25,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     package: "com.jb_portals.beetopic",
     adaptiveIcon: {
       foregroundImage: "./assets/icon.png",
-      backgroundColor: "#1F104A",
+      backgroundColor: "#EABD04",
     },
   },
   extra: {
@@ -37,5 +37,19 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     tsconfigPaths: true,
     typedRoutes: true,
   },
-  plugins: ["expo-router"],
+  plugins: [
+    "expo-router",
+    [
+      "react-native-video",
+      {
+        enableNotificationControls: true,
+        androidExtensions: {
+          useExoplayerRtsp: false,
+          useExoplayerSmoothStreaming: false,
+          useExoplayerHls: false,
+          useExoplayerDash: false,
+        },
+      },
+    ],
+  ],
 });

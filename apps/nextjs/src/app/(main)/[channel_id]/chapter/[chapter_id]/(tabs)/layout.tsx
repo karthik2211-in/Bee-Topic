@@ -64,7 +64,7 @@ export default function ChannelLayout({
         </div>
       </div>
 
-      <div className="px-6">
+      <div className="border-b px-6">
         <ChapterTabs />
       </div>
       <div className="p-6">{children}</div>

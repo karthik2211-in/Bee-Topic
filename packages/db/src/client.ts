@@ -7,4 +7,5 @@ export const db = drizzle({
   client: neon(process.env.DATABASE_URL!),
   schema,
   casing: "snake_case",
+  logger: process.env.NODE_ENV === "development",
 });

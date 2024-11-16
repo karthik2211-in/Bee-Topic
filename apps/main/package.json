@@ -1,0 +1,43 @@
+{
+  "name": "@bt/main",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm with-env next build",
+    "clean": "git clean -xdf .cache .next .turbo node_modules",
+    "dev": "pnpm with-env next dev",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint",
+    "start": "pnpm with-env next start",
+    "typecheck": "tsc --noEmit",
+    "with-env": "dotenv -e ../../.env --"
+  },
+  "dependencies": {
+    "@bt/api": "workspace:*",
+    "@bt/db": "workspace:*",
+    "@bt/ui": "workspace:*",
+    "@bt/validators": "workspace:*",
+    "@clerk/nextjs": "catalog:",
+    "next": "catalog:next14",
+    "react": "catalog:react18",
+    "react-dom": "catalog:react18"
+  },
+  "devDependencies": {
+    "@bt/eslint-config": "workspace:*",
+    "@bt/prettier-config": "workspace:*",
+    "@bt/tailwind-config": "workspace:*",
+    "@bt/tsconfig": "workspace:*",
+    "@clerk/types": "^4.28.0",
+    "@types/node": "^20.16.11",
+    "@types/react": "catalog:react18",
+    "@types/react-dom": "catalog:react18",
+    "dotenv-cli": "^7.4.2",
+    "eslint": "catalog:",
+    "jiti": "^2.3.3",
+    "prettier": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
+  },
+  "prettier": "@bt/prettier-config"
+}

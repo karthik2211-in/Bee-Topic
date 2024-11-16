@@ -81,9 +81,34 @@ export const Videos = pgTable("videos", (t) => ({
   description: t.text(),
   duration: t.real().notNull(),
   ut_fileKey: t.text().notNull(),
+  viewCount: t.integer().default(0),
   isPublished: t.boolean().default(false),
   createdAt: t.timestamp().defaultNow().notNull(),
   updatedAt: t.timestamp().$onUpdate(() => new Date()),
+}));
+
+export const VideosAnalytics = pgTable("videos_analytics", (t) => ({
+  id: t.uuid().notNull().primaryKey().defaultRandom(),
+  videoId: t
+    .uuid()
+    .references(() => Videos.id, { onDelete: "cascade", onUpdate: "cascade" })
+    .notNull(),
+  clerkUserId: t.text().notNull(),
+  from: t.real().notNull(),
+  to: t.real().notNull(),
+  watchedAt: t.timestamp().defaultNow().notNull(),
+}));
+
+export const Subscriptions = pgTable("subscriptions", (t) => ({
+  id: t.uuid().notNull().primaryKey().defaultRandom(),
+  channelId: t
+    .uuid()
+    .references(() => Channels.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    })
+    .notNull(),
+  clerkUserId: t.text().notNull(),
 }));
 
 export const CreateVideoSchema = createInsertSchema(Videos, {
@@ -110,9 +135,26 @@ export const UpdateVideoSchema = createInsertSchema(Videos, {
   duration: true,
 });
 
+export const CreateVideosAnalytics = createInsertSchema(VideosAnalytics, {
+  videoId: z.string().min(1, "Video Id is missing"),
+  from: z.number(),
+  to: z.number(),
+}).omit({
+  clerkUserId: true,
+  id: true,
+  watchedAt: true,
+});
+
 //Relations
 export const ChannelsRelations = relations(Channels, ({ many }) => ({
   chapters: many(Chapters),
+}));
+
+export const SubscriptionsRelations = relations(Subscriptions, ({ one }) => ({
+  channel: one(Channels, {
+    fields: [Subscriptions.channelId],
+    references: [Channels.id],
+  }),
 }));
 
 export const ChaptersRelations = relations(Chapters, ({ one, many }) => ({
@@ -123,9 +165,20 @@ export const ChaptersRelations = relations(Chapters, ({ one, many }) => ({
   videos: many(Videos),
 }));
 
-export const VideosRelations = relations(Videos, ({ one }) => ({
+export const VideosRelations = relations(Videos, ({ one, many }) => ({
   chapters: one(Chapters, {
     fields: [Videos.chapterId],
     references: [Chapters.id],
   }),
+  analytics: many(VideosAnalytics),
 }));
+
+export const VideosAnalyticsRelations = relations(
+  VideosAnalytics,
+  ({ one }) => ({
+    video: one(Videos, {
+      fields: [VideosAnalytics.videoId],
+      references: [Videos.id],
+    }),
+  }),
+);
