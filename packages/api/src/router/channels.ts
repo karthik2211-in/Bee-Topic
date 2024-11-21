@@ -1,9 +1,9 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { clerkClient } from "@clerk/nextjs/server";
+import RazorPay from "razorpay";
 import { z } from "zod";
 
 import { and, asc, count, desc, eq, gte, ilike, sql } from "@bt/db";
-import { db as DataBase } from "@bt/db/client";
 import {
   Channels,
   Chapters,
@@ -185,10 +185,20 @@ export const channelsRouter = {
 
   create: protectedProcedure
     .input(CreateChannelSchema)
-    .mutation(({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const paln = await ctx.pg.plans.create({
+        period: "monthly",
+        item: { amount: 200, currency: "INR", name: input.title },
+        interval: 1,
+      });
+
       return ctx.db
         .insert(Channels)
-        .values({ ...input, createdByClerkUserId: ctx.session.userId });
+        .values({
+          ...input,
+          createdByClerkUserId: ctx.session.userId,
+          razPlanId: paln.id,
+        });
     }),
 
   update: protectedProcedure

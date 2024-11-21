@@ -6,6 +6,7 @@ import {
   View,
 } from "react-native";
 import RazorPay from "react-native-razorpay";
+// import RazorPay from "react-native-razorpay";
 import { BlurView } from "expo-blur";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
@@ -141,7 +142,7 @@ export default function Chapter() {
                     RazorPay.open({
                       amount: 300,
                       currency: "INR",
-                      key: "rzp_test_9Q5Q6Q5Q6Q5Q",
+                      key: "rzp_test_t7y6PLi8JemUfu",
                       description: "Wel",
                       image: "https://example.com/image.jpg",
                       name: "Helo",

@@ -1,6 +1,6 @@
 import React from "react";
 import { ActivityIndicator, TouchableNativeFeedback, View } from "react-native";
-import { Link, Stack, useLocalSearchParams } from "expo-router";
+import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 
 import { Button } from "~/components/ui/button";
@@ -11,6 +11,15 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "~/components/ui/dialog";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Text } from "~/components/ui/text";
 import { Lead, Muted } from "~/components/ui/typography";
@@ -72,6 +81,33 @@ export default function Chapter() {
     }
   }
 
+  function SubscribeDialog() {
+    return (
+      <Dialog
+        open={true}
+        onOpenChange={(open) => {
+          if (!open) {
+            router.back();
+          }
+        }}
+      >
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Subscribe to continue</DialogTitle>
+            <DialogDescription>
+              Subscribe to this channel to get watch the content
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button size={"lg"} className="rounded-full">
+              <Text className="font-bold">{"Subscribe ( ₹2,000 only )"}</Text>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <View style={{ flex: 1 }}>
       <Stack.Screen
@@ -82,6 +118,7 @@ export default function Chapter() {
           headerShadowVisible: false,
         }}
       />
+      <SubscribeDialog />
       {isLoading ? (
         <View className="gap-2 p-3">
           <Card

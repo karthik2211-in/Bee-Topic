@@ -1,5 +1,6 @@
 import React from "react";
 import { Tabs, useSegments } from "expo-router";
+import { PortalHost } from "@rn-primitives/portal";
 
 import { Text } from "~/components/ui/text";
 import { Home } from "~/lib/icons/Home";

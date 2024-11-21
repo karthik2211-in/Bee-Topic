@@ -7,7 +7,11 @@ export const Channels = pgTable("channels", (t) => ({
   id: t.uuid().notNull().primaryKey().defaultRandom(),
   createdByClerkUserId: t.text().notNull(),
   title: t.varchar({ length: 256 }).notNull(),
+  description: t.text(),
   createdAt: t.timestamp().defaultNow().notNull(),
+  razPlanId: t.text(),
+  planUpdatedAt: t.timestamp({ mode: "date", withTimezone: true }),
+  isPublished: t.boolean().default(false),
   updatedAt: t
     .timestamp({ mode: "date", withTimezone: true })
     .$onUpdate(() => new Date()),
