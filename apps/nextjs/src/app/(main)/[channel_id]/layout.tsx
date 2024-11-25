@@ -21,7 +21,7 @@ export default function ChannelLayout({
             <SideBarContent />
           </nav>
         </aside>
-        <div className="w-full min-w-0">{children}</div>
+        <div className="w-full min-w-0 px-10 py-5">{children}</div>
       </TooltipProvider>
     </main>
   );

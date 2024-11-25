@@ -33,7 +33,7 @@ export default function ChannelLayout({
 }) {
   return (
     <div className="w-full">
-      <div className="flex h-28 justify-between p-6">
+      <div className="flex h-20 justify-between">
         <Suspense
           fallback={
             <div className="space-y-1">
@@ -64,10 +64,10 @@ export default function ChannelLayout({
         </div>
       </div>
 
-      <div className="border-b px-6">
+      <div className="border-b">
         <ChapterTabs />
       </div>
-      <div className="p-6">{children}</div>
+      <div className="py-6">{children}</div>
     </div>
   );
 }

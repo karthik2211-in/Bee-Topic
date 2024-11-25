@@ -9,8 +9,6 @@ export const Channels = pgTable("channels", (t) => ({
   title: t.varchar({ length: 256 }).notNull(),
   description: t.text(),
   createdAt: t.timestamp().defaultNow().notNull(),
-  razPlanId: t.text(),
-  planUpdatedAt: t.timestamp({ mode: "date", withTimezone: true }),
   isPublished: t.boolean().default(false),
   updatedAt: t
     .timestamp({ mode: "date", withTimezone: true })
@@ -19,6 +17,7 @@ export const Channels = pgTable("channels", (t) => ({
 
 export const CreateChannelSchema = createInsertSchema(Channels, {
   title: z.string().max(256),
+  description: z.string(),
 }).omit({
   id: true,
   createdAt: true,
@@ -28,6 +27,7 @@ export const CreateChannelSchema = createInsertSchema(Channels, {
 
 export const UpdateChannelSchema = createInsertSchema(Channels, {
   title: z.string().max(256),
+  description: z.string().optional(),
   id: z.string().min(1),
 }).omit({
   createdAt: true,

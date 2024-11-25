@@ -115,7 +115,8 @@ export function ChannelsListClient() {
           <CardHeader className="w-full flex-row justify-between p-4">
             <div className="space-y-2">
               <CardTitle>{channel.title}</CardTitle>
-              <CardDescription>
+              <CardDescription>{channel.description}</CardDescription>
+              <CardDescription className="text-xs">
                 {channel.chapterCount} chapters •{" "}
                 {formatDistanceToNowStrict(channel.createdAt, {
                   addSuffix: true,

@@ -15,6 +15,7 @@ export const subscriptionsRouter = {
         clerkUserId: opts.ctx.session.userId,
       }),
     ),
+
   delete: protectedProcedure
     .input(z.object({ channelId: z.string().min(1) }))
     .mutation((opts) =>

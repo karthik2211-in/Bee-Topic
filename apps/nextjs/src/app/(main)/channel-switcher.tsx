@@ -7,6 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
   CheckIcon,
   ChevronsUpDownIcon,
+  Settings,
   ShellIcon,
   SlashIcon,
   Sprout,
@@ -189,6 +190,11 @@ export default function ChannelSwitcher() {
               </Command>
             </PopoverContent>
           </Popover>
+          <Link href={`/${params.channel_id}/settings`}>
+            <Button size={"icon"} variant={"ghost"}>
+              <Settings className="size-4" />
+            </Button>
+          </Link>
         </>
       )}
     </div>

@@ -190,26 +190,6 @@ export default function Chapter() {
                         {chapter?.channel.subscriptionsCount} Subscribers
                       </CardDescription>
                     </View>
-                    <Button
-                      size={"sm"}
-                      disabled={isSubscribing || isUnSubscribing}
-                      onPress={() =>
-                        chapter?.channel?.isSubscribed
-                          ? unSubscribe({ channelId: chapter.channelId })
-                          : subscribe({ channelId: chapter?.channelId ?? "" })
-                      }
-                      variant={
-                        chapter?.channel?.isSubscribed ? "secondary" : "default"
-                      }
-                      // disabled
-                      className="rounded-full"
-                    >
-                      <Text>
-                        {chapter?.channel?.isSubscribed
-                          ? "Subscribed"
-                          : "Subscribe to Watch"}
-                      </Text>
-                    </Button>
                   </CardHeader>
                 </Card>
               </CardHeader>

@@ -6,9 +6,11 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Edit2Icon,
+  GemIcon,
   LineChartIcon,
   Plus,
   Router,
+  TicketPercent,
 } from "lucide-react";
 
 import { cn } from "@bt/ui";
@@ -22,12 +24,71 @@ import SearchChapter from "./search-chapter";
 export default function SideBarContent() {
   const params = useParams();
   const videoId = params.video_id;
+  const router = useRouter();
   const pathname = usePathname();
   const { data } = api.videos.byId.useQuery(
     { id: videoId as string },
     { enabled: !!videoId },
   );
 
+  if (pathname.startsWith(`/${params.channel_id}/settings`))
+    return (
+      <>
+        <Button
+          size={"lg"}
+          variant={"ghost"}
+          onClick={() => router.back()}
+          className="h-11 w-full justify-start gap-6 px-3 text-sm"
+        >
+          <ArrowLeft strokeWidth={1.25} />
+          Back
+        </Button>
+        <div className="py-1">
+          <div className="text-base font-semibold">Channel Settings</div>
+        </div>
+        <div className="flex w-full flex-col space-y-2">
+          <Link href={`/${params.channel_id}/settings`}>
+            <Button
+              variant={"ghost"}
+              className={cn(
+                "h-11 w-full justify-start gap-6 px-4 text-sm text-foreground/70",
+                pathname === `/${params.channel_id}/settings` &&
+                  "bg-accent text-foreground",
+              )}
+            >
+              <Edit2Icon strokeWidth={1.25} className="size-5" />
+              Details
+            </Button>
+          </Link>
+          <Link href={`/${params.channel_id}/settings/coupons`}>
+            <Button
+              variant={"ghost"}
+              className={cn(
+                "h-11 w-full justify-start gap-6 px-4 text-sm text-foreground/70",
+                pathname === `/${params.channel_id}/settings/coupons` &&
+                  "bg-accent text-foreground",
+              )}
+            >
+              <TicketPercent strokeWidth={1.25} className="size-5" />
+              Coupons
+            </Button>
+          </Link>
+          <Link href={`/${params.channel_id}/settings/subscriptions`}>
+            <Button
+              variant={"ghost"}
+              className={cn(
+                "h-11 w-full justify-start gap-6 px-4 text-sm text-foreground/70",
+                pathname === `/${params.channel_id}/settings/subscriptions` &&
+                  "bg-accent text-foreground",
+              )}
+            >
+              <GemIcon strokeWidth={1.25} className="size-5" />
+              Subscriptions
+            </Button>
+          </Link>
+        </div>
+      </>
+    );
   if (videoId)
     return (
       <>

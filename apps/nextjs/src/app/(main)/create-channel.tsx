@@ -28,6 +28,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -35,6 +36,7 @@ import {
   useForm,
 } from "@bt/ui/form";
 import { Input } from "@bt/ui/input";
+import { Textarea } from "@bt/ui/textarea";
 import { toast } from "@bt/ui/toast";
 
 import { api } from "~/trpc/react";
@@ -44,6 +46,8 @@ const createChannelSchema = z.object({
     .string()
     .max(256)
     .min(1, { message: "title of the channel is required" }),
+  description: z.string().optional(),
+  subscriptionPrice: z.number().gt(0, "Price must be greater than 0"),
 });
 
 export function CreateChannelButton() {
@@ -70,6 +74,8 @@ export function CreateChannelButton() {
   async function onSubmit(values: z.infer<typeof createChannelSchema>) {
     await createChannel({
       title: values.title,
+      subscriptionPrice: values.subscriptionPrice,
+      description: values.description,
     });
   }
 
@@ -81,7 +87,7 @@ export function CreateChannelButton() {
           Create New
         </Button>
       </DialogTrigger>
-      <DialogContent className="top-[35%] max-w-md">
+      <DialogContent className="top-[45%] max-w-md">
         <DialogHeader>
           <DialogTitle>New Channel</DialogTitle>
         </DialogHeader>
@@ -96,6 +102,45 @@ export function CreateChannelButton() {
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea className="resize-none" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Recommended to increase the accessbility
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="subscriptionPrice"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Subscription Price</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value);
+                        field.onChange(isNaN(value) ? undefined : value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    {"Price that customer will pay for monthly in (₹)"}
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -142,7 +187,10 @@ export function EditChannelDialog({
   });
 
   React.useEffect(() => {
-    form.reset({ title: channel?.title });
+    form.reset({
+      title: channel?.title,
+      description: channel?.description ?? "",
+    });
   }, [isLoading]);
 
   async function onSubmit(values: z.infer<typeof createChannelSchema>) {
@@ -175,6 +223,42 @@ export function EditChannelDialog({
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea className="resize-none" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="subscriptionPrice"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Subscription Price</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        {...field}
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value);
+                          field.onChange(isNaN(value) ? undefined : value);
+                        }}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Price that customer will pay for monthly in (₹)
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

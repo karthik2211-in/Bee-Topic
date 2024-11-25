@@ -68,8 +68,8 @@ export async function getChannelById({
 export const channelsRouter = {
   all: protectedProcedure
     .input(z.object({ query: z.string().nullable() }).optional())
-    .query(({ ctx, input }) => {
-      return ctx.db
+    .query(async ({ ctx, input }) => {
+      const channels = await ctx.db
         .select({
           id: Channels.id,
           title: Channels.title,
@@ -77,6 +77,7 @@ export const channelsRouter = {
           chapterCount: sql`count(${Chapters.id})`
             .mapWith(Number)
             .as("chapterCount"),
+          description: Channels.description,
         })
         .from(Channels)
         .leftJoin(Chapters, eq(Chapters.channelId, Channels.id)) // Adjust 'channelId' to the actual foreign key field
@@ -90,6 +91,8 @@ export const channelsRouter = {
         )
         .groupBy(Channels.id)
         .orderBy(desc(Channels.createdAt));
+
+      return channels;
     }),
 
   infinite: protectedProcedure
@@ -186,19 +189,27 @@ export const channelsRouter = {
   create: protectedProcedure
     .input(CreateChannelSchema)
     .mutation(async ({ ctx, input }) => {
-      const paln = await ctx.pg.plans.create({
-        period: "monthly",
-        item: { amount: 200, currency: "INR", name: input.title },
-        interval: 1,
-      });
+      console.log(input);
+      // const plan = await ctx.pg.plans.create({
+      //   period: "monthly",
+      //   item: {
+      //     amount: Math.round(input.subscriptionPrice * 100),
+      //     currency: "INR",
+      //     name: input.title,
+      //     description: input.description ?? undefined,
+      //   },
+      //   interval: 1,
+      //   notes: {
+      //     name: input.title,
+      //     description: input.description ?? "",
+      //   },
+      // });
 
-      return ctx.db
-        .insert(Channels)
-        .values({
-          ...input,
-          createdByClerkUserId: ctx.session.userId,
-          razPlanId: paln.id,
-        });
+      return ctx.db.insert(Channels).values({
+        ...input,
+        createdByClerkUserId: ctx.session.userId,
+        // razPlanId: plan.id,
+      });
     }),
 
   update: protectedProcedure
