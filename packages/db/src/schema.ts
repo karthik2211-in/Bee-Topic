@@ -1,7 +1,12 @@
 import { relations, sql } from "drizzle-orm";
-import { pgTable } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+export const SubscriptionFrequency = pgEnum("subscription_frequency", [
+  "monthly",
+  "yearly",
+]);
 
 export const Channels = pgTable("channels", (t) => ({
   id: t
@@ -120,6 +125,39 @@ export const Coupons = pgTable("coupons", (t) => ({
     .varchar({ length: 100 })
     .default(sql`CONCAT('bt-coupon-', gen_random_uuid())`)
     .primaryKey(),
+  code: t.varchar({ length: 100 }).notNull().unique(),
+  description: t.text(),
+  subscriptionCount: t.integer().default(1),
+  subscriptonFrequency: SubscriptionFrequency("subscripiton_frequency").default(
+    "monthly",
+  ),
+  channelId: t
+    .varchar({ length: 100 })
+    .references(() => Channels.id, { onDelete: "cascade", onUpdate: "cascade" })
+    .notNull(),
+  startsOn: t
+    .timestamp({ mode: "date", withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  endsOn: t.timestamp({ mode: "date", withTimezone: true }).notNull(),
+  createdAt: t.timestamp({ mode: "date", withTimezone: true }).defaultNow(),
+}));
+
+export const CouponEmails = pgTable("coupon_emails", (t) => ({
+  id: t
+    .varchar({ length: 100 })
+    .default(sql`CONCAT('bt-coupon-uid-', gen_random_uuid())`)
+    .primaryKey(),
+  email: t.varchar({ length: 255 }).notNull(),
+  couponId: t
+    .varchar({ length: 100 })
+    .references(() => Coupons.id, { onDelete: "cascade", onUpdate: "cascade" })
+    .notNull(),
+  updatedAt: t
+    .timestamp({ mode: "date", withTimezone: true })
+    .notNull()
+    .$onUpdate(() => new Date()),
+  createdAt: t.timestamp({ mode: "date", withTimezone: true }).defaultNow(),
 }));
 
 export const Subscriptions = pgTable("subscriptions", (t) => ({
@@ -135,6 +173,16 @@ export const Subscriptions = pgTable("subscriptions", (t) => ({
     })
     .notNull(),
   clerkUserId: t.text().notNull(),
+  couponId: t.varchar({ length: 100 }).references(() => Coupons.id), //BeeTopic coupon ID
+  startsOn: t
+    .timestamp({ mode: "date", withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  endsOn: t.timestamp({ mode: "date", withTimezone: true }).notNull(),
+  createdAt: t
+    .timestamp({ mode: "date", withTimezone: true })
+    .notNull()
+    .defaultNow(),
 }));
 
 export const CreateVideoSchema = createInsertSchema(Videos, {
@@ -174,12 +222,33 @@ export const CreateVideosAnalytics = createInsertSchema(VideosAnalytics, {
 //Relations
 export const ChannelsRelations = relations(Channels, ({ many }) => ({
   chapters: many(Chapters),
+  coupons: many(Coupons),
+  subscriptions: many(Subscriptions),
+}));
+
+export const CouponsRelations = relations(Coupons, ({ one, many }) => ({
+  channel: one(Channels, {
+    fields: [Coupons.channelId],
+    references: [Channels.id],
+  }),
+  customers: many(CouponEmails),
+}));
+
+export const CouponEmailsRelations = relations(CouponEmails, ({ one }) => ({
+  coupon: one(Coupons, {
+    fields: [CouponEmails.couponId],
+    references: [Coupons.id],
+  }),
 }));
 
 export const SubscriptionsRelations = relations(Subscriptions, ({ one }) => ({
   channel: one(Channels, {
     fields: [Subscriptions.channelId],
     references: [Channels.id],
+  }),
+  coupon: one(Coupons, {
+    fields: [Subscriptions.couponId],
+    references: [Coupons.id],
   }),
 }));
 
