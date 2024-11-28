@@ -148,10 +148,11 @@ export function DeleteChannelDialog({
       onError(error) {
         toast.error(error.message);
       },
-      onSuccess() {
-        toast.success("Channel deleted");
-        router.refresh();
+      onSettled() {
+        router.prefetch("/"); //prefetch the changed channels list before navigation
+        toast.info("Channel deleted");
         utils.channels.invalidate();
+        router.push("/");
         onChangeOpen(false);
       },
     });
