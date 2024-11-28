@@ -47,7 +47,6 @@ export function CreateCouponButton() {
   const form = useForm({
     schema: CreateCouponSchema,
     defaultValues: {
-      description: "",
       code: "",
       startsOn: new Date(),
       endsOn: new Date(),
@@ -73,6 +72,7 @@ export function CreateCouponButton() {
   async function onSubmit(values: z.infer<typeof CreateCouponSchema>) {
     await createCoupon({
       ...values,
+      code: values.code.toUpperCase(),
       channelId,
     });
   }
@@ -113,7 +113,7 @@ export function CreateCouponButton() {
                   <FormControl>
                     <Textarea
                       {...field}
-                      value={field.value ?? ""}
+                      value={field.value?.toString()}
                       className="resize-none"
                     />
                   </FormControl>

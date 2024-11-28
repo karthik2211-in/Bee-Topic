@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
-import { and, eq } from "@bt/db";
+import { and, desc, eq } from "@bt/db";
 import { Coupons, CreateCouponSchema, UpdateCouponSchema } from "@bt/db/schema";
 
 import { protectedProcedure } from "../trpc";
@@ -12,6 +12,7 @@ export const couponsRouter = {
     .query((opts) =>
       opts.ctx.db.query.Coupons.findMany({
         where: eq(Coupons.channelId, opts.input.channelId),
+        orderBy: desc(Coupons.createdAt),
       }),
     ),
   create: protectedProcedure

@@ -21,7 +21,7 @@ export const CouponColumns: ColumnDef<Coupon>[] = [
     cell(props) {
       return (
         <p className="text-sm text-muted-foreground">
-          {props.row.original.description}
+          {props.row.original.description ?? "-"}
         </p>
       );
     },
