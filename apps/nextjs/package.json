@@ -23,6 +23,7 @@
     "@clerk/themes": "^2.1.39",
     "@t3-oss/env-nextjs": "^0.11.1",
     "@tanstack/react-query": "catalog:",
+    "@tanstack/react-table": "^8.20.5",
     "@trpc/client": "catalog:",
     "@trpc/react-query": "catalog:",
     "@trpc/server": "catalog:",

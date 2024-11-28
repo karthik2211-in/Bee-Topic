@@ -19,7 +19,6 @@ import { Button } from "@bt/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -47,7 +46,6 @@ const createChannelSchema = z.object({
     .max(256)
     .min(1, { message: "title of the channel is required" }),
   description: z.string().optional(),
-  subscriptionPrice: z.number().gt(0, "Price must be greater than 0"),
 });
 
 export function CreateChannelButton() {
@@ -74,7 +72,6 @@ export function CreateChannelButton() {
   async function onSubmit(values: z.infer<typeof createChannelSchema>) {
     await createChannel({
       title: values.title,
-      subscriptionPrice: values.subscriptionPrice,
       description: values.description,
     });
   }
@@ -122,158 +119,12 @@ export function CreateChannelButton() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="subscriptionPrice"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Subscription Price</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      onChange={(e) => {
-                        const value = parseInt(e.target.value);
-                        field.onChange(isNaN(value) ? undefined : value);
-                      }}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    {"Price that customer will pay for monthly in (₹)"}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
             <DialogFooter>
               <Button isLoading={form.formState.isSubmitting}>Create</Button>
             </DialogFooter>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-export function EditChannelDialog({
-  children,
-  channelId,
-}: {
-  children: React.ReactNode;
-  channelId: string;
-}) {
-  const [open, onChangeOpen] = React.useState(false);
-  const { data: channel, isLoading } = api.channels.byId.useQuery(
-    { id: channelId },
-    { enabled: open },
-  );
-  const form = useForm({
-    schema: createChannelSchema,
-    defaultValues: { title: "" },
-  });
-  const router = useRouter();
-  const utils = api.useUtils();
-  const { mutateAsync: updateChannel } = api.channels.update.useMutation({
-    onError(error) {
-      toast.error(error.message);
-    },
-    onSuccess() {
-      toast.info("Channel details saved");
-      form.reset();
-      router.refresh();
-      utils.channels.invalidate();
-      onChangeOpen(false);
-    },
-  });
-
-  React.useEffect(() => {
-    form.reset({
-      title: channel?.title,
-      description: channel?.description ?? "",
-    });
-  }, [isLoading]);
-
-  async function onSubmit(values: z.infer<typeof createChannelSchema>) {
-    await updateChannel({
-      title: values.title,
-      id: channelId,
-    });
-  }
-
-  return (
-    <Dialog onOpenChange={onChangeOpen} open={open}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="top-[35%] max-w-md">
-        <DialogHeader>
-          <DialogTitle>Edit Channel</DialogTitle>
-        </DialogHeader>
-        {isLoading ? (
-          <div className="flex h-20 items-center justify-center">
-            <Loader2 className="size-5 animate-spin text-primary" />
-          </div>
-        ) : (
-          <Form {...form}>
-            <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea className="resize-none" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="subscriptionPrice"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Subscription Price</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        {...field}
-                        onChange={(e) => {
-                          const value = parseInt(e.target.value);
-                          field.onChange(isNaN(value) ? undefined : value);
-                        }}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Price that customer will pay for monthly in (₹)
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button
-                  disabled={!form.formState.isDirty}
-                  isLoading={form.formState.isSubmitting}
-                >
-                  Save
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        )}
       </DialogContent>
     </Dialog>
   );
