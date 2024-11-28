@@ -221,10 +221,14 @@ export const CreateVideosAnalytics = createInsertSchema(VideosAnalytics, {
   watchedAt: true,
 });
 
-export const CraeteCouponSchema = createInsertSchema(Coupons, {
+export const CreateCouponSchema = createInsertSchema(Coupons, {
   channelId: z.string().min(1, "Channel ID is missing"),
   code: z.string().min(1, "CODE is missing"),
-}).omit({ id: true });
+  description: z.string(),
+  startsOn: z.date({ required_error: "A starts on date is required" }),
+  endsOn: z.date({ required_error: "A ends on date is required" }),
+  subscriptionCount: z.number().min(1, "Invalid count"),
+}).omit({ id: true, channelId: true, createdAt: true });
 
 export const UpdateCouponSchema = createInsertSchema(Coupons);
 

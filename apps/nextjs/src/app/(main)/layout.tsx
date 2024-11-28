@@ -26,7 +26,9 @@ export default function MainLayout({
               </Button> */}
               <UserButton
                 appearance={{
-                  elements: { userButtonAvatarBox: "border size-9" },
+                  elements: {
+                    userButtonAvatarBox: "border-border border size-9",
+                  },
                 }}
               />
             </div>

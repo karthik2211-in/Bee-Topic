@@ -2,7 +2,7 @@ import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod";
 
 import { and, eq } from "@bt/db";
-import { Coupons, CraeteCouponSchema, UpdateCouponSchema } from "@bt/db/schema";
+import { Coupons, CreateCouponSchema, UpdateCouponSchema } from "@bt/db/schema";
 
 import { protectedProcedure } from "../trpc";
 
@@ -15,7 +15,11 @@ export const couponsRouter = {
       }),
     ),
   create: protectedProcedure
-    .input(CraeteCouponSchema)
+    .input(
+      CreateCouponSchema.and(
+        z.object({ channelId: z.string().min(1, "channelId is Missing") }),
+      ),
+    )
     .mutation((opts) => opts.ctx.db.insert(Coupons).values(opts.input)),
 
   update: protectedProcedure.input(UpdateCouponSchema).mutation((opts) =>

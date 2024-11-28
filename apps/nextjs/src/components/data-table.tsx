@@ -19,11 +19,13 @@ import {
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  emptyStateComponent?: React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  emptyStateComponent,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -67,9 +69,9 @@ export function DataTable<TData, TValue>({
               </TableRow>
             ))
           ) : (
-            <TableRow>
+            <TableRow className="hover:bg-background">
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+                {emptyStateComponent ?? "No results"}
               </TableCell>
             </TableRow>
           )}

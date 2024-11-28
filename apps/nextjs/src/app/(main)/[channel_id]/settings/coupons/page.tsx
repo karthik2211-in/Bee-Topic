@@ -2,12 +2,12 @@
 
 import React from "react";
 import { useParams } from "next/navigation";
-
-import { Button } from "@bt/ui/button";
+import { TicketPercentIcon } from "lucide-react";
 
 import { DataTable } from "~/components/data-table";
 import { api } from "~/trpc/react";
 import { CouponColumns } from "./columns";
+import { CreateCouponButton } from "./coupon-actions";
 import SearchCoupon from "./search-coupon";
 
 export default function Page() {
@@ -25,15 +25,31 @@ export default function Page() {
             subscriptions.
           </p>
         </div>
+        <CreateCouponButton />
       </div>
-      <div className="flex flex-col gap-5 py-5">
+      <div className="flex flex-col gap-5 py-5 pr-48">
         <div className="flex gap-3">
           <SearchCoupon />
-          <Button variant={"secondary"} size={"lg"}>
-            Create
-          </Button>
         </div>
-        <DataTable columns={CouponColumns} data={Coupons} />
+        <DataTable
+          emptyStateComponent={
+            <div className="flex h-56 flex-col items-center justify-center gap-3">
+              <TicketPercentIcon
+                className="size-16 text-foreground/40"
+                strokeWidth={1}
+              />
+              <div className="flex flex-col items-center justify-center">
+                <div className="text-lg font-semibold">No Coupons</div>
+                <p className="w-3/4 text-center text-sm text-muted-foreground">
+                  Create coupon to your user to access subscription offers for
+                  this channel
+                </p>
+              </div>
+            </div>
+          }
+          columns={CouponColumns}
+          data={Coupons}
+        />
       </div>
     </div>
   );
