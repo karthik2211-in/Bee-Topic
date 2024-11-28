@@ -185,6 +185,8 @@ export const Subscriptions = pgTable("subscriptions", (t) => ({
     .defaultNow(),
 }));
 
+//Input Schemas
+
 export const CreateVideoSchema = createInsertSchema(Videos, {
   title: z.string().max(256),
   description: z.string(),
@@ -218,6 +220,13 @@ export const CreateVideosAnalytics = createInsertSchema(VideosAnalytics, {
   id: true,
   watchedAt: true,
 });
+
+export const CraeteCouponSchema = createInsertSchema(Coupons, {
+  channelId: z.string().min(1, "Channel ID is missing"),
+  code: z.string().min(1, "CODE is missing"),
+}).omit({ id: true });
+
+export const UpdateCouponSchema = createInsertSchema(Coupons);
 
 //Relations
 export const ChannelsRelations = relations(Channels, ({ many }) => ({
