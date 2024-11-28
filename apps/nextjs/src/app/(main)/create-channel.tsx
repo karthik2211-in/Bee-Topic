@@ -79,7 +79,7 @@ export function CreateChannelButton() {
   return (
     <Dialog onOpenChange={onChangeOpen} open={open}>
       <DialogTrigger asChild>
-        <Button size={"lg"}>
+        <Button size={"lg"} className="gap-2">
           <PlusCircleIcon className="size-4" />
           Create New
         </Button>
