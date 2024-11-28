@@ -1,10 +1,13 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { pgTable } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const Channels = pgTable("channels", (t) => ({
-  id: t.uuid().notNull().primaryKey().defaultRandom(),
+  id: t
+    .varchar({ length: 100 })
+    .default(sql`CONCAT('bt-chan-', gen_random_uuid())`)
+    .primaryKey(),
   createdByClerkUserId: t.text().notNull(),
   title: t.varchar({ length: 256 }).notNull(),
   description: t.text(),
@@ -36,9 +39,12 @@ export const UpdateChannelSchema = createInsertSchema(Channels, {
 });
 
 export const Chapters = pgTable("chapters", (t) => ({
-  id: t.uuid().notNull().primaryKey().defaultRandom(),
+  id: t
+    .varchar({ length: 100 })
+    .default(sql`CONCAT('bt-chap-', gen_random_uuid())`)
+    .primaryKey(),
   channelId: t
-    .uuid()
+    .varchar({ length: 100 })
     .references(() => Channels.id, {
       onDelete: "cascade",
       onUpdate: "set null",
@@ -73,9 +79,12 @@ export const UpdateChapterSchema = createInsertSchema(Chapters, {
 });
 
 export const Videos = pgTable("videos", (t) => ({
-  id: t.uuid().notNull().primaryKey().defaultRandom(),
+  id: t
+    .varchar({ length: 100 })
+    .default(sql`CONCAT('bt-video-', gen_random_uuid())`)
+    .primaryKey(),
   chapterId: t
-    .uuid()
+    .varchar({ length: 100 })
     .references(() => Chapters.id, {
       onDelete: "cascade",
       onUpdate: "set null",
@@ -92,9 +101,12 @@ export const Videos = pgTable("videos", (t) => ({
 }));
 
 export const VideosAnalytics = pgTable("videos_analytics", (t) => ({
-  id: t.uuid().notNull().primaryKey().defaultRandom(),
+  id: t
+    .varchar({ length: 100 })
+    .default(sql`CONCAT('bt-vian-', gen_random_uuid())`)
+    .primaryKey(),
   videoId: t
-    .uuid()
+    .varchar({ length: 100 })
     .references(() => Videos.id, { onDelete: "cascade", onUpdate: "cascade" })
     .notNull(),
   clerkUserId: t.text().notNull(),
@@ -103,10 +115,20 @@ export const VideosAnalytics = pgTable("videos_analytics", (t) => ({
   watchedAt: t.timestamp().defaultNow().notNull(),
 }));
 
+export const Coupons = pgTable("coupons", (t) => ({
+  id: t
+    .varchar({ length: 100 })
+    .default(sql`CONCAT('bt-coupon-', gen_random_uuid())`)
+    .primaryKey(),
+}));
+
 export const Subscriptions = pgTable("subscriptions", (t) => ({
-  id: t.uuid().notNull().primaryKey().defaultRandom(),
+  id: t
+    .varchar({ length: 100 })
+    .default(sql`CONCAT('bt-sub-', gen_random_uuid())`)
+    .primaryKey(),
   channelId: t
-    .uuid()
+    .varchar({ length: 100 })
     .references(() => Channels.id, {
       onDelete: "cascade",
       onUpdate: "cascade",
