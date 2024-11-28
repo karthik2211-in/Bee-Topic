@@ -10,11 +10,13 @@ import {
   LineChartIcon,
   Plus,
   Router,
+  Settings,
   TicketPercent,
 } from "lucide-react";
 
 import { cn } from "@bt/ui";
 import { Button } from "@bt/ui/button";
+import { Separator } from "@bt/ui/separator";
 
 import { api } from "~/trpc/react";
 import { ChaptersList } from "./chapter-list-client";
@@ -34,15 +36,16 @@ export default function SideBarContent() {
   if (pathname.startsWith(`/${params.channel_id}/settings`))
     return (
       <>
-        <Button
-          size={"lg"}
-          variant={"ghost"}
-          onClick={() => router.back()}
-          className="h-11 w-full justify-start gap-6 px-3 text-sm"
-        >
-          <ArrowLeft strokeWidth={1.25} />
-          Back
-        </Button>
+        <Link href={`/${params.channel_id}`}>
+          <Button
+            size={"lg"}
+            variant={"ghost"}
+            className="w-full justify-start gap-4 px-3 text-sm"
+          >
+            <ArrowLeft strokeWidth={1.25} />
+            Channel Content
+          </Button>
+        </Link>
         <div className="py-1">
           <div className="text-base font-semibold">Channel Settings</div>
         </div>
@@ -147,6 +150,17 @@ export default function SideBarContent() {
 
   return (
     <>
+      <Link href={`/${params.channel_id}/settings`}>
+        <Button
+          size={"lg"}
+          variant={"ghost"}
+          className="w-full justify-start gap-4 px-3 text-sm"
+        >
+          <Settings className="size-5" strokeWidth={1.25} />
+          Channel Settings
+        </Button>
+      </Link>
+      <Separator />
       <p className="text-sm font-semibold">CHAPTERS</p>
       <div className="flex gap-2">
         <SearchChapter />
