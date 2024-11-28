@@ -35,6 +35,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@bt/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetPortal,
+  SheetTitle,
+  SheetTrigger,
+} from "@bt/ui/sheet";
 import { Textarea } from "@bt/ui/textarea";
 import { toast } from "@bt/ui/toast";
 
@@ -276,5 +285,24 @@ export function CreateCouponButton() {
         </Form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+export function ViewCouponSheet({ children }: { children: React.ReactNode }) {
+  return (
+    <Sheet modal={false}>
+      <SheetTrigger asChild>{children}</SheetTrigger>
+      <SheetPortal container={document.getElementById("settings-section")}>
+        <SheetContent
+          className="top-16 max-h-[calc(100vh-60px)] bg-background/60 backdrop-blur-xl"
+          container={document.getElementById("settings-section")}
+        >
+          <SheetHeader>
+            <SheetTitle>Coupon</SheetTitle>
+            <SheetDescription>View details</SheetDescription>
+          </SheetHeader>
+        </SheetContent>
+      </SheetPortal>
+    </Sheet>
   );
 }

@@ -4,6 +4,9 @@ import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 
 import { RouterOutputs } from "@bt/api";
+import { Button } from "@bt/ui/button";
+
+import { ViewCouponSheet } from "./coupon-actions";
 
 export type Coupon = RouterOutputs["coupons"]["all"][0];
 
@@ -12,7 +15,15 @@ export const CouponColumns: ColumnDef<Coupon>[] = [
     accessorKey: "code",
     header: "Code",
     cell(props) {
-      return <span className="text-primary">{props.row.original.code}</span>;
+      return (
+        <>
+          <ViewCouponSheet>
+            <Button className="pointer-events-auto z-40" variant={"link"}>
+              {props.row.original.code}
+            </Button>
+          </ViewCouponSheet>
+        </>
+      );
     },
   },
   {

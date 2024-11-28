@@ -78,7 +78,7 @@ export default function Page() {
     <div className="relative w-full">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmitVideo)}>
-          <div className="sticky top-16 z-50 flex items-start justify-between bg-background/90 pr-48">
+          <div className="flex items-start justify-between bg-background/90 py-3 pr-48">
             <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
               Channel Details
             </h4>

@@ -15,7 +15,7 @@ export default function MainLayout({
     <>
       <ProgresBarProvider />
       <main className="flex min-h-screen flex-col">
-        <div className="sticky inset-0 z-20 flex flex-col border-b bg-background/90 backdrop-blur-xl">
+        <div className="sticky inset-0 z-20 flex flex-col border-b bg-background/60 backdrop-blur-xl">
           <header className="relative flex h-16 items-center justify-between px-4">
             <ChannelSwitcher />
             <div className="flex items-center gap-3">
