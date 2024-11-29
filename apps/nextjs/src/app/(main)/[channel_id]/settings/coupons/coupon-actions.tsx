@@ -1,11 +1,20 @@
-import React from "react";
-import { useParams, useRouter } from "next/navigation";
-import { format, subDays } from "date-fns";
-import { CalendarIcon, PlusIcon } from "lucide-react";
+"use client";
+
+import React, { useEffect } from "react";
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
+import { format, formatDistanceToNowStrict, subDays } from "date-fns";
+import { CalendarIcon, PlusIcon, Users2 } from "lucide-react";
+import { Mention, MentionsInput } from "react-mentions";
 import { z } from "zod";
 
 import { CreateCouponSchema } from "@bt/db/schema";
 import { cn } from "@bt/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@bt/ui/avatar";
 import { Button } from "@bt/ui/button";
 import { Calendar } from "@bt/ui/calendar";
 import {
@@ -35,15 +44,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@bt/ui/select";
+import { Separator } from "@bt/ui/separator";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
-  SheetPortal,
   SheetTitle,
-  SheetTrigger,
 } from "@bt/ui/sheet";
+import { Skeleton } from "@bt/ui/skeleton";
 import { Textarea } from "@bt/ui/textarea";
 import { toast } from "@bt/ui/toast";
 
@@ -288,21 +297,252 @@ export function CreateCouponButton() {
   );
 }
 
-export function ViewCouponSheet({ children }: { children: React.ReactNode }) {
+const addEmailsSchema = z.object({
+  emails: z
+    .string()
+    .refine(
+      (value) => {
+        return value.split(",").length > 1 || !value.includes(" ");
+      },
+      {
+        message: "Email addresses must be separated by commas.",
+      },
+    )
+    .refine(
+      (value) => {
+        const emails = value.split(",").map((email) => email.trim());
+
+        try {
+          emails.forEach((email) => z.string().email().parse(email));
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      {
+        message: "One or more emails are invalid or not properly formatted.",
+      },
+    ),
+});
+
+export function ViewCouponSheetPortal() {
+  const [open, onChangeOpen] = React.useState(false);
+  const searchParams = useSearchParams();
+  const form = useForm({
+    schema: addEmailsSchema,
+    mode: "onChange",
+    defaultValues: {
+      emails: "",
+    },
+  });
+  const couponId = searchParams.get("open_coupon_id");
+  const { data, isLoading } = api.coupons.byId.useQuery(
+    { couponId: couponId! },
+    { enabled: !!couponId },
+  );
+  const utils = api.useUtils();
+  const { mutateAsync: addEmail } = api.coupons.addEmail.useMutation({
+    onSuccess(data, variables) {
+      toast.success(`${variables.email} is added`);
+    },
+    onSettled() {
+      utils.coupons.invalidate();
+      router.refresh();
+    },
+    onError(error, variables) {
+      if (error.shape?.code === -32603)
+        toast.error(`${variables.email} is already exists`);
+      else
+        toast.error(`Something went wrong`, {
+          description: `When adding the ${variables.email}`,
+        });
+    },
+  });
+
+  const [container, setContainer] = React.useState<HTMLElement | null>(null);
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const deleteQueryString = React.useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete(name, value);
+
+      return params.toString();
+    },
+    [searchParams],
+  );
+
+  useEffect(() => {
+    onChangeOpen(!!couponId);
+  }, [couponId]);
+
+  useEffect(() => {
+    setContainer(document.getElementById("settings-section"));
+  }, []);
+
+  async function onSubmit(values: z.infer<typeof addEmailsSchema>) {
+    await Promise.all(
+      values.emails
+        .split(",")
+        .map((email) =>
+          addEmail({ email: email.trim().toLowerCase(), couponId: couponId! }),
+        ),
+    );
+    form.reset();
+  }
+
   return (
-    <Sheet modal={false}>
-      <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetPortal container={document.getElementById("settings-section")}>
-        <SheetContent
-          className="top-16 max-h-[calc(100vh-60px)] bg-background/60 backdrop-blur-xl"
-          container={document.getElementById("settings-section")}
-        >
-          <SheetHeader>
-            <SheetTitle>Coupon</SheetTitle>
-            <SheetDescription>View details</SheetDescription>
-          </SheetHeader>
-        </SheetContent>
-      </SheetPortal>
+    <Sheet
+      modal={false}
+      open={open}
+      onOpenChange={(open) => {
+        if (!open && couponId) {
+          router.push(
+            pathname + "?" + deleteQueryString("open_coupon_id", couponId),
+            { scroll: false },
+          );
+        }
+      }}
+    >
+      <SheetContent
+        className="top-16 max-h-[calc(100vh-60px)] space-y-5 overflow-y-auto bg-background/60 shadow-none backdrop-blur-xl sm:max-w-xl"
+        container={container}
+      >
+        <SheetHeader>
+          <SheetTitle className="text-primary">
+            {isLoading ? (
+              <Skeleton className="h-6 w-20 rounded-full" />
+            ) : (
+              data?.code
+            )}
+          </SheetTitle>
+          {isLoading ? (
+            <Skeleton className="h-2 w-60 rounded-full" />
+          ) : (
+            <SheetDescription
+              className={cn(!data?.description && "text-muted-foreground/40")}
+            >
+              {data?.description ?? "--- no description provided ---"}
+            </SheetDescription>
+          )}
+          {isLoading ? (
+            <Skeleton className="h-3 w-60 rounded-full" />
+          ) : (
+            <small className="text-sm font-medium leading-none">
+              Subscription of {data?.subscriptionCount}{" "}
+              {data?.subscriptonFrequency == "monthly" ? "month" : "year"}
+            </small>
+          )}
+          {/* <Button variant={"outline"} className="w-full">
+            Edit Coupon
+          </Button> */}
+        </SheetHeader>
+        <Separator />
+        <div className="flex flex-col gap-5">
+          <div className="flex items-end justify-between">
+            <div>
+              <div className="font-semibold">Customers</div>
+              <p className="text-xs text-muted-foreground">
+                All only users access to this coupon
+              </p>
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant={"outline"} className="w-20">
+                  Add <PlusIcon className="size-4" strokeWidth={1.25} />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="h-fit w-[400px]">
+                <Form {...form}>
+                  <form
+                    className="space-y-3"
+                    onSubmit={form.handleSubmit(onSubmit)}
+                  >
+                    <FormField
+                      control={form.control}
+                      name="emails"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Textarea
+                              rows={4}
+                              className="resize-none"
+                              placeholder="Enter emails seperated with comma ( , )"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="w-full text-right">
+                      <Button isLoading={form.formState.isSubmitting}>
+                        Apply
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="space-y-3">
+            {data?.customers.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-3 py-20">
+                <Users2
+                  className="size-20 text-muted-foreground/50"
+                  strokeDasharray={2}
+                  strokeDashoffset={4}
+                  strokeWidth={0.2}
+                />
+                <p className="w-1/2 text-center text-xs text-muted-foreground/80">
+                  Add users to the particular coupon code to restrict the copoun
+                  to that users
+                </p>
+              </div>
+            ) : (
+              data?.customers.map((customer) => (
+                <div
+                  className="flex items-center justify-between gap-1"
+                  key={customer.id}
+                >
+                  <div className="flex items-center gap-2">
+                    <Avatar className="size-9 border-2 border-accent-foreground/30">
+                      <AvatarImage src={customer?.imageUrl} />
+                      <AvatarFallback>
+                        {customer.email.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="text-sm font-medium">
+                        {customer?.fullName}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {customer.email}
+                      </p>
+                      {!customer.fullName && (
+                        <p className="text-xs text-muted-foreground/80">
+                          Not a member of BeeTopic
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <Button variant={"link"} className="px-0">
+                      Remove
+                    </Button>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDistanceToNowStrict(customer.createdAt, {
+                        addSuffix: true,
+                      })}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </SheetContent>
     </Sheet>
   );
 }

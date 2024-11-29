@@ -1,5 +1,5 @@
 import { relations, sql } from "drizzle-orm";
-import { pgEnum, pgTable } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable, uniqueIndex } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -143,22 +143,36 @@ export const Coupons = pgTable("coupons", (t) => ({
   createdAt: t.timestamp({ mode: "date", withTimezone: true }).defaultNow(),
 }));
 
-export const CouponEmails = pgTable("coupon_emails", (t) => ({
-  id: t
-    .varchar({ length: 100 })
-    .default(sql`CONCAT('bt-coupon-uid-', gen_random_uuid())`)
-    .primaryKey(),
-  email: t.varchar({ length: 255 }).notNull(),
-  couponId: t
-    .varchar({ length: 100 })
-    .references(() => Coupons.id, { onDelete: "cascade", onUpdate: "cascade" })
-    .notNull(),
-  updatedAt: t
-    .timestamp({ mode: "date", withTimezone: true })
-    .notNull()
-    .$onUpdate(() => new Date()),
-  createdAt: t.timestamp({ mode: "date", withTimezone: true }).defaultNow(),
-}));
+export const CouponEmails = pgTable(
+  "coupon_emails",
+  (t) => ({
+    id: t
+      .varchar({ length: 100 })
+      .default(sql`CONCAT('bt-coupon-uid-', gen_random_uuid())`)
+      .primaryKey(),
+    email: t.varchar({ length: 255 }).notNull(),
+    couponId: t
+      .varchar({ length: 100 })
+      .references(() => Coupons.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      })
+      .notNull(),
+    updatedAt: t
+      .timestamp({ mode: "date", withTimezone: true })
+      .$onUpdate(() => new Date()),
+    createdAt: t
+      .timestamp({ mode: "date", withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  }),
+  (couponEmails) => ({
+    uniqueCouponEmail: uniqueIndex("unique_coupon_email").on(
+      couponEmails.couponId,
+      couponEmails.email,
+    ),
+  }),
+);
 
 export const Subscriptions = pgTable("subscriptions", (t) => ({
   id: t

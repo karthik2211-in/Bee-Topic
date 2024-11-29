@@ -1,20 +1,21 @@
-"use client";
-
 import React from "react";
-import { useParams } from "next/navigation";
 import { TicketPercentIcon } from "lucide-react";
 
 import { DataTable } from "~/components/data-table";
-import { api } from "~/trpc/react";
+import { api } from "~/trpc/server";
 import { CouponColumns } from "./columns";
-import { CreateCouponButton } from "./coupon-actions";
+import { CreateCouponButton, ViewCouponSheetPortal } from "./coupon-actions";
 import SearchCoupon from "./search-coupon";
 
-export default function Page() {
-  const channelId = useParams().channel_id as string;
-  const [Coupons] = api.coupons.all.useSuspenseQuery({ channelId });
+export default async function Page({
+  params,
+}: {
+  params: { channel_id: string };
+}) {
+  const Coupons = await api.coupons.all({ channelId: params.channel_id });
   return (
     <div>
+      <ViewCouponSheetPortal />
       <div className="top-16 z-50 flex items-start justify-between bg-background/90 py-3 pr-48">
         <div>
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">

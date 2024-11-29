@@ -1,4 +1,5 @@
 import type { TRPCRouterRecord } from "@trpc/server";
+import { clerkClient } from "@clerk/nextjs/server";
 
 import { protectedProcedure, publicProcedure } from "../trpc";
 
@@ -14,5 +15,11 @@ export const authRouter = {
       return { success: false };
     }
     return { success: true };
+  }),
+  getUsersList: protectedProcedure.query(async () => {
+    const client = await clerkClient();
+    const users = await client.users.getUserList();
+
+    return users.data;
   }),
 } satisfies TRPCRouterRecord;
