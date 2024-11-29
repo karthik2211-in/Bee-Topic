@@ -28,7 +28,7 @@ import {
 import { Skeleton } from "@bt/ui/skeleton";
 
 import { api } from "~/trpc/react";
-import { DeleteChannelDialog, EditChannelDialog } from "./create-channel";
+import { DeleteChannelDialog } from "./create-channel";
 
 export function ChannelsListClient() {
   const searchParams = useSearchParams();
@@ -115,7 +115,8 @@ export function ChannelsListClient() {
           <CardHeader className="w-full flex-row justify-between p-4">
             <div className="space-y-2">
               <CardTitle>{channel.title}</CardTitle>
-              <CardDescription>
+              <CardDescription>{channel.description}</CardDescription>
+              <CardDescription className="text-xs">
                 {channel.chapterCount} chapters •{" "}
                 {formatDistanceToNowStrict(channel.createdAt, {
                   addSuffix: true,
@@ -128,12 +129,12 @@ export function ChannelsListClient() {
                   <MoreHorizontalIcon className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent key={channel.id}>
-                <EditChannelDialog key={channel.id} channelId={channel.id}>
+              <DropdownMenuContent align="start" key={channel.id}>
+                <Link href={`/${channel.id}/settings`}>
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    Edit
+                    Channel Settings
                   </DropdownMenuItem>
-                </EditChannelDialog>
+                </Link>
                 <DeleteChannelDialog channelId={channel.id}>
                   <DropdownMenuItem
                     onSelect={(e) => e.preventDefault()}

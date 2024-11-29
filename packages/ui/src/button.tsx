@@ -11,8 +11,8 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary:
-          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+        primary: "bg-foreground text-background shadow hover:bg-foreground/90",
+        branch: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
         destructive:
           "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         outline:

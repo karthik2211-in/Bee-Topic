@@ -5,7 +5,8 @@ import {
   TouchableNativeFeedback,
   View,
 } from "react-native";
-import RazorPay from "react-native-razorpay";
+import RazorpayCheckout from "react-native-razorpay";
+// import RazorPay from "react-native-razorpay";
 import { BlurView } from "expo-blur";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
@@ -135,33 +136,6 @@ export default function Chapter() {
                     <Muted>{channel?.createdBy}</Muted>
                   </View>
                 </View>
-                <Button
-                  disabled={isSubscribing || isUnSubscribing}
-                  onPress={() =>
-                    RazorPay.open({
-                      amount: 300,
-                      currency: "INR",
-                      key: "rzp_test_9Q5Q6Q5Q6Q5Q",
-                      description: "Wel",
-                      image: "https://example.com/image.jpg",
-                      name: "Helo",
-                      order_id: "83939330",
-                      theme: {},
-                    })
-                  }
-                  variant={channel?.isSubscribed ? "secondary" : "default"}
-                  // disabled
-                  className="w-full rounded-full"
-                >
-                  <Text>
-                    {channel?.isSubscribed
-                      ? "Subscribed"
-                      : "Subscribe to Watch"}
-                  </Text>
-                  {(isSubscribing || isUnSubscribing) && (
-                    <ActivityIndicator size={"small"} color={"#ffff"} />
-                  )}
-                </Button>
               </View>
             </View>
           }

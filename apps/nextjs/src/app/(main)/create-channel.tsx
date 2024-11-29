@@ -19,7 +19,6 @@ import { Button } from "@bt/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -28,6 +27,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -35,6 +35,7 @@ import {
   useForm,
 } from "@bt/ui/form";
 import { Input } from "@bt/ui/input";
+import { Textarea } from "@bt/ui/textarea";
 import { toast } from "@bt/ui/toast";
 
 import { api } from "~/trpc/react";
@@ -44,6 +45,7 @@ const createChannelSchema = z.object({
     .string()
     .max(256)
     .min(1, { message: "title of the channel is required" }),
+  description: z.string().optional(),
 });
 
 export function CreateChannelButton() {
@@ -70,18 +72,19 @@ export function CreateChannelButton() {
   async function onSubmit(values: z.infer<typeof createChannelSchema>) {
     await createChannel({
       title: values.title,
+      description: values.description,
     });
   }
 
   return (
     <Dialog onOpenChange={onChangeOpen} open={open}>
       <DialogTrigger asChild>
-        <Button size={"lg"}>
+        <Button size={"lg"} className="gap-2">
           <PlusCircleIcon className="size-4" />
           Create New
         </Button>
       </DialogTrigger>
-      <DialogContent className="top-[35%] max-w-md">
+      <DialogContent className="top-[45%] max-w-md">
         <DialogHeader>
           <DialogTitle>New Channel</DialogTitle>
         </DialogHeader>
@@ -100,96 +103,28 @@ export function CreateChannelButton() {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea className="resize-none" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Recommended to increase the accessbility
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <DialogFooter>
               <Button isLoading={form.formState.isSubmitting}>Create</Button>
             </DialogFooter>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-export function EditChannelDialog({
-  children,
-  channelId,
-}: {
-  children: React.ReactNode;
-  channelId: string;
-}) {
-  const [open, onChangeOpen] = React.useState(false);
-  const { data: channel, isLoading } = api.channels.byId.useQuery(
-    { id: channelId },
-    { enabled: open },
-  );
-  const form = useForm({
-    schema: createChannelSchema,
-    defaultValues: { title: "" },
-  });
-  const router = useRouter();
-  const utils = api.useUtils();
-  const { mutateAsync: updateChannel } = api.channels.update.useMutation({
-    onError(error) {
-      toast.error(error.message);
-    },
-    onSuccess() {
-      toast.info("Channel details saved");
-      form.reset();
-      router.refresh();
-      utils.channels.invalidate();
-      onChangeOpen(false);
-    },
-  });
-
-  React.useEffect(() => {
-    form.reset({ title: channel?.title });
-  }, [isLoading]);
-
-  async function onSubmit(values: z.infer<typeof createChannelSchema>) {
-    await updateChannel({
-      title: values.title,
-      id: channelId,
-    });
-  }
-
-  return (
-    <Dialog onOpenChange={onChangeOpen} open={open}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="top-[35%] max-w-md">
-        <DialogHeader>
-          <DialogTitle>Edit Channel</DialogTitle>
-        </DialogHeader>
-        {isLoading ? (
-          <div className="flex h-20 items-center justify-center">
-            <Loader2 className="size-5 animate-spin text-primary" />
-          </div>
-        ) : (
-          <Form {...form}>
-            <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button
-                  disabled={!form.formState.isDirty}
-                  isLoading={form.formState.isSubmitting}
-                >
-                  Save
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        )}
       </DialogContent>
     </Dialog>
   );
@@ -213,10 +148,11 @@ export function DeleteChannelDialog({
       onError(error) {
         toast.error(error.message);
       },
-      onSuccess() {
-        toast.success("Channel deleted");
-        router.refresh();
+      onSettled() {
+        router.prefetch("/"); //prefetch the changed channels list before navigation
+        toast.info("Channel deleted");
         utils.channels.invalidate();
+        router.push("/");
         onChangeOpen(false);
       },
     });

@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
 
 import { Tabs, TabsList, TabsTrigger } from "@bt/ui/tabs";
@@ -22,7 +20,7 @@ export function ChapterTabs() {
       }
       className="w-full border-b-0"
     >
-      <TabsList className="w-full justify-start">
+      <TabsList className="h-11 w-full justify-start">
         <TabsTrigger
           onClick={() =>
             router.push(`/${params.channel_id}/chapter/${params.chapter_id}`)

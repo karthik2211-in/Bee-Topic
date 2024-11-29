@@ -1,13 +1,23 @@
-import { relations } from "drizzle-orm";
-import { pgTable } from "drizzle-orm/pg-core";
+import { relations, sql } from "drizzle-orm";
+import { pgEnum, pgTable, uniqueIndex } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+export const SubscriptionFrequency = pgEnum("subscription_frequency", [
+  "monthly",
+  "yearly",
+]);
+
 export const Channels = pgTable("channels", (t) => ({
-  id: t.uuid().notNull().primaryKey().defaultRandom(),
+  id: t
+    .varchar({ length: 100 })
+    .default(sql`CONCAT('bt-chan-', gen_random_uuid())`)
+    .primaryKey(),
   createdByClerkUserId: t.text().notNull(),
   title: t.varchar({ length: 256 }).notNull(),
+  description: t.text(),
   createdAt: t.timestamp().defaultNow().notNull(),
+  isPublished: t.boolean().default(false),
   updatedAt: t
     .timestamp({ mode: "date", withTimezone: true })
     .$onUpdate(() => new Date()),
@@ -15,6 +25,7 @@ export const Channels = pgTable("channels", (t) => ({
 
 export const CreateChannelSchema = createInsertSchema(Channels, {
   title: z.string().max(256),
+  description: z.string(),
 }).omit({
   id: true,
   createdAt: true,
@@ -24,6 +35,7 @@ export const CreateChannelSchema = createInsertSchema(Channels, {
 
 export const UpdateChannelSchema = createInsertSchema(Channels, {
   title: z.string().max(256),
+  description: z.string().optional(),
   id: z.string().min(1),
 }).omit({
   createdAt: true,
@@ -32,9 +44,12 @@ export const UpdateChannelSchema = createInsertSchema(Channels, {
 });
 
 export const Chapters = pgTable("chapters", (t) => ({
-  id: t.uuid().notNull().primaryKey().defaultRandom(),
+  id: t
+    .varchar({ length: 100 })
+    .default(sql`CONCAT('bt-chap-', gen_random_uuid())`)
+    .primaryKey(),
   channelId: t
-    .uuid()
+    .varchar({ length: 100 })
     .references(() => Channels.id, {
       onDelete: "cascade",
       onUpdate: "set null",
@@ -69,9 +84,12 @@ export const UpdateChapterSchema = createInsertSchema(Chapters, {
 });
 
 export const Videos = pgTable("videos", (t) => ({
-  id: t.uuid().notNull().primaryKey().defaultRandom(),
+  id: t
+    .varchar({ length: 100 })
+    .default(sql`CONCAT('bt-video-', gen_random_uuid())`)
+    .primaryKey(),
   chapterId: t
-    .uuid()
+    .varchar({ length: 100 })
     .references(() => Chapters.id, {
       onDelete: "cascade",
       onUpdate: "set null",
@@ -88,9 +106,12 @@ export const Videos = pgTable("videos", (t) => ({
 }));
 
 export const VideosAnalytics = pgTable("videos_analytics", (t) => ({
-  id: t.uuid().notNull().primaryKey().defaultRandom(),
+  id: t
+    .varchar({ length: 100 })
+    .default(sql`CONCAT('bt-vian-', gen_random_uuid())`)
+    .primaryKey(),
   videoId: t
-    .uuid()
+    .varchar({ length: 100 })
     .references(() => Videos.id, { onDelete: "cascade", onUpdate: "cascade" })
     .notNull(),
   clerkUserId: t.text().notNull(),
@@ -99,17 +120,86 @@ export const VideosAnalytics = pgTable("videos_analytics", (t) => ({
   watchedAt: t.timestamp().defaultNow().notNull(),
 }));
 
-export const Subscriptions = pgTable("subscriptions", (t) => ({
-  id: t.uuid().notNull().primaryKey().defaultRandom(),
+export const Coupons = pgTable("coupons", (t) => ({
+  id: t
+    .varchar({ length: 100 })
+    .default(sql`CONCAT('bt-coupon-', gen_random_uuid())`)
+    .primaryKey(),
+  code: t.varchar({ length: 100 }).notNull().unique(),
+  description: t.text(),
+  subscriptionCount: t.integer().default(1),
+  subscriptonFrequency: SubscriptionFrequency("subscripiton_frequency").default(
+    "monthly",
+  ),
   channelId: t
-    .uuid()
+    .varchar({ length: 100 })
+    .references(() => Channels.id, { onDelete: "cascade", onUpdate: "cascade" })
+    .notNull(),
+  startsOn: t
+    .timestamp({ mode: "date", withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  endsOn: t.timestamp({ mode: "date", withTimezone: true }).notNull(),
+  createdAt: t.timestamp({ mode: "date", withTimezone: true }).defaultNow(),
+}));
+
+export const CouponEmails = pgTable(
+  "coupon_emails",
+  (t) => ({
+    id: t
+      .varchar({ length: 100 })
+      .default(sql`CONCAT('bt-coupon-uid-', gen_random_uuid())`)
+      .primaryKey(),
+    email: t.varchar({ length: 255 }).notNull(),
+    couponId: t
+      .varchar({ length: 100 })
+      .references(() => Coupons.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      })
+      .notNull(),
+    updatedAt: t
+      .timestamp({ mode: "date", withTimezone: true })
+      .$onUpdate(() => new Date()),
+    createdAt: t
+      .timestamp({ mode: "date", withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  }),
+  (couponEmails) => ({
+    uniqueCouponEmail: uniqueIndex("unique_coupon_email").on(
+      couponEmails.couponId,
+      couponEmails.email,
+    ),
+  }),
+);
+
+export const Subscriptions = pgTable("subscriptions", (t) => ({
+  id: t
+    .varchar({ length: 100 })
+    .default(sql`CONCAT('bt-sub-', gen_random_uuid())`)
+    .primaryKey(),
+  channelId: t
+    .varchar({ length: 100 })
     .references(() => Channels.id, {
       onDelete: "cascade",
       onUpdate: "cascade",
     })
     .notNull(),
   clerkUserId: t.text().notNull(),
+  couponId: t.varchar({ length: 100 }).references(() => Coupons.id), //BeeTopic coupon ID
+  startsOn: t
+    .timestamp({ mode: "date", withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  endsOn: t.timestamp({ mode: "date", withTimezone: true }).notNull(),
+  createdAt: t
+    .timestamp({ mode: "date", withTimezone: true })
+    .notNull()
+    .defaultNow(),
 }));
+
+//Input Schemas
 
 export const CreateVideoSchema = createInsertSchema(Videos, {
   title: z.string().max(256),
@@ -145,15 +235,47 @@ export const CreateVideosAnalytics = createInsertSchema(VideosAnalytics, {
   watchedAt: true,
 });
 
+export const CreateCouponSchema = createInsertSchema(Coupons, {
+  channelId: z.string().min(1, "Channel ID is missing"),
+  code: z.string().min(1, "CODE is missing"),
+  description: z.string(),
+  startsOn: z.date({ required_error: "A starts on date is required" }),
+  endsOn: z.date({ required_error: "A ends on date is required" }),
+  subscriptionCount: z.number().min(1, "Invalid count"),
+}).omit({ id: true, channelId: true, createdAt: true });
+
+export const UpdateCouponSchema = createInsertSchema(Coupons);
+
 //Relations
 export const ChannelsRelations = relations(Channels, ({ many }) => ({
   chapters: many(Chapters),
+  coupons: many(Coupons),
+  subscriptions: many(Subscriptions),
+}));
+
+export const CouponsRelations = relations(Coupons, ({ one, many }) => ({
+  channel: one(Channels, {
+    fields: [Coupons.channelId],
+    references: [Channels.id],
+  }),
+  customers: many(CouponEmails),
+}));
+
+export const CouponEmailsRelations = relations(CouponEmails, ({ one }) => ({
+  coupon: one(Coupons, {
+    fields: [CouponEmails.couponId],
+    references: [Coupons.id],
+  }),
 }));
 
 export const SubscriptionsRelations = relations(Subscriptions, ({ one }) => ({
   channel: one(Channels, {
     fields: [Subscriptions.channelId],
     references: [Channels.id],
+  }),
+  coupon: one(Coupons, {
+    fields: [Subscriptions.couponId],
+    references: [Coupons.id],
   }),
 }));
 

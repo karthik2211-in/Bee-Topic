@@ -1,4 +1,5 @@
 import type { TRPCRouterRecord } from "@trpc/server";
+import { addDays, endOfMonth } from "date-fns";
 import { z } from "zod";
 
 import { and, eq } from "@bt/db";
@@ -13,8 +14,10 @@ export const subscriptionsRouter = {
       opts.ctx.db.insert(Subscriptions).values({
         channelId: opts.input.channelId,
         clerkUserId: opts.ctx.session.userId,
+        endsOn: addDays(new Date(), 30),
       }),
     ),
+
   delete: protectedProcedure
     .input(z.object({ channelId: z.string().min(1) }))
     .mutation((opts) =>

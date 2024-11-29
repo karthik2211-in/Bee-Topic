@@ -53,7 +53,7 @@ export default function ChapterItem({
       </CardContent>
       <CardHeader className="flex w-full flex-row items-center justify-between gap-1 space-y-0 p-0 px-2">
         <div>
-          <CardTitle className="m-0 truncate p-0 text-sm font-medium">
+          <CardTitle className="m-0 max-w-full truncate p-0 text-sm font-medium">
             {chapter.title}
           </CardTitle>
           <CardDescription className="m-0 p-0 font-mono text-[10px]">

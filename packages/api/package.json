@@ -24,6 +24,8 @@
     "@clerk/nextjs": "catalog:",
     "@trpc/server": "catalog:",
     "date-fns": "^4.1.0",
+    "razorpay": "^2.9.5",
+    "razorpay-typescript": "^1.0.12",
     "superjson": "2.2.1",
     "uploadthing": "catalog:",
     "zod": "catalog:"

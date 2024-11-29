@@ -15,6 +15,13 @@
       "when": 1731761272737,
       "tag": "0001_smooth_captain_universe",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1732897355212,
+      "tag": "0002_pink_mockingbird",
+      "breakpoints": true
     }
   ]
 }

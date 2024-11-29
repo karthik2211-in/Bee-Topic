@@ -2,20 +2,9 @@
 
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Loader2 } from "lucide-react";
-import Player from "next-video/player";
+import { Loader2 } from "lucide-react";
 import { z } from "zod";
 
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@bt/ui/alert-dialog";
 import { Button } from "@bt/ui/button";
 import {
   Form,
@@ -27,95 +16,36 @@ import {
   FormMessage,
   useForm,
 } from "@bt/ui/form";
-import { Input } from "@bt/ui/input";
 import { Textarea } from "@bt/ui/textarea";
 import { toast } from "@bt/ui/toast";
 
 import { api } from "~/trpc/react";
+import { DeleteChannelDialog } from "../../create-channel";
 
-// Form schema for video details
-const videoDetailsSchema = z.object({
+const channelDetailsSchema = z.object({
   title: z.string().min(1, "Required"),
   description: z.string().optional(),
 });
 
-export function DeleteVideoDialog({
-  videoId,
-  children,
-}: {
-  videoId: string;
-  children: React.ReactNode;
-}) {
-  const [open, onChangeOpen] = React.useState(false);
-
-  const router = useRouter();
-
-  const utils = api.useUtils();
-
-  const { mutateAsync: deleteChapter, isPending } =
-    api.videos.delete.useMutation({
-      onError(error) {
-        toast.error(error.message);
-      },
-      onSuccess() {
-        toast.success("Video deleted");
-        router.back();
-        router.refresh();
-        utils.videos.invalidate();
-        utils.chapters.invalidate();
-        onChangeOpen(false);
-      },
-    });
-
-  async function handleDelete() {
-    await deleteChapter(videoId);
-  }
-
-  return (
-    <AlertDialog open={open} onOpenChange={onChangeOpen}>
-      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
-      <AlertDialogContent className="top-[35%]">
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            video and remove your content within your video
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <Button
-            onClick={handleDelete}
-            isLoading={isPending}
-            variant={"destructive"}
-          >
-            Delete
-          </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
-}
-
 export default function Page() {
   const params = useParams();
-  const { data: video, isLoading } = api.videos.byId.useQuery({
-    id: params.video_id as string,
+  const { data: video, isLoading } = api.channels.byId.useQuery({
+    id: params.channel_id as string,
   });
   const utils = api.useUtils();
   const form = useForm({
-    schema: videoDetailsSchema,
+    schema: channelDetailsSchema,
     defaultValues: {
       title: "",
       description: "",
     },
   });
-  const { mutateAsync: updateVideo } = api.videos.update.useMutation({
+  const { mutateAsync: updateChannel } = api.channels.update.useMutation({
     onError(error) {
       toast.error(error.message);
     },
     onSuccess(data) {
-      toast.success("Video details saved");
+      toast.success("Channels details saved");
       router.refresh();
       utils.videos.invalidate();
       form.reset({
@@ -127,8 +57,8 @@ export default function Page() {
 
   const router = useRouter();
 
-  async function onSubmitVideo(values: z.infer<typeof videoDetailsSchema>) {
-    await updateVideo({ id: params.video_id as string, ...values });
+  async function onSubmitVideo(values: z.infer<typeof channelDetailsSchema>) {
+    await updateChannel({ id: params.channel_id as string, ...values });
   }
 
   React.useEffect(() => {
@@ -137,25 +67,24 @@ export default function Page() {
 
   if (isLoading)
     return (
-      <div className="flex h-screen w-full items-center justify-center">
+      <div className="flex h-full w-full flex-1 items-center justify-center">
         <Loader2
           strokeWidth={1.25}
-          className="size-20 animate-spin text-primary"
+          className="size-10 animate-spin text-foreground"
         />
       </div>
     );
-
   return (
     <div className="relative w-full">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmitVideo)}>
-          <div className="sticky top-16 z-50 flex items-center justify-between bg-background/90 pr-48">
+          <div className="flex items-start justify-between bg-background/90 py-3 pr-48">
             <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-              Video Details
+              Channel Details
             </h4>
 
             <div className="space-x-3">
-              <DeleteVideoDialog videoId={params.video_id as string}>
+              <DeleteChannelDialog channelId={params.channel_id as string}>
                 <Button
                   type="button"
                   variant={"ghost"}
@@ -163,7 +92,7 @@ export default function Page() {
                 >
                   Delete
                 </Button>
-              </DeleteVideoDialog>
+              </DeleteChannelDialog>
               <Button
                 disabled={!form.formState.isDirty}
                 isLoading={form.formState.isSubmitting}
@@ -181,9 +110,9 @@ export default function Page() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Video Title
+                      Title
                       <span className="text-xs text-muted-foreground">
-                        {"(Required)"}
+                        {" (Required)"}
                       </span>
                     </FormLabel>
                     <FormControl>
@@ -202,21 +131,19 @@ export default function Page() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel> Description</FormLabel>
                     <FormControl>
                       <Textarea className="resize-none" rows={10} {...field} />
                     </FormControl>
-                    <FormDescription>Tell more about the video</FormDescription>
+                    <FormDescription>
+                      Tell more about the channel
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            <Player
-              accentColor="hsl(45 100% 60%)"
-              className="col-span-2 aspect-video overflow-hidden rounded-md border"
-              src={`https://utfs.io/f/${video?.ut_fileKey}`}
-            />
+            <div></div>
           </div>
         </form>
       </Form>

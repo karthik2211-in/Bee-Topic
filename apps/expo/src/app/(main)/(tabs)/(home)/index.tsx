@@ -5,7 +5,7 @@ import {
   View,
 } from "react-native";
 import { Link, Tabs } from "expo-router";
-import { useAuth, useClerk, useUser } from "@clerk/clerk-expo";
+import { useAuth } from "@clerk/clerk-expo";
 import { FlashList } from "@shopify/flash-list";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -19,7 +19,7 @@ import {
 } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Text } from "~/components/ui/text";
-import { H1, H2, H3, Lead, Muted } from "~/components/ui/typography";
+import { H3, Lead, Muted } from "~/components/ui/typography";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { api } from "~/utils/api";
 

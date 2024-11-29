@@ -7,6 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
   CheckIcon,
   ChevronsUpDownIcon,
+  Settings,
   ShellIcon,
   SlashIcon,
   Sprout,

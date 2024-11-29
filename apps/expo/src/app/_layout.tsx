@@ -13,6 +13,7 @@ import "../styles.css";
 
 import React from "react";
 import { ClerkLoaded, ClerkProvider, useAuth } from "@clerk/clerk-expo";
+import { PortalHost } from "@rn-primitives/portal";
 
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { NAV_THEME } from "~/lib/constants";
@@ -141,6 +142,7 @@ export default function RootLayout() {
           It also allows you to configure your screens 
           */}
           <InitialLayout />
+          <PortalHost />
         </TRPCProvider>
       </ClerkLoaded>
     </ClerkProvider>
