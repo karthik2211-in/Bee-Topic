@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1730393179695,
-      "tag": "0000_long_steve_rogers",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1731761272737,
-      "tag": "0001_smooth_captain_universe",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1732897355212,
-      "tag": "0002_pink_mockingbird",
+      "when": 1732897955506,
+      "tag": "0000_loving_alex_wilder",
       "breakpoints": true
     }
   ]
