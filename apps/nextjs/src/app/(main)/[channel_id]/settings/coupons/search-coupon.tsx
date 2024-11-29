@@ -39,7 +39,7 @@ export default function SearchCoupon() {
     <div className="relative flex w-full items-center">
       <Search className="absolute ml-2.5 mr-2.5 size-4 text-muted-foreground" />
       <Input
-        placeholder="Search channel..."
+        placeholder="Search coupons..."
         value={channelQuery ?? ""}
         onChange={(e) =>
           router.push(

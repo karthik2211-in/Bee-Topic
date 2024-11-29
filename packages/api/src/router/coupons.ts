@@ -29,6 +29,14 @@ export const couponsRouter = {
         .insert(CouponEmails)
         .values({ email: opts.input.email, couponId: opts.input.couponId }),
     ),
+  removeEmail: protectedProcedure
+    .input(z.object({ couponEmailId: z.string().min(1) }))
+    .mutation((opts) =>
+      opts.ctx.db
+        .delete(CouponEmails)
+        .where(eq(CouponEmails.id, opts.input.couponEmailId))
+        .returning(),
+    ),
   byId: protectedProcedure
     .input(z.object({ couponId: z.string().min(1, "No channelID") }))
     .query(async (opts) => {
@@ -86,6 +94,7 @@ export const couponsRouter = {
     .mutation((opts) =>
       opts.ctx.db
         .delete(Coupons)
-        .where(and(eq(Coupons.id, opts.input.couponId))),
+        .where(and(eq(Coupons.id, opts.input.couponId)))
+        .returning(),
     ),
 } satisfies TRPCRouterRecord;

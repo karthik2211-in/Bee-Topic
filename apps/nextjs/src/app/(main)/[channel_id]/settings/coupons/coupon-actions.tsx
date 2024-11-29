@@ -9,9 +9,9 @@ import {
 } from "next/navigation";
 import { format, formatDistanceToNowStrict, subDays } from "date-fns";
 import { CalendarIcon, PlusIcon, Users2 } from "lucide-react";
-import { Mention, MentionsInput } from "react-mentions";
 import { z } from "zod";
 
+import { RouterOutputs } from "@bt/api";
 import { CreateCouponSchema } from "@bt/db/schema";
 import { cn } from "@bt/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@bt/ui/avatar";
@@ -37,6 +37,7 @@ import {
 } from "@bt/ui/form";
 import { Input } from "@bt/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@bt/ui/popover";
+import { ScrollArea } from "@bt/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -49,6 +50,7 @@ import {
   Sheet,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@bt/ui/sheet";
@@ -325,8 +327,70 @@ const addEmailsSchema = z.object({
     ),
 });
 
+export function CustomerListItem({
+  customer,
+}: {
+  customer: RouterOutputs["coupons"]["byId"]["customers"][number];
+}) {
+  const utils = api.useUtils();
+  const router = useRouter();
+  const { mutateAsync: removeEmail, isPending } =
+    api.coupons.removeEmail.useMutation({
+      onSuccess(data) {
+        toast.info(`${data.at(0)?.email} is removed`);
+        utils.coupons.invalidate();
+        router.refresh();
+      },
+
+      onError() {
+        toast.error(`Something went wrong`, {
+          description: "Try again later!",
+        });
+      },
+    });
+
+  return (
+    <div className="flex items-center justify-between gap-1" key={customer.id}>
+      <div className="flex items-center gap-2">
+        <Avatar className="size-9 border-2 border-accent-foreground/30">
+          <AvatarImage src={customer?.imageUrl} />
+          <AvatarFallback>
+            {customer.email.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        <div>
+          <div className="text-sm font-medium">{customer?.fullName}</div>
+          <p className="text-sm text-muted-foreground">{customer.email}</p>
+          {!customer.fullName && (
+            <p className="text-xs text-muted-foreground/80">
+              Not a member of BeeTopic
+            </p>
+          )}
+        </div>
+      </div>
+      <div className="text-right">
+        <Button
+          onClick={() => removeEmail({ couponEmailId: customer.id })}
+          isLoading={isPending}
+          loadingText=""
+          variant={"link"}
+          className="px-0"
+        >
+          Remove
+        </Button>
+        <p className="text-xs text-muted-foreground">
+          {formatDistanceToNowStrict(customer.createdAt, {
+            addSuffix: true,
+          })}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function ViewCouponSheetPortal() {
   const [open, onChangeOpen] = React.useState(false);
+  const [openPopover, onChangeOpenPopover] = React.useState(false);
   const searchParams = useSearchParams();
   const form = useForm({
     schema: addEmailsSchema,
@@ -348,6 +412,7 @@ export function ViewCouponSheetPortal() {
     onSettled() {
       utils.coupons.invalidate();
       router.refresh();
+      onChangeOpenPopover(false);
     },
     onError(error, variables) {
       if (error.shape?.code === -32603)
@@ -358,6 +423,27 @@ export function ViewCouponSheetPortal() {
         });
     },
   });
+
+  const { mutateAsync: deleteCoupon, isPending } =
+    api.coupons.delete.useMutation({
+      onSuccess(data) {
+        toast.info(`${data.at(0)?.code} is deleted`, {
+          position: "bottom-center",
+        });
+        utils.coupons.invalidate();
+        router.replace(
+          pathname + "?" + deleteQueryString("open_coupon_id", couponId ?? ""),
+        );
+        router.refresh();
+      },
+
+      onError() {
+        toast.error(`Something went wrong`, {
+          description: `When deleting the code`,
+          position: "bottom-center",
+        });
+      },
+    });
 
   const [container, setContainer] = React.useState<HTMLElement | null>(null);
   const pathname = usePathname();
@@ -406,13 +492,13 @@ export function ViewCouponSheetPortal() {
       }}
     >
       <SheetContent
-        className="top-16 max-h-[calc(100vh-60px)] space-y-5 overflow-y-auto bg-background/60 shadow-none backdrop-blur-xl sm:max-w-xl"
+        className="top-16 max-h-[calc(100vh-60px)] space-y-5 bg-background/80 shadow-none backdrop-blur-xl sm:max-w-xl"
         container={container}
       >
         <SheetHeader>
           <SheetTitle className="text-primary">
             {isLoading ? (
-              <Skeleton className="h-6 w-20 rounded-full" />
+              <Skeleton className="mb-3 h-5 w-20 rounded-full" />
             ) : (
               data?.code
             )}
@@ -439,7 +525,7 @@ export function ViewCouponSheetPortal() {
           </Button> */}
         </SheetHeader>
         <Separator />
-        <div className="flex flex-col gap-5">
+        <div className="flex h-full flex-col gap-2">
           <div className="flex items-end justify-between">
             <div>
               <div className="font-semibold">Customers</div>
@@ -447,7 +533,7 @@ export function ViewCouponSheetPortal() {
                 All only users access to this coupon
               </p>
             </div>
-            <Popover>
+            <Popover open={openPopover} onOpenChange={onChangeOpenPopover}>
               <PopoverTrigger asChild>
                 <Button variant={"outline"} className="w-20">
                   Add <PlusIcon className="size-4" strokeWidth={1.25} />
@@ -486,62 +572,60 @@ export function ViewCouponSheetPortal() {
               </PopoverContent>
             </Popover>
           </div>
-          <div className="space-y-3">
-            {data?.customers.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-3 py-20">
-                <Users2
-                  className="size-20 text-muted-foreground/50"
-                  strokeDasharray={2}
-                  strokeDashoffset={4}
-                  strokeWidth={0.2}
-                />
-                <p className="w-1/2 text-center text-xs text-muted-foreground/80">
-                  Add users to the particular coupon code to restrict the copoun
-                  to that users
-                </p>
-              </div>
-            ) : (
-              data?.customers.map((customer) => (
-                <div
-                  className="flex items-center justify-between gap-1"
-                  key={customer.id}
-                >
-                  <div className="flex items-center gap-2">
-                    <Avatar className="size-9 border-2 border-accent-foreground/30">
-                      <AvatarImage src={customer?.imageUrl} />
-                      <AvatarFallback>
-                        {customer.email.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="text-sm font-medium">
-                        {customer?.fullName}
+          <ScrollArea className="max-h-[70%]">
+            <div className="flex flex-col gap-3 pb-10 pr-5">
+              {isLoading ? (
+                Array.from({ length: 8 }).map((_, index) => (
+                  <div
+                    className="flex items-center justify-between gap-1"
+                    key={index}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="size-9 rounded-full" />
+                      <div>
+                        <Skeleton className="mb-2 h-3 w-32 rounded-full" />
+                        <Skeleton className="h-2 w-1/2 rounded-full" />
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {customer.email}
-                      </p>
-                      {!customer.fullName && (
-                        <p className="text-xs text-muted-foreground/80">
-                          Not a member of BeeTopic
-                        </p>
-                      )}
+                    </div>
+                    <div className="text-right">
+                      <Skeleton className="mb-2 h-8 w-20" />
+                      <Skeleton className="ml-auto h-1 w-14 rounded-full" />
                     </div>
                   </div>
-                  <div className="text-right">
-                    <Button variant={"link"} className="px-0">
-                      Remove
-                    </Button>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDistanceToNowStrict(customer.createdAt, {
-                        addSuffix: true,
-                      })}
-                    </p>
-                  </div>
+                ))
+              ) : data?.customers.length === 0 ? (
+                <div className="flex flex-col items-center justify-center gap-3 py-20">
+                  <Users2
+                    className="size-20 text-muted-foreground/50"
+                    strokeDasharray={2}
+                    strokeDashoffset={4}
+                    strokeWidth={0.2}
+                  />
+                  <p className="w-1/2 text-center text-xs text-muted-foreground/80">
+                    Add users to the particular coupon code to restrict the
+                    copoun to that users
+                  </p>
                 </div>
-              ))
-            )}
-          </div>
+              ) : (
+                data?.customers.map((customer) => (
+                  <CustomerListItem key={customer.id} {...{ customer }} />
+                ))
+              )}
+            </div>
+          </ScrollArea>
         </div>
+        <SheetFooter className="fixed bottom-5 left-5 right-5 w-[90%]">
+          <Button
+            size={"lg"}
+            variant={"outline"}
+            isLoading={isPending}
+            loadingText="Processing..."
+            onClick={() => deleteCoupon({ couponId: couponId! })}
+            className="w-full border-destructive bg-background/60 text-destructive backdrop-blur-md hover:bg-background/80 hover:backdrop-blur-2xl"
+          >
+            Delete Coupon
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );
