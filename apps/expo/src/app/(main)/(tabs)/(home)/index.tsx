@@ -4,7 +4,14 @@ import {
   TouchableNativeFeedback,
   View,
 } from "react-native";
+import Animated, {
+  Easing,
+  FadeInDown,
+  ReduceMotion,
+} from "react-native-reanimated";
+import { BlurView } from "expo-blur";
 import { Link, Tabs } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useAuth } from "@clerk/clerk-expo";
 import { FlashList } from "@shopify/flash-list";
 
@@ -12,7 +19,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -23,32 +29,28 @@ import { H3, Lead, Muted } from "~/components/ui/typography";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { api } from "~/utils/api";
 
+const AnimatedCard = Animated.createAnimatedComponent(Card);
+
 export default function Index() {
   const { userId } = useAuth();
   const utils = api.useUtils();
-  const {
-    data,
-    isLoading,
-    refetch,
-    isRefetching,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-  } = api.channels.infinite.useInfiniteQuery(
-    { limit: 5 },
-    {
-      initialCursor: undefined,
-      getNextPageParam: (lastPage) => {
-        console.log("lastPage", lastPage.nextCursor);
-        return lastPage.nextCursor;
+  const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
+    api.channels.infinite.useInfiniteQuery(
+      { limit: 5 },
+      {
+        initialCursor: undefined,
+        getNextPageParam: (lastPage) => {
+          console.log("lastPage", lastPage.nextCursor);
+          return lastPage.nextCursor;
+        },
+        enabled: !!userId,
       },
-      enabled: !!userId,
-    },
-  );
+    );
   const { isDarkColorScheme } = useColorScheme();
 
   return (
     <View className="flex-1">
+      <StatusBar translucent />
       <Tabs.Screen
         options={{
           headerTitle(props) {
@@ -61,16 +63,32 @@ export default function Index() {
                 }
                 style={{
                   height: 60,
-                  width: 130,
+                  width: 160,
                 }}
               />
             );
           },
+          headerTransparent: true,
+          headerBackground(props) {
+            return (
+              <BlurView
+                intensity={300}
+                tint="systemMaterialDark"
+                style={{
+                  flex: 1,
+                  backgroundColor: isDarkColorScheme
+                    ? "hsla(20,14.3%,4.1%, 0.8)"
+                    : "hsla(0,0%,100%, 0.8)",
+                }}
+              />
+            );
+          },
+          headerTitleAlign: "center",
         }}
       />
 
       {isLoading ? (
-        <View className="gap-3 p-3">
+        <View className="mt-24 gap-3 p-3">
           {Array.from({ length: 5 }).map((_, i) => (
             <Skeleton key={i} className={"h-56 w-full rounded-2xl"} />
           ))}
@@ -81,9 +99,14 @@ export default function Index() {
           keyExtractor={(item, index) => item.id}
           estimatedItemSize={400}
           ListHeaderComponent={() => (
-            <H3 className="my-3 w-2/3 font-mono leading-snug tracking-widest text-foreground/70">
-              Let's learn something new today
-            </H3>
+            <View className="mt-24 gap-1 pb-3">
+              <H3 className="text-center capitalize leading-snug text-foreground">
+                Something New Today
+              </H3>
+              <Muted className="text-center font-semibold">
+                Latest channels from BeeTopic
+              </Muted>
+            </View>
           )}
           ListEmptyComponent={
             <View className="h-full w-full flex-1 items-center justify-center">
@@ -91,75 +114,90 @@ export default function Index() {
             </View>
           }
           contentContainerStyle={{ paddingHorizontal: 12, paddingVertical: 12 }}
-          renderItem={({ item: channel }) => {
+          renderItem={({ item: channel, index }) => {
             utils.channels.byId.prefetch({ id: channel.id });
             return (
-              <Card
+              <AnimatedCard
+                entering={FadeInDown.duration(500)
+                  // .delay(200 + index * 200)
+                  .springify(2000)
+                  .easing(Easing.linear)}
                 key={channel.id}
                 style={{ position: "relative" }}
-                className="my-3 min-h-52 overflow-hidden rounded-2xl"
+                className="my-2 min-h-52 overflow-hidden rounded-md border border-border/80"
               >
                 <Link asChild href={`/channels/${channel.id}`}>
-                  <TouchableNativeFeedback style={{ borderRadius: 40 }}>
+                  <TouchableNativeFeedback
+                    background={{ type: "RippleAndroid", borderless: false }}
+                    useForeground={false}
+                    style={{ borderRadius: 40 }}
+                  >
                     <View className="flex-1">
-                      <Image
-                        source={require("assets/honey.png")}
-                        style={{
-                          height: 200,
-                          width: 200,
-                          position: "absolute",
-                          right: -60,
-                          top: -60,
-                          opacity: 0.3,
-                        }}
-                      />
-                      <CardHeader className="gap-2">
-                        <CardTitle className="leading-snug">
+                      <CardContent className="flex-1 object-contain p-0">
+                        <Image
+                          source={{
+                            uri: "https://s2.dmcdn.net/v/PhtPf1ZckrzTH_Sd3/x1080",
+                          }}
+                          resizeMode="cover"
+                          style={{
+                            width: "auto",
+                            flex: 1,
+                            height: 205,
+                          }}
+                        />
+                      </CardContent>
+                      <CardHeader className="items-start gap-2 p-3">
+                        <CardTitle className="text-xl leading-snug">
                           {channel.title}
                         </CardTitle>
-                        <CardDescription className="text-sm">
+                        <View className="flex-row items-center gap-1">
+                          <Muted className="text-xs">Created by</Muted>
+                          <View className="flex-row items-center justify-center gap-1">
+                            <Avatar
+                              className="size-5 border border-border"
+                              alt="Channel Creator"
+                            >
+                              <AvatarImage
+                                source={{
+                                  uri: channel?.createdByImageUrl,
+                                }}
+                              />
+                              <AvatarFallback className="items-center justify-center">
+                                <Text>{channel?.createdBy?.charAt(0)}</Text>
+                              </AvatarFallback>
+                            </Avatar>
+                            <Muted className="text-xs font-semibold">
+                              {channel?.createdBy}
+                            </Muted>
+                          </View>
+                        </View>
+                      </CardHeader>
+                      <CardFooter className="w-full flex-1 items-center justify-center gap-2 border-t border-border bg-muted/20 px-3 py-3">
+                        <Muted className="text-xs font-medium">
                           {channel.totalChapters} Chapters •{" "}
                           {channel.subscriptionCount} Subscribers
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="flex-row flex-wrap justify-between p-0 py-4"></CardContent>
-                      <CardFooter className="w-full flex-col items-start gap-2">
-                        <Muted>Created by</Muted>
-                        <View className="flex-row items-center gap-2">
-                          <Avatar className="size-6" alt="Channel Creator">
-                            <AvatarImage
-                              source={{
-                                uri: channel?.createdByImageUrl,
-                              }}
-                            />
-                            <AvatarFallback className="items-center justify-center">
-                              <Text>{channel?.createdBy?.charAt(0)}</Text>
-                            </AvatarFallback>
-                          </Avatar>
-                          <Muted>{channel?.createdBy}</Muted>
-                        </View>
+                        </Muted>
                       </CardFooter>
                     </View>
                   </TouchableNativeFeedback>
                 </Link>
-              </Card>
+              </AnimatedCard>
             );
           }}
           onEndReached={() => {
             console.log("Reached", hasNextPage);
             fetchNextPage();
           }}
-          onRefresh={() => refetch()}
-          refreshing={isRefetching}
           onEndReachedThreshold={0.8} // Adjust threshold for when to load more data
           ListFooterComponent={
             isFetchingNextPage ? (
               <ActivityIndicator
                 size="small"
-                color={isDarkColorScheme ? "black" : "white"}
+                className="my-4"
+                color={isDarkColorScheme ? "white" : "black"}
               />
             ) : (
-              <View style={{ height: 50 }} />
+              <View style={{ height: 32 }} />
             )
           }
         />

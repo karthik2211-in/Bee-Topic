@@ -12,7 +12,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "web:hover:opacity-90 bg-primary active:opacity-90",
+        default: "web:hover:opacity-90 bg-foreground active:opacity-90",
         destructive: "web:hover:opacity-90 bg-destructive active:opacity-90",
         outline:
           "web:hover:bg-accent web:hover:text-accent-foreground border border-input bg-background active:bg-accent",
@@ -36,11 +36,11 @@ const buttonVariants = cva(
 );
 
 const buttonTextVariants = cva(
-  "web:whitespace-nowrap native:text-base web:transition-colors text-sm font-medium text-foreground",
+  "web:whitespace-nowrap native:text-base web:transition-colors font-semibold text-foreground",
   {
     variants: {
       variant: {
-        default: "text-primary-foreground",
+        default: "text-background",
         destructive: "text-destructive-foreground",
         outline: "group-active:text-accent-foreground",
         secondary:
