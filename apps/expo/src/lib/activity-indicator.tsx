@@ -1,8 +1,20 @@
 import { ActivityIndicator as Loader } from "react-native";
+import { cssInterop } from "nativewind";
 
-import { useColorScheme } from "./useColorScheme";
+import { cn } from "./utils";
 
-export function ActivityIndicator(props: React.ComponentProps<typeof Loader>) {
-  const { isDarkColorScheme } = useColorScheme();
-  return <Loader color={isDarkColorScheme ? "white" : "black"} {...props} />;
+cssInterop(Loader, {
+  className: {
+    target: "style",
+    nativeStyleToProp: {
+      color: true,
+    },
+  },
+});
+
+export function ActivityIndicator({
+  className,
+  ...props
+}: React.ComponentProps<typeof Loader>) {
+  return <Loader {...props} className={cn("text-foreground", className)} />;
 }

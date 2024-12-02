@@ -1,6 +1,6 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { clerkClient } from "@clerk/nextjs/server";
-import RazorPay from "razorpay";
+import { endOfDay } from "date-fns";
 import { z } from "zod";
 
 import { and, asc, count, desc, eq, gte, ilike, sql } from "@bt/db";
@@ -59,6 +59,8 @@ export async function getChannelById({
     totalChapters: agregate.at(0)?.totalChapters,
     subscriptionsCount: subscriptionsAgregate.at(0)?.subscriptionsCount ?? 0,
     isSubscribed: !!subscription?.id,
+    isSubscriptionExpired:
+      new Date(Date.now()) >= new Date(subscription?.endsOn ?? Date.now()),
     createdBy: user.fullName,
     createdByImageUrl: user.imageUrl,
     ...item,

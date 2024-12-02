@@ -8,6 +8,7 @@ import {
   CouponEmails,
   Coupons,
   CreateCouponSchema,
+  Transactions,
   UpdateCouponSchema,
 } from "@bt/db/schema";
 

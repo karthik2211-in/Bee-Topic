@@ -1,14 +1,15 @@
 import type { VariantProps } from "class-variance-authority";
 import * as React from "react";
-import { Pressable } from "react-native";
+import { Pressable, TouchableNativeFeedback } from "react-native";
 import * as Slot from "@rn-primitives/slot";
 import { cva } from "class-variance-authority";
 
 import { TextClassContext } from "~/components/ui/text";
+import { ActivityIndicator } from "~/lib/activity-indicator";
 import { cn } from "~/lib/utils";
 
 const buttonVariants = cva(
-  "web:ring-offset-background web:transition-colors web:focus-visible:outline-none web:focus-visible:ring-2 web:focus-visible:ring-ring web:focus-visible:ring-offset-2 group flex flex-row items-center justify-center gap-2 rounded-md",
+  "web:ring-offset-background web:transition-colors web:focus-visible:outline-none web:focus-visible:ring-2 web:focus-visible:ring-ring web:focus-visible:ring-offset-2 group flex flex-row items-center justify-center gap-2 overflow-hidden rounded-md",
   {
     variants: {
       variant: {
@@ -65,33 +66,58 @@ const buttonTextVariants = cva(
 type ButtonProps = React.ComponentPropsWithoutRef<typeof Pressable> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
+    isLoading?: boolean;
   };
 
 const Button = React.forwardRef<
   React.ElementRef<typeof Pressable>,
   ButtonProps
->(({ className, asChild, variant, size, ...props }, ref) => {
-  const Comp = asChild ? Slot.Pressable : Pressable;
-  return (
-    <TextClassContext.Provider
-      value={buttonTextVariants({
-        variant,
-        size,
-        className: "web:pointer-events-none",
-      })}
-    >
-      <Comp
-        className={cn(
-          props.disabled && "web:pointer-events-none opacity-50",
-          buttonVariants({ variant, size, className }),
-        )}
-        ref={ref}
-        role="button"
-        {...props}
-      />
-    </TextClassContext.Provider>
-  );
-});
+>(
+  (
+    { className, children, isLoading, asChild, variant, size, ...props },
+    ref,
+  ) => {
+    const Comp = asChild ? Slot.Pressable : Pressable;
+    return (
+      <TextClassContext.Provider
+        value={buttonTextVariants({
+          variant,
+          size,
+          className: "web:pointer-events-none",
+        })}
+      >
+        <Comp
+          className={cn(
+            props.disabled && "web:pointer-events-none opacity-50",
+            buttonVariants({ variant, size, className }),
+          )}
+          ref={ref}
+          role="button"
+          android_ripple={{
+            color: "rgba(0,0,0,0.2)",
+            borderless: false,
+            foreground: true,
+          }}
+          {...props}
+          disabled={isLoading || props.disabled}
+          children={
+            isLoading ? (
+              <>
+                {children}
+                <ActivityIndicator
+                  className={buttonTextVariants({ variant, size })}
+                  size={18}
+                />
+              </>
+            ) : (
+              children
+            )
+          }
+        />
+      </TextClassContext.Provider>
+    );
+  },
+);
 Button.displayName = "Button";
 
 export { Button, buttonTextVariants, buttonVariants };

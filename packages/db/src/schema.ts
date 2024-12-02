@@ -127,7 +127,7 @@ export const Coupons = pgTable("coupons", (t) => ({
     .primaryKey(),
   code: t.varchar({ length: 100 }).notNull().unique(),
   description: t.text(),
-  subscriptionCount: t.integer().default(1),
+  subscriptionCount: t.integer().default(1).notNull(),
   subscriptonFrequency: SubscriptionFrequency("subscripiton_frequency").default(
     "monthly",
   ),
@@ -174,30 +174,61 @@ export const CouponEmails = pgTable(
   }),
 );
 
-export const Subscriptions = pgTable("subscriptions", (t) => ({
+export const Transactions = pgTable("transactions", (t) => ({
   id: t
     .varchar({ length: 100 })
-    .default(sql`CONCAT('bt-sub-', gen_random_uuid())`)
+    .default(sql`CONCAT('bt-trans-', gen_random_uuid())`)
     .primaryKey(),
+  clerkUserId: t.text().notNull(),
+  couponId: t.varchar({ length: 100 }).references(() => Coupons.id, {
+    onDelete: "set null",
+    onUpdate: "set null",
+  }),
   channelId: t
     .varchar({ length: 100 })
     .references(() => Channels.id, {
-      onDelete: "cascade",
-      onUpdate: "cascade",
+      onDelete: "set null",
+      onUpdate: "set null",
     })
     .notNull(),
-  clerkUserId: t.text().notNull(),
-  couponId: t.varchar({ length: 100 }).references(() => Coupons.id), //BeeTopic coupon ID
-  startsOn: t
-    .timestamp({ mode: "date", withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  endsOn: t.timestamp({ mode: "date", withTimezone: true }).notNull(),
   createdAt: t
     .timestamp({ mode: "date", withTimezone: true })
     .notNull()
     .defaultNow(),
 }));
+
+export const Subscriptions = pgTable(
+  "subscriptions",
+  (t) => ({
+    id: t
+      .varchar({ length: 100 })
+      .default(sql`CONCAT('bt-sub-', gen_random_uuid())`)
+      .primaryKey(),
+    channelId: t
+      .varchar({ length: 100 })
+      .references(() => Channels.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      })
+      .notNull(),
+    clerkUserId: t.text().notNull(),
+    startsOn: t
+      .timestamp({ mode: "date", withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    endsOn: t.timestamp({ mode: "date", withTimezone: true }).notNull(),
+    createdAt: t
+      .timestamp({ mode: "date", withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  }),
+  (subscription) => ({
+    uniqueChannelSubscriber: uniqueIndex("unique_channel_subscriber").on(
+      subscription.channelId,
+      subscription.clerkUserId,
+    ),
+  }),
+);
 
 //Input Schemas
 
@@ -272,10 +303,6 @@ export const SubscriptionsRelations = relations(Subscriptions, ({ one }) => ({
   channel: one(Channels, {
     fields: [Subscriptions.channelId],
     references: [Channels.id],
-  }),
-  coupon: one(Coupons, {
-    fields: [Subscriptions.couponId],
-    references: [Coupons.id],
   }),
 }));
 

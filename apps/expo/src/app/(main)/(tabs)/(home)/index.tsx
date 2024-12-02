@@ -119,7 +119,6 @@ export default function Index() {
             return (
               <AnimatedCard
                 entering={FadeInDown.duration(500)
-                  // .delay(200 + index * 200)
                   .springify(2000)
                   .easing(Easing.linear)}
                 key={channel.id}
@@ -128,8 +127,11 @@ export default function Index() {
               >
                 <Link asChild href={`/channels/${channel.id}`}>
                   <TouchableNativeFeedback
-                    background={{ type: "RippleAndroid", borderless: false }}
-                    useForeground={false}
+                    background={TouchableNativeFeedback.Ripple(
+                      "rgba(0,0,0,0.25)",
+                      false,
+                    )}
+                    useForeground={true}
                     style={{ borderRadius: 40 }}
                   >
                     <View className="flex-1">

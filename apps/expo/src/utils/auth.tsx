@@ -50,7 +50,6 @@ export const GoogleSignInButton = () => {
       size={"lg"}
       onPress={onPress}
       className="w-full"
-      variant={"outline"}
     >
       <Svg
         width="20"

@@ -27,7 +27,7 @@
     "ui-add": "pnpm dlx shadcn@latest add && prettier src --write --list-different"
   },
   "dependencies": {
-    "@hookform/resolvers": "^3.9.0",
+    "@hookform/resolvers": "catalog:",
     "@radix-ui/react-alert-dialog": "^1.1.2",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-dialog": "^1.1.2",

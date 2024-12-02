@@ -12,7 +12,9 @@ import "expo-router";
 import "../styles.css";
 
 import React from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ClerkLoaded, ClerkProvider, useAuth } from "@clerk/clerk-expo";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { PortalHost } from "@rn-primitives/portal";
 
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
@@ -134,17 +136,21 @@ export default function RootLayout() {
   }
 
   return (
-    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <ClerkLoaded>
-        <TRPCProvider>
-          {/*
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+        <ClerkLoaded>
+          <TRPCProvider>
+            <BottomSheetModalProvider>
+              {/*
           The Stack component displays the current page.
           It also allows you to configure your screens 
           */}
-          <InitialLayout />
-          <PortalHost />
-        </TRPCProvider>
-      </ClerkLoaded>
-    </ClerkProvider>
+              <InitialLayout />
+              <PortalHost />
+            </BottomSheetModalProvider>
+          </TRPCProvider>
+        </ClerkLoaded>
+      </ClerkProvider>
+    </GestureHandlerRootView>
   );
 }

@@ -80,34 +80,6 @@ export default function Chapter() {
       return `${mins}:${String(secs).padStart(2, "0")}`;
     }
   }
-
-  function SubscribeDialog() {
-    return (
-      <Dialog
-        open={true}
-        onOpenChange={(open) => {
-          if (!open) {
-            router.back();
-          }
-        }}
-      >
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Subscribe to continue</DialogTitle>
-            <DialogDescription>
-              Subscribe to this channel to get watch the content
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button size={"lg"} className="rounded-full">
-              <Text className="font-bold">{"Subscribe ( ₹2,000 only )"}</Text>
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   return (
     <View style={{ flex: 1 }}>
       <Stack.Screen
@@ -118,7 +90,6 @@ export default function Chapter() {
           headerShadowVisible: false,
         }}
       />
-      <SubscribeDialog />
       {isLoading ? (
         <View className="gap-2 p-3">
           <Card

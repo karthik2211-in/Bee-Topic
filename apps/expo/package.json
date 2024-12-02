@@ -19,8 +19,11 @@
     "@clerk/clerk-expo": "^2.2.29",
     "@expo/metro-config": "^0.18.11",
     "@expo/metro-runtime": "~3.2.3",
+    "@gorhom/bottom-sheet": "5",
+    "@hookform/resolvers": "catalog:",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-community/slider": "4.5.2",
+    "@rn-primitives/alert-dialog": "^1.1.0",
     "@rn-primitives/avatar": "^1.1.0",
     "@rn-primitives/dialog": "^1.1.0",
     "@rn-primitives/label": "^1.1.0",
@@ -68,7 +71,8 @@
     "react-native-web": "~0.19.10",
     "superjson": "2.2.1",
     "tailwind-merge": "^2.5.4",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@babel/core": "^7.25.8",

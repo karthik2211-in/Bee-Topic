@@ -1,16 +1,30 @@
-import React from "react";
 import {
   ActivityIndicator,
   Image,
   TouchableNativeFeedback,
   View,
 } from "react-native";
-import RazorpayCheckout from "react-native-razorpay";
-// import RazorPay from "react-native-razorpay";
-import { BlurView } from "expo-blur";
+import Animated, {
+  Easing,
+  FadeIn,
+  FadeInLeft,
+  FadeInRight,
+  FadeInUp,
+} from "react-native-reanimated";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
 import { FlashList } from "@shopify/flash-list";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
@@ -23,33 +37,26 @@ import {
 } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Text } from "~/components/ui/text";
-import { H3, Lead, Muted } from "~/components/ui/typography";
+import { Lead, Muted } from "~/components/ui/typography";
+import { Crown } from "~/lib/icons/Crown";
 import { Hash } from "~/lib/icons/Hash";
-import { useColorScheme } from "~/lib/useColorScheme";
 import { api } from "~/utils/api";
 
 export default function Chapter() {
   const params = useLocalSearchParams<{ id: string }>();
-  const { isDarkColorScheme } = useColorScheme();
+
   const channelId = params.id;
   const utils = api.useUtils();
   const { data: channel } = api.channels.byId.useQuery({ id: channelId });
-  const { mutate: subscribe, isPending: isSubscribing } =
-    api.subscriptions.create.useMutation({
-      onSuccess(data, variables, context) {
-        console.log(data, variables, context);
-      },
-      onSettled() {
-        utils.channels.invalidate();
-      },
-    });
+
   const { mutate: unSubscribe, isPending: isUnSubscribing } =
     api.subscriptions.delete.useMutation({
-      onSuccess(data, variables, context) {
+      async onSuccess(data, variables, context) {
         console.log(data, variables, context);
+        await utils.channels.invalidate();
       },
-      onSettled() {
-        utils.channels.invalidate();
+      async onSettled() {
+        await utils.channels.invalidate();
       },
     });
   const {
@@ -67,11 +74,12 @@ export default function Chapter() {
     <View style={{ flex: 1 }}>
       <Stack.Screen
         options={{
-          headerTitle: "",
-          headerTitleStyle: { fontSize: 18 },
+          headerTitle: "Channel",
           headerShadowVisible: false,
+          headerTitleAlign: "center",
         }}
       />
+
       {isLoading ? (
         <View className="gap-4 p-3">
           <View className="relative h-64 min-h-64 gap-2 px-2 py-4">
@@ -145,9 +153,62 @@ export default function Chapter() {
                 </View>
               </CardHeader>
               <CardFooter className="w-full flex-1 flex-col items-center justify-center gap-2 px-3 py-3">
-                <Button className="w-full">
-                  <Text>Subscribe Now</Text>
-                </Button>
+                {channel?.isSubscribed && !channel.isSubscriptionExpired ? (
+                  <AlertDialog className="w-full">
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        isLoading={isUnSubscribing}
+                        variant={"outline"}
+                        className="w-full bg-accent/50"
+                      >
+                        <Animated.View
+                          entering={FadeIn.duration(200).easing(Easing.linear)}
+                          className="rounded-full border-[1px] border-primary bg-primary/10 p-1.5"
+                        >
+                          <Crown size={14} className="text-primary" />
+                        </Animated.View>
+                        <Text>Subscribed</Text>
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Do you want to unsubscribe?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          By unsubscribing this channel you will lost your
+                          subscription and you won't long be access the contents
+                          of this channel.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>
+                          <Text>Cancel</Text>
+                        </AlertDialogCancel>
+                        <AlertDialogAction asChild>
+                          <Button
+                            isLoading={isUnSubscribing}
+                            onPress={() => unSubscribe({ channelId })}
+                          >
+                            <Text>Continue</Text>
+                          </Button>
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                ) : channel?.isSubscribed && channel.isSubscriptionExpired ? (
+                  <Link href={`/(modal)/subscribe/${channel?.id}`} asChild>
+                    <Button variant={"secondary"} className="w-full">
+                      <Text>Renew Subscription</Text>
+                    </Button>
+                  </Link>
+                ) : (
+                  <Link href={`/(modal)/subscribe/${channel?.id}`} asChild>
+                    <Button className="w-full">
+                      <Text>Subscribe</Text>
+                    </Button>
+                  </Link>
+                )}
                 <Muted className="text-xs font-medium">
                   {channel?.totalChapters} Chapters •{" "}
                   {channel?.subscriptionsCount} Subscribers
@@ -171,7 +232,7 @@ export default function Chapter() {
                   <View className="flex-shrink flex-row items-center">
                     <CardContent className="items-center justify-center rounded-sm p-0">
                       <Hash
-                        size={32}
+                        size={24}
                         className="text-card-foreground/50"
                         strokeWidth={1}
                       />

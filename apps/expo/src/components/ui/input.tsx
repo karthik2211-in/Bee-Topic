@@ -2,12 +2,14 @@ import type { TextInputProps } from "react-native";
 import * as React from "react";
 import { TextInput } from "react-native";
 
+import { useColorScheme } from "~/lib/useColorScheme";
 import { cn } from "~/lib/utils";
 
 const Input = React.forwardRef<
   React.ElementRef<typeof TextInput>,
   TextInputProps
 >(({ className, placeholderClassName, ...props }, ref) => {
+  const { isDarkColorScheme } = useColorScheme();
   return (
     <TextInput
       ref={ref}
@@ -16,6 +18,7 @@ const Input = React.forwardRef<
         props.editable === false && "web:cursor-not-allowed opacity-50",
         className,
       )}
+      cursorColor={isDarkColorScheme ? "white" : "black"}
       placeholderClassName={cn("text-muted-foreground", placeholderClassName)}
       {...props}
     />
