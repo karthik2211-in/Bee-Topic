@@ -124,7 +124,7 @@ export default function Index() {
                   .easing(Easing.linear)}
                 key={channel.id}
                 style={{ position: "relative" }}
-                className="my-2 min-h-52 overflow-hidden rounded-md border border-border/80"
+                className="mt-3 min-h-52 overflow-hidden rounded-md border border-border/80"
               >
                 <Link asChild href={`/channels/${channel.id}`}>
                   <TouchableNativeFeedback

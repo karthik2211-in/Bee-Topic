@@ -17,6 +17,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
@@ -53,10 +54,8 @@ export default function Chapter() {
     });
   const {
     data: chapters,
-    isRefetching,
     hasNextPage,
     isLoading,
-    refetch,
     fetchNextPage,
     isFetchingNextPage,
   } = api.chapters.infinite.useInfiniteQuery(
@@ -68,8 +67,7 @@ export default function Chapter() {
     <View style={{ flex: 1 }}>
       <Stack.Screen
         options={{
-          title: "Channel Details",
-          headerTitleAlign: "center",
+          headerTitle: "",
           headerTitleStyle: { fontSize: 18 },
           headerShadowVisible: false,
         }}
@@ -98,32 +96,39 @@ export default function Chapter() {
       ) : (
         <FlashList
           data={chapters?.pages?.flatMap((page) => page.items) || []}
-          estimatedItemSize={2}
-          contentContainerStyle={{ padding: 12 }}
+          estimatedItemSize={200}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={
-            <View className="relative h-64 min-h-64 px-2 py-4">
-              <Image
-                source={require("assets/honey.png")}
-                style={{
-                  height: 200,
-                  width: 200,
-                  position: "absolute",
-                  right: -60,
-                  top: -60,
-                  opacity: 0.6,
-                }}
-              />
-              <H3 className="w-4/5">{channel?.title}</H3>
-              <Muted>
-                {channel?.totalChapters} Chapters •{" "}
-                {channel?.subscriptionsCount} Subscribers
-              </Muted>
-              <View className="mt-auto items-end gap-4">
-                <View className="mt-auto w-full flex-col gap-2">
-                  <Muted>Created by</Muted>
-                  <View className="flex-row items-center gap-2">
-                    <Avatar className="size-6" alt="Channel Creator">
+            <Card className="h-fit rounded-none border-0 border-b border-b-border">
+              <CardContent className="flex-1 object-contain p-0">
+                <Image
+                  source={{
+                    uri: "https://s2.dmcdn.net/v/PhtPf1ZckrzTH_Sd3/x1080",
+                  }}
+                  resizeMode="cover"
+                  style={{
+                    width: "auto",
+                    flex: 1,
+                    height: 205,
+                  }}
+                />
+              </CardContent>
+              <CardHeader className="items-start gap-2 p-3">
+                <CardTitle className="text-xl leading-snug">
+                  {channel?.title}
+                </CardTitle>
+                {channel?.description && (
+                  <CardDescription className="text-foreground/70">
+                    {channel?.description}
+                  </CardDescription>
+                )}
+                <View className="flex-row items-center gap-1">
+                  <Muted className="text-xs">Created by</Muted>
+                  <View className="flex-row items-center justify-center gap-1">
+                    <Avatar
+                      className="size-5 border border-border"
+                      alt="Channel Creator"
+                    >
                       <AvatarImage
                         source={{
                           uri: channel?.createdByImageUrl,
@@ -133,14 +138,25 @@ export default function Chapter() {
                         <Text>{channel?.createdBy?.charAt(0)}</Text>
                       </AvatarFallback>
                     </Avatar>
-                    <Muted>{channel?.createdBy}</Muted>
+                    <Muted className="text-xs font-semibold">
+                      {channel?.createdBy}
+                    </Muted>
                   </View>
                 </View>
-              </View>
-            </View>
+              </CardHeader>
+              <CardFooter className="w-full flex-1 flex-col items-center justify-center gap-2 px-3 py-3">
+                <Button className="w-full">
+                  <Text>Subscribe Now</Text>
+                </Button>
+                <Muted className="text-xs font-medium">
+                  {channel?.totalChapters} Chapters •{" "}
+                  {channel?.subscriptionsCount} Subscribers
+                </Muted>
+              </CardFooter>
+            </Card>
           }
           ListEmptyComponent={
-            <View className="border-t-hairline h-60 flex-1 items-center justify-center border-t-border px-10">
+            <View className="h-60 flex-1 items-center justify-center px-10">
               <Lead>No Chapters</Lead>
               <Muted className="text-center">
                 If the creator of this channel posts any new chapters will be
@@ -150,25 +166,8 @@ export default function Chapter() {
           }
           renderItem={({ item: chapter }) => (
             <Link href={`/chapters/${chapter.id}`} asChild>
-              <TouchableNativeFeedback disabled={!channel?.isSubscribed}>
-                <Card className="relative mb-3 flex gap-2 overflow-hidden p-3">
-                  {!channel?.isSubscribed && (
-                    <BlurView
-                      intensity={100}
-                      style={{
-                        height: "140%",
-                        width: "140%",
-                        position: "absolute",
-                        flex: 1,
-                        zIndex: 10,
-                      }}
-                      tint={
-                        isDarkColorScheme
-                          ? "systemThinMaterialDark"
-                          : "systemUltraThinMaterialLight"
-                      }
-                    />
-                  )}
+              <TouchableNativeFeedback>
+                <Card className="border-b-hairline mt-[1px] box-border gap-2 overflow-auto rounded-none border-0 px-3 py-5">
                   <View className="flex-shrink flex-row items-center">
                     <CardContent className="items-center justify-center rounded-sm p-0">
                       <Hash
@@ -182,8 +181,8 @@ export default function Chapter() {
                         <CardTitle className="text-base">
                           {chapter?.title}
                         </CardTitle>
-                        <CardDescription>
-                          {chapter.totalVideos} Videos
+                        <CardDescription className={"text-foreground/90"}>
+                          {chapter.totalVideos} videos
                         </CardDescription>
                       </View>
                     </CardHeader>
@@ -196,8 +195,6 @@ export default function Chapter() {
           onEndReached={() => {
             if (hasNextPage) fetchNextPage();
           }}
-          onRefresh={() => refetch()}
-          refreshing={isRefetching}
           onEndReachedThreshold={0.8} // Adjust threshold for when to load more data
           ListFooterComponent={
             isFetchingNextPage ? (

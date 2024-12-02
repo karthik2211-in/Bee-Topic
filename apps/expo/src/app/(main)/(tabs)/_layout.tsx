@@ -1,13 +1,14 @@
 import React from "react";
 import { Tabs, useSegments } from "expo-router";
-import { PortalHost } from "@rn-primitives/portal";
 
 import { Text } from "~/components/ui/text";
 import { Home } from "~/lib/icons/Home";
 import { User } from "~/lib/icons/User";
+import { useColorScheme } from "~/lib/useColorScheme";
 
 export default function TabsLayout() {
   const segment = useSegments();
+  const { isDarkColorScheme } = useColorScheme();
   return (
     <>
       <Tabs
@@ -32,7 +33,15 @@ export default function TabsLayout() {
               <Text style={{ color, fontSize: 10 }}>Home</Text>
             ),
             headerShown: false,
-            tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
+            tabBarIcon: ({ color, size, focused }) => (
+              <Home
+                fillOpacity={0.19}
+                fill={focused ? color : "transparent"}
+                color={color}
+                size={size}
+                strokeWidth={0.5}
+              />
+            ),
           }}
         />
         <Tabs.Screen
@@ -46,7 +55,15 @@ export default function TabsLayout() {
             tabBarLabel: ({ color }) => (
               <Text style={{ color, fontSize: 10 }}>Profile</Text>
             ),
-            tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
+            tabBarIcon: ({ color, size, focused }) => (
+              <User
+                fillOpacity={0.19}
+                fill={focused ? color : "transparent"}
+                color={color}
+                size={size}
+                strokeWidth={0.5}
+              />
+            ),
           }}
         />
       </Tabs>
