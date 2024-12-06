@@ -6,6 +6,11 @@ import {
   View,
 } from "react-native";
 import Orientation from "react-native-orientation-locker";
+import Animated, {
+  FadeInDown,
+  FadeInUp,
+  ZoomIn,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Video, { ReactVideoEvents, VideoRef } from "react-native-video";
 import * as NavigationBar from "expo-navigation-bar";
@@ -38,6 +43,9 @@ import { PlayCircle } from "~/lib/icons/PlayCircle";
 import { Sprout } from "~/lib/icons/Sprout";
 import { api } from "~/utils/api";
 import { cn } from "~/utils/cn";
+
+const AnimatedPlayCircle = Animated.createAnimatedComponent(PlayCircle);
+const AnimatedPauseCircle = Animated.createAnimatedComponent(PauseCircle);
 
 export default function VideoPlayer() {
   const { id: videoId } = useLocalSearchParams<{ id: string }>();
@@ -151,10 +159,7 @@ export default function VideoPlayer() {
   };
 
   const handleBackPress = () => {
-    if (isFullScreen) {
-      exitFullScreen();
-      return true; // Prevent default back action
-    }
+    exitFullScreen();
     return false; // Allow default back action
   };
 
@@ -190,6 +195,11 @@ export default function VideoPlayer() {
     }
   }, [isFullScreen]);
 
+  //Enter full screen when the player screen is mounted
+  useEffect(() => {
+    enterFullScreen();
+  }, []);
+
   //create analytics data for watched segments
   useEffect(() => {
     const listner = navigation.addListener("beforeRemove", (e) => {
@@ -215,7 +225,7 @@ export default function VideoPlayer() {
   }, [currentTime, watchSegments]);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
       <Tabs.Screen options={{ tabBarStyle: { display: "none" } }} />
       <Stack.Screen
         options={{
@@ -223,10 +233,8 @@ export default function VideoPlayer() {
           headerTitleAlign: "center",
           headerShown: false,
           fullScreenGestureEnabled: true,
-          presentation: "containedModal",
-          animation: "slide_from_bottom",
-          animationDuration: 10,
-          headerRight: () => <Muted>1/3</Muted>,
+          orientation: "landscape",
+          animation: "flip",
         }}
       />
       <StatusBar
@@ -245,7 +253,7 @@ export default function VideoPlayer() {
             justifyContent: "center",
           }}
         >
-          <ActivityIndicator size={"large"} />
+          <ActivityIndicator color={"white"} size={40} />
         </View>
       ) : (
         <>
@@ -294,29 +302,38 @@ export default function VideoPlayer() {
                     backgroundColor: "transparent",
                   }}
                 >
-                  <ActivityIndicator size={"large"} color={"white"} />
+                  <ActivityIndicator size={40} color={"white"} />
                 </View>
               ) : (
-                <TouchableOpacity
-                  onPress={() => setShowControls(!showControls)}
-                  activeOpacity={1}
-                  style={{
-                    position: "absolute",
-                    opacity: showControls ? 1 : 0,
-                    pointerEvents: showControls ? "auto" : "none",
-                  }}
-                  className="h-full w-full items-center justify-between bg-black/60"
-                >
-                  {/**Header */}
-                  <View className="w-full flex-row items-center justify-between p-5">
+                <>
+                  {showControls && (
                     <TouchableOpacity
-                      onPress={() =>
-                        isFullScreen ? exitFullScreen() : router.back()
-                      }
+                      onPress={() => setShowControls(!showControls)}
+                      activeOpacity={1}
+                      style={{
+                        position: "absolute",
+                      }}
+                      className="h-full w-full items-center justify-between bg-black/60"
                     >
-                      <ArrowLeft size={24} color={"#ffff"} strokeWidth={1.25} />
-                    </TouchableOpacity>
-                    <TouchableOpacity
+                      {/**Header */}
+                      <Animated.View
+                        exiting={FadeInDown}
+                        entering={FadeInUp}
+                        className="w-full flex-row items-center justify-between p-5"
+                      >
+                        <TouchableOpacity
+                          onPress={() => {
+                            exitFullScreen();
+                            router.back();
+                          }}
+                        >
+                          <ArrowLeft
+                            size={24}
+                            color={"#ffff"}
+                            strokeWidth={1.25}
+                          />
+                        </TouchableOpacity>
+                        {/* <TouchableOpacity
                       onPress={() =>
                         isFullScreen ? exitFullScreen() : enterFullScreen()
                       }
@@ -334,47 +351,61 @@ export default function VideoPlayer() {
                           strokeWidth={1.25}
                         />
                       )}
+                    </TouchableOpacity> */}
+                      </Animated.View>
+
+                      {/**Middle */}
+                      <TouchableOpacity onPress={togglePlayPause}>
+                        {paused ? (
+                          <AnimatedPlayCircle
+                            entering={ZoomIn.duration(100)}
+                            strokeWidth={1}
+                            size={64}
+                            color={"#ffff"}
+                          />
+                        ) : (
+                          <AnimatedPauseCircle
+                            strokeWidth={1}
+                            entering={ZoomIn.duration(100)}
+                            size={64}
+                            color={"#ffff"}
+                          />
+                        )}
+                      </TouchableOpacity>
+
+                      {/**Footer */}
+                      <Animated.View
+                        exiting={FadeInUp}
+                        entering={FadeInDown}
+                        className={cn(
+                          "w-full flex-shrink flex-row items-center justify-between px-3 py-2",
+                          isFullScreen && "py-5",
+                        )}
+                      >
+                        <View className="w-full flex-shrink">
+                          <Text className="mr-4 self-end text-white">
+                            {formatTime(currentTime)} / {formatTime(duration)}
+                          </Text>
+                          <Slider
+                            style={{ width: "auto", flexShrink: 1 }}
+                            minimumValue={0}
+                            maximumValue={duration}
+                            value={currentTime}
+                            onSlidingComplete={(time) => handleSeek(time)}
+                            minimumTrackTintColor="yellow"
+                            maximumTrackTintColor="yellow"
+                            thumbTintColor="yellow"
+                          />
+                        </View>
+                      </Animated.View>
                     </TouchableOpacity>
-                  </View>
-
-                  {/**Middle */}
-                  <TouchableOpacity onPress={togglePlayPause}>
-                    {paused ? (
-                      <PlayCircle strokeWidth={1} size={64} color={"#ffff"} />
-                    ) : (
-                      <PauseCircle strokeWidth={1} size={64} color={"#ffff"} />
-                    )}
-                  </TouchableOpacity>
-
-                  {/**Footer */}
-                  <View
-                    className={cn(
-                      "w-full flex-shrink flex-row items-center justify-between px-3 py-2",
-                      isFullScreen && "py-5",
-                    )}
-                  >
-                    <View className="w-full flex-shrink">
-                      <Text className="mr-4 self-end text-white">
-                        {formatTime(currentTime)} / {formatTime(duration)}
-                      </Text>
-                      <Slider
-                        style={{ width: "auto", flexShrink: 1 }}
-                        minimumValue={0}
-                        maximumValue={duration}
-                        value={currentTime}
-                        onSlidingComplete={(time) => handleSeek(time)}
-                        minimumTrackTintColor="green"
-                        maximumTrackTintColor="green"
-                        thumbTintColor="green"
-                      />
-                    </View>
-                  </View>
-                </TouchableOpacity>
+                  )}
+                </>
               )}
             </View>
           </TouchableOpacity>
 
-          {!isFullScreen && (
+          {/* {!isFullScreen && (
             <View className="gap-3 p-4">
               <H3>{videoDetails?.title}</H3>
               <Muted className="text-xs">
@@ -454,7 +485,7 @@ export default function VideoPlayer() {
                 </Muted>
               </View>
             </View>
-          )}
+          )} */}
         </>
       )}
     </SafeAreaView>

@@ -1,6 +1,7 @@
 import React from "react";
-import { View } from "react-native";
-import Animated from "react-native-reanimated";
+import { TouchableOpacity, View } from "react-native";
+import Animated, { Easing } from "react-native-reanimated";
+import { BlurView } from "expo-blur";
 import { Stack, useRouter } from "expo-router";
 import BottomSheet, {
   BottomSheetModal,
@@ -43,7 +44,7 @@ export default function ModalLayout() {
         style={{ borderTopEndRadius: 10, overflow: "hidden" }}
         index={0}
         ref={modalRef}
-        snapPoints={["65%", "100%"]}
+        snapPoints={["75%", "100%"]}
       >
         <BottomSheetView
           style={{ flex: 1 }}

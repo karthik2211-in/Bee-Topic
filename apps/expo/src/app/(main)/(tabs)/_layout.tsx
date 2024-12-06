@@ -1,14 +1,11 @@
-import React from "react";
 import { Tabs, useSegments } from "expo-router";
 
 import { Text } from "~/components/ui/text";
 import { Home } from "~/lib/icons/Home";
 import { User } from "~/lib/icons/User";
-import { useColorScheme } from "~/lib/useColorScheme";
 
 export default function TabsLayout() {
   const segment = useSegments();
-  const { isDarkColorScheme } = useColorScheme();
   return (
     <>
       <Tabs

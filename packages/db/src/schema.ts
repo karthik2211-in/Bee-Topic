@@ -197,6 +197,35 @@ export const Transactions = pgTable("transactions", (t) => ({
     .defaultNow(),
 }));
 
+export const UserChannelState = pgTable(
+  "user_channel_state",
+  (t) => ({
+    id: t
+      .varchar({ length: 100 })
+      .default(sql`CONCAT('bt-ucs-', gen_random_uuid())`)
+      .primaryKey(),
+    clerkUserId: t.text().notNull(),
+    channelId: t
+      .varchar({ length: 100 })
+      .references(() => Channels.id, {
+        onDelete: "cascade",
+        onUpdate: "set null",
+      })
+      .notNull(),
+    activeChapterId: t.varchar({ length: 100 }).references(() => Chapters.id, {
+      onDelete: "cascade",
+      onUpdate: "set null",
+    }),
+    createdAt: t
+      .timestamp({ mode: "date", withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  }),
+  (ucs) => ({
+    uniqueUCS: uniqueIndex().on(ucs.clerkUserId, ucs.channelId),
+  }),
+);
+
 export const Subscriptions = pgTable(
   "subscriptions",
   (t) => ({

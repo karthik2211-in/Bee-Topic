@@ -33,7 +33,7 @@ export function ChaptersList() {
     [searchParams],
   );
 
-  const chapters = api.chapters.all.useQuery(
+  const { data: chaptersList, isLoading } = api.chapters.all.useQuery(
     { channelId: params.channel_id as string, query: chapterQuery },
     {
       enabled: !!params.channel_id,
@@ -42,7 +42,9 @@ export function ChaptersList() {
     },
   );
 
-  if (chapters.isLoading)
+  const chapters = chaptersList?.data;
+
+  if (isLoading)
     return (
       <div className="flex flex-col gap-2">
         {Array.from({ length: 10 }).map((_, index) => (
@@ -51,7 +53,7 @@ export function ChaptersList() {
       </div>
     );
 
-  if (chapters.data?.length === 0 && chapterQuery)
+  if (chapters?.length === 0 && chapterQuery)
     return (
       <div className="mt-28 flex flex-col items-center gap-2 px-3">
         <SearchXIcon className="size-8" strokeWidth={1.25} />
@@ -73,7 +75,7 @@ export function ChaptersList() {
       </div>
     );
 
-  if (chapters.data?.length === 0)
+  if (chapters?.length === 0)
     return (
       <div className="mt-28 flex flex-col items-center gap-2 px-3">
         <HashIcon className="size-8" strokeWidth={1.25} />
@@ -86,7 +88,7 @@ export function ChaptersList() {
 
   return (
     <div className="flex w-full flex-col gap-1">
-      {chapters.data?.map((chapter) => (
+      {chapters?.map((chapter) => (
         <Link
           key={chapter.id}
           href={`/${params.channel_id}/chapter/${chapter.id}`}

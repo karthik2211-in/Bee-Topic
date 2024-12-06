@@ -73,13 +73,18 @@ export default function Index() {
             return (
               <BlurView
                 intensity={300}
-                tint="systemMaterialDark"
+                tint={
+                  isDarkColorScheme
+                    ? "systemChromeMaterialDark"
+                    : "systemChromeMaterialLight"
+                }
                 style={{
                   flex: 1,
                   backgroundColor: isDarkColorScheme
-                    ? "hsla(20,14.3%,4.1%, 0.8)"
-                    : "hsla(0,0%,100%, 0.8)",
+                    ? "hsla(20,14.3%,4.1%, 0.4)"
+                    : "hsla(0,0%,100%, 0.4)",
                 }}
+                blurReductionFactor={50}
               />
             );
           },
@@ -128,7 +133,9 @@ export default function Index() {
                 <Link asChild href={`/channels/${channel.id}`}>
                   <TouchableNativeFeedback
                     background={TouchableNativeFeedback.Ripple(
-                      "rgba(0,0,0,0.25)",
+                      isDarkColorScheme
+                        ? "rgba(255,255,255,0.25)"
+                        : "rgba(0,0,0,0.25)",
                       false,
                     )}
                     useForeground={true}

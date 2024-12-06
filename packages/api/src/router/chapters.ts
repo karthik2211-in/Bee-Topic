@@ -7,6 +7,7 @@ import {
   Chapters,
   CreateChapterSchema,
   UpdateChapterSchema,
+  UserChannelState,
   Videos,
 } from "@bt/db/schema";
 
@@ -16,14 +17,18 @@ import { getChannelById } from "./channels";
 export const ChaptersRouter = {
   all: protectedProcedure
     .input(
-      z.object({ channelId: z.string().min(1), query: z.string().nullable() }),
+      z.object({
+        channelId: z.string().min(1),
+        query: z.string().nullable().optional(),
+      }),
     )
-    .query(({ ctx, input }) => {
-      return ctx.db
+    .query(async ({ ctx, input }) => {
+      const chapters = await ctx.db
         .select({
           id: Chapters.id,
           title: Chapters.title,
           createdAt: Chapters.createdAt,
+          description: Chapters.description,
           videosCount: sql`count(${Videos.id})`
             .mapWith(Number)
             .as("videosCount"),
@@ -40,6 +45,20 @@ export const ChaptersRouter = {
         )
         .groupBy(Chapters.id)
         .orderBy(asc(Chapters.title));
+
+      const activeChapterForUser =
+        await ctx.db.query.UserChannelState.findFirst({
+          where: and(
+            eq(UserChannelState.channelId, input.channelId),
+            eq(UserChannelState.clerkUserId, ctx.session.userId),
+          ),
+        });
+
+      return {
+        data: chapters,
+        activeChapterId:
+          activeChapterForUser?.activeChapterId ?? chapters[0]?.id,
+      };
     }),
 
   byId: protectedProcedure

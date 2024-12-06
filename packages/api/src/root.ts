@@ -1,4 +1,4 @@
-import { AnalyticsRouter } from "./router/analytics";
+import { analyticsRouter } from "./router/analytics";
 import { authRouter } from "./router/auth";
 import { channelsRouter } from "./router/channels";
 import { ChaptersRouter } from "./router/chapters";
@@ -14,7 +14,7 @@ export const appRouter = createTRPCRouter({
   chapters: ChaptersRouter,
   videos: VideosRouter,
   subscriptions: subscriptionsRouter,
-  analytics: AnalyticsRouter,
+  analytics: analyticsRouter,
   payments: paymentsRouter,
   coupons: couponsRouter,
 });

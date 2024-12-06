@@ -10,6 +10,7 @@ import {
   CreateChannelSchema,
   Subscriptions,
   UpdateChannelSchema,
+  UserChannelState,
   Videos,
 } from "@bt/db/schema";
 
@@ -95,6 +96,30 @@ export const channelsRouter = {
         .orderBy(desc(Channels.createdAt));
 
       return channels;
+    }),
+
+  setActiveChapterForUser: protectedProcedure
+    .input(
+      z.object({
+        channelId: z.string().min(1),
+        activeChapterId: z.string().min(1),
+      }),
+    )
+    .mutation(({ ctx, input }) => {
+      return ctx.db
+        .insert(UserChannelState)
+        .values({
+          channelId: input.channelId,
+          activeChapterId: input.activeChapterId,
+          clerkUserId: ctx.session.userId,
+        })
+        .onConflictDoUpdate({
+          target: [UserChannelState.clerkUserId, UserChannelState.channelId],
+          set: {
+            activeChapterId: input.activeChapterId,
+            channelId: input.channelId,
+          },
+        });
     }),
 
   infinite: protectedProcedure

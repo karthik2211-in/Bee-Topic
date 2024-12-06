@@ -6,6 +6,7 @@ import { cva } from "class-variance-authority";
 
 import { TextClassContext } from "~/components/ui/text";
 import { ActivityIndicator } from "~/lib/activity-indicator";
+import { useColorScheme } from "~/lib/useColorScheme";
 import { cn } from "~/lib/utils";
 
 const buttonVariants = cva(
@@ -78,6 +79,7 @@ const Button = React.forwardRef<
     ref,
   ) => {
     const Comp = asChild ? Slot.Pressable : Pressable;
+    const { isDarkColorScheme } = useColorScheme();
     return (
       <TextClassContext.Provider
         value={buttonTextVariants({
@@ -94,7 +96,9 @@ const Button = React.forwardRef<
           ref={ref}
           role="button"
           android_ripple={{
-            color: "rgba(0,0,0,0.2)",
+            color: isDarkColorScheme
+              ? "rgba(255,255,255,0.2)"
+              : "rgba(0,0,0,0.2)",
             borderless: false,
             foreground: true,
           }}
