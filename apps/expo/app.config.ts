@@ -42,6 +42,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-video",
     "expo-secure-store",
     [
+      "expo-screen-orientation",
+      {
+        initialOrientation: "DEFAULT",
+      },
+    ],
+    [
       "react-native-video",
       {
         enableNotificationControls: true,
