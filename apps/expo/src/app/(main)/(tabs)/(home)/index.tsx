@@ -53,7 +53,7 @@ export default function Index() {
       <StatusBar translucent />
       <Tabs.Screen
         options={{
-          headerTitle(props) {
+          headerTitle() {
             return (
               <Image
                 source={
@@ -69,7 +69,7 @@ export default function Index() {
             );
           },
           headerTransparent: true,
-          headerBackground(props) {
+          headerBackground() {
             return (
               <BlurView
                 intensity={300}

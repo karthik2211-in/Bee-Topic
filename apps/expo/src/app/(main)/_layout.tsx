@@ -1,4 +1,4 @@
-import { Stack } from "expo-router";
+import { Stack } from "expo-router/stack";
 
 export default function MainStackLayout() {
   return (
@@ -6,7 +6,7 @@ export default function MainStackLayout() {
       screenOptions={{
         headerShown: false,
         headerBackTitleVisible: false,
-        animation: "ios",
+        headerShadowVisible: false,
       }}
     />
   );

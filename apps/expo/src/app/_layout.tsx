@@ -4,11 +4,10 @@ import { Slot, SplashScreen, useRouter, useSegments } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Theme, ThemeProvider } from "@react-navigation/native";
+import { DefaultTheme, Theme, ThemeProvider } from "@react-navigation/native";
 
 import { TRPCProvider } from "~/utils/api";
 
-import "expo-router";
 import "../styles.css";
 
 import React from "react";
@@ -24,10 +23,12 @@ import { useColorScheme } from "~/lib/useColorScheme";
 const LIGHT_THEME: Theme = {
   dark: false,
   colors: NAV_THEME.light,
+  fonts: DefaultTheme.fonts,
 };
 const DARK_THEME: Theme = {
   dark: true,
   colors: NAV_THEME.dark,
+  fonts: DefaultTheme.fonts,
 };
 
 export {
@@ -73,7 +74,7 @@ function InitialLayout() {
         const isAuthSegment = segments[0] === "(auth)";
 
         if (isSignedIn && isAuthSegment) {
-          router.replace("/(main)");
+          router.replace("/(main)/(tabs)/(home)");
         } else if (!isSignedIn) {
           router.replace("/(auth)");
         }

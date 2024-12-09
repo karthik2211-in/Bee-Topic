@@ -1,4 +1,5 @@
-import { Tabs, useSegments } from "expo-router";
+import { useSegments } from "expo-router";
+import { Tabs } from "expo-router/tabs";
 
 import { Text } from "~/components/ui/text";
 import { Home } from "~/lib/icons/Home";
@@ -13,7 +14,7 @@ export default function TabsLayout() {
           tabBarStyle: {
             borderTopWidth: 0.2, // Remove top border
             elevation: 0, // Remove shadow for Android
-            height: 54,
+            height: 64,
             display: segment["0"] === "videos" ? "none" : "flex",
           },
         }}
@@ -22,7 +23,6 @@ export default function TabsLayout() {
           name="(home)"
           options={{
             tabBarItemStyle: {
-              paddingTop: 10,
               alignItems: "center",
               justifyContent: "center",
             },
@@ -45,7 +45,6 @@ export default function TabsLayout() {
           name="profile"
           options={{
             tabBarItemStyle: {
-              paddingTop: 10,
               alignItems: "center",
               justifyContent: "center",
             },

@@ -1,7 +1,5 @@
 import { Stack } from "expo-router";
 
 export default function MainLayout() {
-  return (
-    <Stack screenOptions={{ animation: "ios", headerShadowVisible: false }} />
-  );
+  return <Stack screenOptions={{ headerShadowShown: false }} />;
 }
