@@ -52,22 +52,27 @@ export default function Index() {
         {chaptersList?.data.map((chapter) => (
           <Button
             variant={"ghost"}
-            size={"lg"}
-            className="w-full justify-between rounded-none"
+            className={cn(
+              "native:h-16 w-full justify-between rounded-md",
+              chaptersList.activeChapterId === chapter.id && "bg-accent/60",
+            )}
             key={chapter.id}
             onPress={() =>
               setActiveChapter({ channelId, activeChapterId: chapter.id })
             }
           >
-            <Text
-              className={cn(
-                "font-normal text-muted-foreground",
-                chaptersList.activeChapterId === chapter.id &&
-                  "font-semibold text-foreground",
-              )}
-            >
-              {chapter.title}
-            </Text>
+            <View>
+              <Text
+                className={cn(
+                  "font-normal text-muted-foreground",
+                  chaptersList.activeChapterId === chapter.id &&
+                    "font-semibold text-foreground",
+                )}
+              >
+                {chapter.title}
+              </Text>
+              <Muted className="px-4 text-xs">{` ${chapter.videosCount !== 0 ? chapter.videosCount : ""} ${chapter.videosCount === 0 ? "No videos" : chapter.videosCount > 1 ? "videos" : "video"} `}</Muted>
+            </View>
             {chaptersList.activeChapterId === chapter.id && (
               <Check size={18} className="text-foreground" />
             )}
