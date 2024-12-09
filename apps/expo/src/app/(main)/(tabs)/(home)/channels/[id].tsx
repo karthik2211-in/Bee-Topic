@@ -79,6 +79,8 @@ export default function Chapter() {
     },
   );
 
+  const videosData = videos?.pages?.flatMap((page) => page.items) || [];
+
   return (
     <View style={{ flex: 1 }}>
       <Stack.Screen
@@ -115,7 +117,7 @@ export default function Chapter() {
         </View>
       ) : (
         <FlashList
-          data={videos?.pages?.flatMap((page) => page.items) || []}
+          data={videosData}
           estimatedItemSize={200}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={
@@ -261,40 +263,46 @@ export default function Chapter() {
               </CardFooter>
             </Card>
           }
-          renderItem={({ item: video }) => (
-            <Link href={`/videos/${video.id}`} asChild>
-              <TouchableNativeFeedback
-                background={TouchableNativeFeedback.Ripple(
-                  "rgba(255,255,255,0.2)",
-                  false,
-                )}
+          renderItem={({ item: video, index, extraData }) => {
+            utils.videos.byId.prefetch({ video_file_key: video.ut_fileKey });
+            return (
+              <Link
+                href={`/videos/${video.ut_fileKey}?next=${videosData[index + 1]?.ut_fileKey}`}
+                asChild
               >
-                <Card className="my-3 flex gap-2 overflow-hidden border-0 p-3">
-                  <View className="flex-shrink flex-row items-center">
-                    <CardContent className="items-center justify-center rounded-sm p-0">
-                      <PlayCircle
-                        size={38}
-                        className="fill-foreground/10 text-card-foreground/50"
-                        strokeWidth={1}
-                      />
-                    </CardContent>
-                    <CardHeader className="h-full w-full flex-shrink items-start justify-between px-3 py-0">
-                      <View className="gap-1">
-                        <CardTitle className="text-base">
-                          {video?.title}
-                        </CardTitle>
-                        <CardDescription className="p-0 text-xs text-foreground/70">
-                          {formatDuration(video.duration)} •{" "}
-                          {formatViewCount(video.viewCount ?? 0)} views
-                        </CardDescription>
-                      </View>
-                    </CardHeader>
-                  </View>
-                  {video.description && <Muted>{video.description}</Muted>}
-                </Card>
-              </TouchableNativeFeedback>
-            </Link>
-          )}
+                <TouchableNativeFeedback
+                  background={TouchableNativeFeedback.Ripple(
+                    "rgba(255,255,255,0.2)",
+                    false,
+                  )}
+                >
+                  <Card className="my-3 flex gap-2 overflow-hidden border-0 p-3">
+                    <View className="flex-shrink flex-row items-center">
+                      <CardContent className="items-center justify-center rounded-sm p-0">
+                        <PlayCircle
+                          size={38}
+                          className="fill-foreground/10 text-card-foreground/50"
+                          strokeWidth={1}
+                        />
+                      </CardContent>
+                      <CardHeader className="h-full w-full flex-shrink items-start justify-between px-3 py-0">
+                        <View className="gap-1">
+                          <CardTitle className="text-base">
+                            {video?.title}
+                          </CardTitle>
+                          <CardDescription className="p-0 text-xs text-foreground/70">
+                            {formatDuration(video.duration)} •{" "}
+                            {formatViewCount(video.viewCount ?? 0)} views
+                          </CardDescription>
+                        </View>
+                      </CardHeader>
+                    </View>
+                    {video.description && <Muted>{video.description}</Muted>}
+                  </Card>
+                </TouchableNativeFeedback>
+              </Link>
+            );
+          }}
           onEndReached={() => {
             if (hasNextPage) fetchNextPage();
           }}

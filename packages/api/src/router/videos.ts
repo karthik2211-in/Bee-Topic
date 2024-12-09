@@ -87,14 +87,15 @@ export const VideosRouter = {
     }),
 
   byId: protectedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ video_file_key: z.string() }))
     .query(async ({ ctx, input }) => {
       const data = await ctx.db.query.Videos.findFirst({
-        where: eq(Videos.id, input.id),
+        where: eq(Videos.ut_fileKey, input.video_file_key),
         with: {
           chapters: {
             with: {
               channel: true,
+              videos: true,
             },
           },
         },

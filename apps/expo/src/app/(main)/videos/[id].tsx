@@ -10,7 +10,7 @@ import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEvent, useEventListener } from "expo";
 import * as NavigationBar from "expo-navigation-bar";
-import { router } from "expo-router";
+import { Link, router, Stack, useLocalSearchParams } from "expo-router";
 import * as Orientation from "expo-screen-orientation";
 import { StatusBar } from "expo-status-bar";
 import { useVideoPlayer, VideoView } from "expo-video";
@@ -19,6 +19,7 @@ import Slider from "@react-native-community/slider";
 import { Button } from "~/components/ui/button";
 import { Text } from "~/components/ui/text";
 import { Muted, Small } from "~/components/ui/typography";
+import VideoPlayer from "~/components/video-player";
 import { ActivityIndicator } from "~/lib/activity-indicator";
 import { ArrowLeft } from "~/lib/icons/ArrowLeft";
 import { PauseCircle } from "~/lib/icons/PauseCircle";
@@ -26,6 +27,7 @@ import { PlayCircle } from "~/lib/icons/PlayCircle";
 import { SkipForward } from "~/lib/icons/SkipForward";
 import { StepBack } from "~/lib/icons/StepBack";
 import { StepForward } from "~/lib/icons/StepForward";
+import { api } from "~/utils/api";
 
 const AnimatedPlayCircle = Animated.createAnimatedComponent(PlayCircle);
 const AnimatedPauseCircle = Animated.createAnimatedComponent(PauseCircle);
@@ -37,7 +39,7 @@ const AnimatedPauseCircle = Animated.createAnimatedComponent(PauseCircle);
 //   const { data: videoDetails, isLoading } = api.videos.byId.useQuery({
 //     id: videoId,
 //   });
-//   const { mutate: incrementView } = api.videos.incrementView.useMutation();
+
 //   const { mutate: subscribe, isPending: isSubscribing } =
 //     api.subscriptions.create.useMutation({
 //       onSuccess(data, variables, context) {
@@ -58,7 +60,6 @@ const AnimatedPauseCircle = Animated.createAnimatedComponent(PauseCircle);
 //         utils.invalidate();
 //       },
 //     });
-//   const [viewRecorded, setViewRecorded] = useState(false);
 //   const videoRef = useRef<VideoRef>(null);
 //   const router = useRouter();
 //   const [paused, setPaused] = useState(false);
@@ -83,13 +84,13 @@ const AnimatedPauseCircle = Animated.createAnimatedComponent(PauseCircle);
 //     setDuration(meta.duration);
 //   };
 
-//   const handleProgress: ReactVideoEvents["onProgress"] = (progress) => {
-//     if (progress.currentTime >= 1 && !viewRecorded && videoDetails?.id) {
-//       incrementView(videoDetails.id);
-//       setViewRecorded(true); // Ensure it only triggers once
-//     }
-//     setCurrentTime(progress.currentTime);
-//   };
+// const handleProgress: ReactVideoEvents["onProgress"] = (progress) => {
+//   if (progress.currentTime >= 1 && !viewRecorded && videoDetails?.id) {
+//     incrementView(videoDetails.id);
+//     setViewRecorded(true); // Ensure it only triggers once
+//   }
+//   setCurrentTime(progress.currentTime);
+// };
 
 //   // When the video starts playing, set the start time
 //   const startSegment = (currentTime: number) => {
@@ -476,330 +477,53 @@ const AnimatedPauseCircle = Animated.createAnimatedComponent(PauseCircle);
 // }
 
 // Helper function to format time for display
-const { height, width } = Dimensions.get("screen");
-
-const videoSource =
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
 
 export default function VideoScreen() {
-  const [isFullScreen, setIsFullScreen] = React.useState(true);
-  const player = useVideoPlayer(videoSource, (player) => {
-    player.loop = true;
-    player.bufferOptions = {
-      preferredForwardBufferDuration: 50,
-      waitsToMinimizeStalling: true,
-      prioritizeTimeOverSizeThreshold: true,
-    };
-    player.audioMixingMode = "duckOthers";
-    player.preservesPitch = true;
-    player.currentTime = 0;
-    player.timeUpdateEventInterval = 1;
-    player.play();
+  const params = useLocalSearchParams<{ id: string; next: string }>();
+  const videoId = params.id;
+  const nextVideoId = params.next;
+  const [viewRecorded, setViewRecorded] = React.useState(false);
+  const { data: videoDetails } = api.videos.byId.useQuery({
+    video_file_key: videoId,
   });
-
-  const [showControls, setShowControls] = React.useState(true);
-
-  const { isPlaying } = useEvent(player, "playingChange", {
-    isPlaying: player.playing,
-  });
-
-  const { currentTime } = useEvent(player, "timeUpdate", {
-    currentTime: player.currentTime,
-    bufferedPosition: player.bufferedPosition,
-    currentLiveTimestamp: player.currentLiveTimestamp,
-    currentOffsetFromLive: player.currentOffsetFromLive,
-  });
-
-  useEventListener(player, "statusChange", (payload) => {
-    console.log("Player error", payload.error);
-    console.log("player status", payload.status);
-  });
-
-  const controlsTimeout = React.useRef<NodeJS.Timeout | null>(null);
-
-  const startTimeToHideControls = () => {
-    // Set a new timeout to hide the controls after 3 seconds
-    controlsTimeout.current = setTimeout(() => {
-      setShowControls(false);
-      controlsTimeout.current = null; // Reset the timeout reference
-    }, 5000);
-  };
-
-  const handleControlsVisibility = () => {
-    if (controlsTimeout.current) {
-      clearTimeout(controlsTimeout.current); // Clear the existing timeout
-    }
-
-    setShowControls(true); // Show the controls
-
-    startTimeToHideControls();
-  };
-
-  const handleControlsClose = () => {
-    if (controlsTimeout.current) {
-      clearTimeout(controlsTimeout.current); // Clear the existing timeout
-    }
-
-    setShowControls(false);
-  };
-
-  const enterFullScreen = async () => {
-    setIsFullScreen(true);
-    await NavigationBar.setVisibilityAsync("hidden");
-    Orientation.lockAsync(Orientation.OrientationLock.LANDSCAPE); // Lock to landscape for full-screen mode
-  };
-
-  const exitFullScreen = async () => {
-    setIsFullScreen(false);
-    await NavigationBar.setVisibilityAsync("visible");
-    Orientation.lockAsync(Orientation.OrientationLock.DEFAULT); // Reset to portrait when exiting full-screen
-  };
-
-  React.useEffect(() => {
-    if (isFullScreen) enterFullScreen();
-    else exitFullScreen();
-  }, [isFullScreen]);
-
-  function handleBackPress() {
-    exitFullScreen();
-    return false;
-  }
-
-  React.useEffect(() => {
-    startTimeToHideControls(); //when initally video starts
-  }, []);
-
-  //Exit from the full screen if it clicked back
-  React.useEffect(() => {
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      handleBackPress,
-    );
-
-    return () => {
-      backHandler.remove();
-      // if (controlsTimeout) clearTimeout(controlsTimeout); // Clear timeout on unmount
-    };
-  }, [isFullScreen]);
+  const { mutate: incrementView } = api.videos.incrementView.useMutation();
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "black",
-        position: "relative",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <StatusBar hidden translucent />
-      <TouchableOpacity
-        onPress={() => {
-          handleControlsVisibility();
+    <>
+      <Stack.Screen
+        options={{
+          animation: "none",
         }}
-        activeOpacity={1}
-        style={styles.contentContainer}
       />
-      <VideoView
-        style={{
-          width: "100%",
-          flex: 1,
-          height,
+      <VideoPlayer
+        videoId={videoId}
+        metadata={{
+          title: videoDetails?.title ?? "",
+          description: `${videoDetails?.chapters.channel.title} ( ${videoDetails?.chapters.title} )`,
         }}
-        pointerEvents="none"
-        player={player}
-        nativeControls={false}
-        allowsPictureInPicture={false}
-        contentFit="contain"
-      />
-      {showControls && (
-        <Animated.View
-          pointerEvents={"box-none"}
-          entering={FadeIn}
-          exiting={FadeOut}
-          style={styles.controlsContainer}
-        >
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={(e) => {
-              e.stopPropagation();
-              handleControlsClose();
-            }}
-            disabled={!showControls}
-            style={styles.controlsInner}
+        BottomSection={
+          <Link
+            style={{ opacity: nextVideoId ? 1 : 0 }}
+            disabled={!nextVideoId}
+            href={`/videos/${nextVideoId}`}
+            replace
+            asChild
           >
-            <Animated.View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                width: "100%",
-                paddingVertical: 5,
-              }}
-            >
-              <Button
-                size={"icon"}
-                variant={"ghost"}
-                className="size-14 rounded-full active:bg-transparent"
-                onPress={() => {
-                  router.back();
-                  exitFullScreen();
-                }}
-              >
-                <ArrowLeft className="text-foreground" />
-              </Button>
-              <Animated.View className={"gap-1"}>
-                <Small className="text-center">Basics of Web</Small>
-                <Muted className="text-foreground/60">1. Introduction</Muted>
-              </Animated.View>
-              <Animated.View className={"w-10"}></Animated.View>
-            </Animated.View>
-            {player.status === "loading" ? (
-              <ActivityIndicator size={52} className="text-white" />
-            ) : (
-              <Button
-                size={"icon"}
-                className="size-32 rounded-full active:bg-transparent"
-                variant={"ghost"}
-                onPress={(e) => {
-                  if (isPlaying) {
-                    player.pause();
-                    if (controlsTimeout.current)
-                      clearTimeout(controlsTimeout.current); //prevent closing controls when video is paused
-                  } else {
-                    if (controlsTimeout.current)
-                      clearTimeout(controlsTimeout.current);
-                    player.play();
-                    startTimeToHideControls();
-                  }
-                }}
-              >
-                {isPlaying ? (
-                  <AnimatedPauseCircle
-                    entering={FadeIn}
-                    exiting={FadeOut}
-                    size={64}
-                    className={"text-white"}
-                    strokeWidth={1}
-                  />
-                ) : (
-                  <AnimatedPlayCircle
-                    entering={FadeIn}
-                    exiting={FadeOut}
-                    className={"text-white"}
-                    size={64}
-                    strokeWidth={1}
-                  />
-                )}
-              </Button>
-            )}
-            <Animated.View
-              pointerEvents={"auto"}
-              style={{ width: "100%", flexShrink: 0, gap: 5 }}
-            >
-              <Animated.View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  width: "100%",
-                }}
-                pointerEvents={"auto"}
-              >
-                <Small>{formatTime(currentTime)}</Small>
-                <Slider
-                  style={{ width: "90%", height: 26 }}
-                  minimumValue={0}
-                  disabled={player.status === "idle"}
-                  maximumValue={player.duration}
-                  value={player.currentTime}
-                  removeClippedSubviews
-                  onSlidingStart={() => {
-                    if (controlsTimeout.current)
-                      clearInterval(controlsTimeout.current); //prevent closing controls when sliding
-                  }}
-                  onSlidingComplete={(time) => {
-                    player.currentTime = time;
-                    if (!isPlaying) player.play(); //play if playback is paused
-                    startTimeToHideControls(); //after time seek start to hide
-                  }}
-                  minimumTrackTintColor="hsl(47.9 95.8% 53.1%)"
-                  maximumTrackTintColor="white"
-                  thumbTintColor="hsl(47.9 95.8% 53.1%)"
-                  pointerEvents="box-only"
-                />
-                <Small>{formatTime(player.duration)}</Small>
-              </Animated.View>
-              <Animated.View
-                style={{
-                  width: "auto",
-                  flexDirection: "row",
-                  justifyContent: "flex-end",
-                  paddingHorizontal: 20,
-                }}
-              >
-                <Button
-                  disabled={player.status === "loading"}
-                  className="h-10 active:bg-transparent"
-                  variant={"ghost"}
-                  size={"sm"}
-                >
-                  <SkipForward size={20} className="text-foreground" />
-                  <Text className="text-sm">Next Video</Text>
-                </Button>
-              </Animated.View>
-            </Animated.View>
-          </TouchableOpacity>
-        </Animated.View>
-      )}
-    </View>
+            <Button variant={"ghost"} className="h-10 active:bg-transparent">
+              <SkipForward size={18} className="text-foreground" />
+              <Text>Next Video</Text>
+            </Button>
+          </Link>
+        }
+        onProgress={(currentTime) => {
+          if (currentTime >= 1 && !viewRecorded && videoDetails?.id) {
+            incrementView(videoDetails.id);
+            setViewRecorded(true); // Ensure it only triggers once
+          }
+        }}
+        videoSource={`https://utfs.io/f/${videoId}`}
+        nextVideoSource={nextVideoId && `https://utfs.io/f/${nextVideoId}`}
+      />
+    </>
   );
-}
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    flex: 1,
-    backgroundColor: "transparent",
-    position: "absolute",
-    height,
-    width,
-    top: 1,
-    zIndex: 10,
-  },
-  controlsContainer: {
-    position: "absolute",
-    zIndex: 10,
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    height,
-    width,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    paddingBottom: 20,
-  },
-  controlsInner: {
-    flex: 1,
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexGrow: 1,
-    height,
-    width: "100%",
-  },
-});
-
-const formatTime = (time: number) => {
-  const minutes = Math.floor(time / 60);
-  const seconds = Math.floor(time % 60);
-  return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-};
-
-export function formatViewCount(number: number) {
-  if (number >= 1_000_000_000) {
-    return (number / 1_000_000_000).toFixed(1).replace(/\.0$/, "") + "B";
-  } else if (number >= 1_000_000) {
-    return (number / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
-  } else if (number >= 1_000) {
-    return (number / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
-  }
-  return number.toString();
 }
