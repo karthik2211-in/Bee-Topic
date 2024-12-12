@@ -45,7 +45,7 @@ type VideoPlayerProps = Omit<VideoViewProps, "player"> & {
   metadata?:
     | VideoPlayerMetaData
     | ((videoId: string) => Promise<VideoPlayerMetaData> | VideoPlayerMetaData);
-  BottomSection?: React.ReactElement | null;
+  FooterComponent?: React.ReactElement | null;
 };
 
 export default function VideoPlayer({
@@ -53,7 +53,7 @@ export default function VideoPlayer({
   onProgress,
   nextVideoSource,
   videoId,
-  BottomSection,
+  FooterComponent,
   metadata,
   ...videoViewProps
 }: VideoPlayerProps) {
@@ -337,7 +337,7 @@ export default function VideoPlayer({
                   paddingHorizontal: 20,
                 }}
               >
-                {BottomSection}
+                {FooterComponent}
               </Animated.View>
             </Animated.View>
           </TouchableOpacity>

@@ -10,7 +10,13 @@ import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEvent, useEventListener } from "expo";
 import * as NavigationBar from "expo-navigation-bar";
-import { Link, router, Stack, useLocalSearchParams } from "expo-router";
+import {
+  Link,
+  Stack,
+  useFocusEffect,
+  useLocalSearchParams,
+  useRouter,
+} from "expo-router";
 import * as Orientation from "expo-screen-orientation";
 import { StatusBar } from "expo-status-bar";
 import { useVideoPlayer, VideoView } from "expo-video";
@@ -494,6 +500,7 @@ export default function VideoScreen() {
         options={{
           animation: "none",
         }}
+        redirect={!videoDetails?.chapters.channel.isSubscribed}
       />
       <VideoPlayer
         videoId={videoId}
@@ -501,7 +508,7 @@ export default function VideoScreen() {
           title: videoDetails?.title ?? "",
           description: `${videoDetails?.chapters.channel.title} ( ${videoDetails?.chapters.title} )`,
         }}
-        BottomSection={
+        FooterComponent={
           <Link
             style={{ opacity: nextVideoId ? 1 : 0 }}
             disabled={!nextVideoId}

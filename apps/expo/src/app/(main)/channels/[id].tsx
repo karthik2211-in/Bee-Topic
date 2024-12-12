@@ -1,9 +1,4 @@
-import {
-  ActivityIndicator,
-  Image,
-  TouchableNativeFeedback,
-  View,
-} from "react-native";
+import { Image, TouchableNativeFeedback, View } from "react-native";
 import Animated, { Easing, FadeIn } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
@@ -33,6 +28,8 @@ import {
 import { Skeleton } from "~/components/ui/skeleton";
 import { Text } from "~/components/ui/text";
 import { Muted } from "~/components/ui/typography";
+import VideoCard from "~/components/video-card";
+import { ActivityIndicator } from "~/lib/activity-indicator";
 import { Crown } from "~/lib/icons/Crown";
 import { Hash } from "~/lib/icons/Hash";
 import { PlayCircle } from "~/lib/icons/PlayCircle";
@@ -89,31 +86,13 @@ export default function Chapter() {
           headerShadowVisible: false,
           headerTitleAlign: "center",
           headerTransparent: true,
-          headerTintColor: "#ffff",
         }}
       />
       <StatusBar style={"light"} />
 
       {isLoading || isChaptersLoading ? (
-        <View className="gap-4 p-3">
-          <View className="relative h-64 min-h-64 gap-2 px-2 py-4">
-            <Skeleton className="h-6 w-4/5 rounded-full" />
-            <Skeleton className="h-6 w-4/6 rounded-full" />
-            <Skeleton className={"h-3 w-1/2"} />
-            <View className="mt-auto items-end gap-4">
-              <View className="mt-auto w-full flex-col gap-2">
-                <Muted>Created by</Muted>
-                <View className="flex-row items-center gap-2">
-                  <Skeleton className={"size-6 rounded-full"} />
-                  <Skeleton className={"h-3 w-1/4"} />
-                </View>
-              </View>
-              <Skeleton className={"h-12 w-full rounded-full"} />
-            </View>
-          </View>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className={"h-24 w-full"} />
-          ))}
+        <View className="flex-1 justify-center gap-4 py-32">
+          <ActivityIndicator size={"large"} className="text-primary" />
         </View>
       ) : (
         <FlashList
@@ -183,7 +162,6 @@ export default function Chapter() {
                   <AlertDialog className="w-full">
                     <AlertDialogTrigger asChild>
                       <Button
-                        size={"lg"}
                         isLoading={isUnSubscribing}
                         variant={"outline"}
                         className="w-full bg-accent/5"
@@ -224,25 +202,21 @@ export default function Chapter() {
                     </AlertDialogContent>
                   </AlertDialog>
                 ) : channel?.isSubscribed && channel.isSubscriptionExpired ? (
-                  <Link href={`/(modal)/subscribe/${channel?.id}`} asChild>
-                    <Button
-                      size={"lg"}
-                      variant={"secondary"}
-                      className="w-full"
-                    >
+                  <Link href={`/subscribe/${channel?.id}`} asChild>
+                    <Button variant={"secondary"} className="w-full">
                       <Text>Renew Subscription</Text>
                     </Button>
                   </Link>
                 ) : (
-                  <Link href={`/(modal)/subscribe/${channel?.id}`} asChild>
-                    <Button size={"lg"} className="w-full">
-                      <Text>Subscribe</Text>
+                  <Link href={`/subscribe/${channel?.id}`} asChild>
+                    <Button className="w-full">
+                      <Text>Subscribe To Watch</Text>
                     </Button>
                   </Link>
                 )}
 
                 <Link href={`/chapters-list/${channel?.id}`} asChild>
-                  <Button size={"lg"} variant={"secondary"} className="w-full">
+                  <Button variant={"secondary"} className="w-full">
                     <Text className="font-normal">
                       {
                         chapters?.find(
@@ -263,42 +237,33 @@ export default function Chapter() {
               </CardFooter>
             </Card>
           }
-          renderItem={({ item: video, index, extraData }) => {
-            utils.videos.byId.prefetch({ video_file_key: video.ut_fileKey });
+          renderItem={({ item: videoData, index, extraData }) => {
+            utils.videos.byId.prefetch({
+              video_file_key: videoData.ut_fileKey,
+            });
             return (
               <Link
-                href={`/videos/${video.ut_fileKey}?next=${videosData[index + 1]?.ut_fileKey}`}
+                disabled={!channel?.isSubscribed}
+                href={
+                  channel?.isSubscribed
+                    ? `/videos/${videoData.ut_fileKey}?next=${videosData[index + 1]?.ut_fileKey}`
+                    : `/subscribe/${channel?.id}`
+                }
                 asChild
+                key={videoData.id}
               >
                 <TouchableNativeFeedback
                   background={TouchableNativeFeedback.Ripple(
-                    "rgba(255,255,255,0.2)",
+                    isDarkColorScheme
+                      ? "rgba(255,255,255,0.2)"
+                      : "rgba(0,0,0,0.2)",
                     false,
                   )}
                 >
-                  <Card className="my-3 flex gap-2 overflow-hidden border-0 p-3">
-                    <View className="flex-shrink flex-row items-center">
-                      <CardContent className="items-center justify-center rounded-sm p-0">
-                        <PlayCircle
-                          size={38}
-                          className="fill-foreground/10 text-card-foreground/50"
-                          strokeWidth={1}
-                        />
-                      </CardContent>
-                      <CardHeader className="h-full w-full flex-shrink items-start justify-between px-3 py-0">
-                        <View className="gap-1">
-                          <CardTitle className="text-base">
-                            {video?.title}
-                          </CardTitle>
-                          <CardDescription className="p-0 text-xs text-foreground/70">
-                            {formatDuration(video.duration)} •{" "}
-                            {formatViewCount(video.viewCount ?? 0)} views
-                          </CardDescription>
-                        </View>
-                      </CardHeader>
-                    </View>
-                    {video.description && <Muted>{video.description}</Muted>}
-                  </Card>
+                  <VideoCard
+                    style={{ opacity: channel?.isSubscribed ? 1 : 0.3 }}
+                    videoData={videoData}
+                  />
                 </TouchableNativeFeedback>
               </Link>
             );

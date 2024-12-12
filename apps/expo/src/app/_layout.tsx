@@ -74,7 +74,7 @@ function InitialLayout() {
         const isAuthSegment = segments[0] === "(auth)";
 
         if (isSignedIn && isAuthSegment) {
-          router.replace("/(main)/(tabs)/(home)");
+          router.replace("/(main)");
         } else if (!isSignedIn) {
           router.replace("/(auth)");
         }

@@ -4,15 +4,11 @@ import {
   TouchableNativeFeedback,
   View,
 } from "react-native";
-import Animated, {
-  Easing,
-  FadeInDown,
-  ReduceMotion,
-} from "react-native-reanimated";
-import { BlurView } from "expo-blur";
-import { Link, Tabs } from "expo-router";
+import Animated, { Easing, FadeIn, FadeInDown } from "react-native-reanimated";
+import { Link, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useAuth } from "@clerk/clerk-expo";
+import { useAuth, useUser } from "@clerk/clerk-expo";
+import { BlurView } from "@react-native-community/blur";
 import { FlashList } from "@shopify/flash-list";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -26,6 +22,7 @@ import {
 import { Skeleton } from "~/components/ui/skeleton";
 import { Text } from "~/components/ui/text";
 import { H3, Lead, Muted } from "~/components/ui/typography";
+import { User } from "~/lib/icons/User";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { api } from "~/utils/api";
 
@@ -33,6 +30,7 @@ const AnimatedCard = Animated.createAnimatedComponent(Card);
 
 export default function Index() {
   const { userId } = useAuth();
+  const { user } = useUser();
   const utils = api.useUtils();
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
     api.channels.infinite.useInfiniteQuery(
@@ -51,7 +49,7 @@ export default function Index() {
   return (
     <View className="flex-1">
       <StatusBar translucent />
-      <Tabs.Screen
+      <Stack.Screen
         options={{
           headerTitle() {
             return (
@@ -63,32 +61,42 @@ export default function Index() {
                 }
                 style={{
                   height: 60,
-                  width: 160,
+                  width: 140,
                 }}
               />
+            );
+          },
+          headerRight(props) {
+            return (
+              <Link href={"/profile"}>
+                <Avatar alt="Avatar" className="size-9">
+                  <AvatarImage src={user?.imageUrl} />
+                  <AvatarFallback>
+                    <User
+                      size={32}
+                      strokeWidth={0.5}
+                      className="fill-foreground/10 text-foreground"
+                    />
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
             );
           },
           headerTransparent: true,
           headerBackground() {
             return (
               <BlurView
-                intensity={300}
-                tint={
-                  isDarkColorScheme
-                    ? "systemChromeMaterialDark"
-                    : "systemChromeMaterialLight"
-                }
+                blurAmount={64}
+                blurType={isDarkColorScheme ? "dark" : "light"}
                 style={{
                   flex: 1,
-                  backgroundColor: isDarkColorScheme
-                    ? "hsla(20,14.3%,4.1%, 0.4)"
-                    : "hsla(0,0%,100%, 0.4)",
+                  overflow: "hidden",
+                  // opacity: 0,
                 }}
-                blurReductionFactor={50}
               />
             );
           },
-          headerTitleAlign: "center",
+          headerTitleAlign: "left",
         }}
       />
 
@@ -123,9 +131,7 @@ export default function Index() {
             utils.channels.byId.prefetch({ id: channel.id });
             return (
               <AnimatedCard
-                entering={FadeInDown.duration(500)
-                  .springify(2000)
-                  .easing(Easing.linear)}
+                entering={FadeIn}
                 key={channel.id}
                 style={{ position: "relative" }}
                 className="mt-3 min-h-52 overflow-hidden rounded-md border border-border/80"
