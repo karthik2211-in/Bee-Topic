@@ -89,9 +89,7 @@ function InitialLayout() {
 
   return (
     <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-      <Stack
-        screenOptions={{ headerShown: false, animation: "ios_from_right" }}
-      />
+      <Slot screenOptions={{ headerShown: false }} />
       <StatusBar
         style={"auto"}
         backgroundColor={

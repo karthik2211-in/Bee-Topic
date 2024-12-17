@@ -8,7 +8,6 @@ import {
   CouponEmails,
   Coupons,
   CreateCouponSchema,
-  Transactions,
   UpdateCouponSchema,
 } from "@bt/db/schema";
 
@@ -82,13 +81,20 @@ export const couponsRouter = {
     )
     .mutation((opts) => opts.ctx.db.insert(Coupons).values(opts.input)),
 
-  update: protectedProcedure.input(UpdateCouponSchema).mutation((opts) =>
-    opts.ctx.db
-      .update(Coupons)
-      .set(opts.input)
-      .where(eq(Coupons.id, opts.input.id ?? ""))
-      .returning(),
-  ),
+  update: protectedProcedure
+    .input(UpdateCouponSchema)
+    .mutation(async (opts) => {
+      if (opts.input.type === "open" && opts.input.id) {
+        await opts.ctx.db
+          .delete(CouponEmails)
+          .where(eq(CouponEmails.couponId, opts.input.id));
+      }
+      return opts.ctx.db
+        .update(Coupons)
+        .set({ ...opts.input, code: opts.input.code.toUpperCase() })
+        .where(eq(Coupons.id, opts.input.id ?? ""))
+        .returning();
+    }),
 
   delete: protectedProcedure
     .input(z.object({ couponId: z.string().min(1) }))

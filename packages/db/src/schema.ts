@@ -8,6 +8,8 @@ export const SubscriptionFrequency = pgEnum("subscription_frequency", [
   "yearly",
 ]);
 
+export const CouponType = pgEnum("coupon_type", ["open", "restricted"]);
+
 export const Channels = pgTable("channels", (t) => ({
   id: t
     .varchar({ length: 100 })
@@ -131,6 +133,8 @@ export const Coupons = pgTable("coupons", (t) => ({
   subscriptonFrequency: SubscriptionFrequency("subscripiton_frequency").default(
     "monthly",
   ),
+  type: CouponType("type").default("open").notNull(),
+  maxUsersCountForOpen: t.integer().notNull().default(1),
   channelId: t
     .varchar({ length: 100 })
     .references(() => Channels.id, { onDelete: "cascade", onUpdate: "cascade" })
@@ -302,9 +306,22 @@ export const CreateCouponSchema = createInsertSchema(Coupons, {
   startsOn: z.date({ required_error: "A starts on date is required" }),
   endsOn: z.date({ required_error: "A ends on date is required" }),
   subscriptionCount: z.number().min(1, "Invalid count"),
+  maxUsersCountForOpen: z
+    .number({ required_error: "Required", invalid_type_error: "Invalid" })
+    .min(1, "Invalid count"),
 }).omit({ id: true, channelId: true, createdAt: true });
 
-export const UpdateCouponSchema = createInsertSchema(Coupons);
+export const UpdateCouponSchema = createInsertSchema(Coupons, {
+  code: z.string().min(1, "CODE is missing"),
+  description: z.string(),
+  startsOn: z.date({ required_error: "A starts on date is required" }),
+  endsOn: z.date({ required_error: "A ends on date is required" }),
+  subscriptionCount: z.number().min(1, "Invalid count"),
+  id: z.string().min(1, "couponId is missing"),
+  maxUsersCountForOpen: z
+    .number({ required_error: "Required", invalid_type_error: "Invalid" })
+    .min(1, "Invalid count"),
+}).omit({ channelId: true });
 
 //Relations
 export const ChannelsRelations = relations(Channels, ({ many }) => ({

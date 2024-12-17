@@ -47,17 +47,5 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         initialOrientation: "DEFAULT",
       },
     ],
-    [
-      "react-native-video",
-      {
-        enableNotificationControls: true,
-        androidExtensions: {
-          useExoplayerRtsp: false,
-          useExoplayerSmoothStreaming: false,
-          useExoplayerHls: false,
-          useExoplayerDash: false,
-        },
-      },
-    ],
   ],
 });

@@ -78,19 +78,45 @@ export const subscriptionsRouter = {
           message: "Code already used for subscription",
         });
 
-      /* Check for valid user */
-      const couponEmail = await opts.ctx.db.query.CouponEmails.findFirst({
-        where: and(
-          eq(CouponEmails.couponId, coupon.id),
-          eq(CouponEmails.email, user.primaryEmailAddress?.emailAddress ?? ""),
-        ),
-      });
+      if (coupon.type === "open") {
+        /* Check for excemption of usage of open token */
+        const aggr = await opts.ctx.db
+          .select({
+            totalTransaction: sql`count(*)`
+              .mapWith(Number)
+              .as("totalTransaction"),
+          })
+          .from(Transactions)
+          .where(eq(Transactions.couponId, coupon.id))
+          .groupBy(Transactions.couponId);
+        const numberOfTransactions = aggr.at(0)?.totalTransaction;
 
-      if (!couponEmail)
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "unauthorize for this coupon code",
+        if (
+          numberOfTransactions &&
+          numberOfTransactions >= coupon.maxUsersCountForOpen
+        )
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "coupon reaced maximum limit",
+          });
+      } else {
+        /* Check for valid user */
+        const couponEmail = await opts.ctx.db.query.CouponEmails.findFirst({
+          where: and(
+            eq(CouponEmails.couponId, coupon.id),
+            eq(
+              CouponEmails.email,
+              user.primaryEmailAddress?.emailAddress ?? "",
+            ),
+          ),
         });
+
+        if (!couponEmail)
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "unauthorize for this coupon code",
+          });
+      }
 
       /**Create Subscription */
       const endOfSubscription =

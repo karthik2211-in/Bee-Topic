@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import {
   useParams,
   usePathname,
@@ -8,15 +8,16 @@ import {
   useSearchParams,
 } from "next/navigation";
 import { format, formatDistanceToNowStrict, subDays } from "date-fns";
-import { CalendarIcon, PlusIcon, Users2 } from "lucide-react";
+import { CalendarIcon, Loader2Icon, PlusIcon, Users2 } from "lucide-react";
 import { z } from "zod";
 
 import { RouterOutputs } from "@bt/api";
-import { CreateCouponSchema } from "@bt/db/schema";
+import { CreateCouponSchema, UpdateCouponSchema } from "@bt/db/schema";
 import { cn } from "@bt/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@bt/ui/avatar";
 import { Button } from "@bt/ui/button";
 import { Calendar } from "@bt/ui/calendar";
+import { Card, CardHeader, CardTitle } from "@bt/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -72,13 +73,16 @@ export function CreateCouponButton() {
       endsOn: new Date(),
       subscriptonFrequency: "monthly",
       subscriptionCount: 1,
+      type: "open",
     },
   });
   const router = useRouter();
   const utils = api.useUtils();
   const { mutateAsync: createCoupon } = api.coupons.create.useMutation({
     onError(error) {
-      toast.error(error.message);
+      toast.error(
+        error.shape?.code === -32603 ? "Code already exists" : error.message,
+      );
     },
     onSuccess() {
       toast.success("Coupon created");
@@ -231,12 +235,13 @@ export function CreateCouponButton() {
                 )}
               />
             </div>
+
             <FormField
               control={form.control}
-              name="subscriptonFrequency"
+              name="type"
               render={({ field }) => (
                 <FormItem className="flex w-full flex-col">
-                  <FormLabel>Subscription Frequency</FormLabel>
+                  <FormLabel>Subscription Type</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value?.toString()}
@@ -247,45 +252,91 @@ export function CreateCouponButton() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                      <SelectItem value="yearly">Yearly</SelectItem>
+                      <SelectItem value="open">Open</SelectItem>
+                      <SelectItem value="restricted">Restricted</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            {form.getValues().type === "open" && (
+              <FormField
+                control={form.control}
+                name="maxUsersCountForOpen"
+                render={({ field }) => (
+                  <FormItem className="flex w-full flex-col">
+                    <FormLabel>Max. Users Count</FormLabel>
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) => field.onChange(parseInt(e.target.value))}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            <div className="flex w-full gap-2">
+              <FormField
+                control={form.control}
+                name="subscriptonFrequency"
+                render={({ field }) => (
+                  <FormItem className="flex w-full flex-col">
+                    <FormLabel>Subscription Frequency</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value?.toString()}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select frequency" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="yearly">Yearly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="subscriptionCount"
-              render={({ field }) => (
-                <FormItem className="flex w-full flex-col">
-                  <FormLabel>
-                    No. of {form.getValues().subscriptonFrequency}
-                  </FormLabel>
-                  <Select
-                    onValueChange={(value) => field.onChange(parseInt(value))}
-                    defaultValue={field.value?.toString()}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select count" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="1">1</SelectItem>
-                      <SelectItem value="2">2</SelectItem>
-                      <SelectItem value="3">3</SelectItem>
-                      <SelectItem value="4">4</SelectItem>
-                      <SelectItem value="5">5</SelectItem>
-                      <SelectItem value="6">6</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="subscriptionCount"
+                render={({ field }) => (
+                  <FormItem className="flex w-full flex-col">
+                    <FormLabel>
+                      No. of{" "}
+                      {form.getValues().subscriptonFrequency === "monthly"
+                        ? "Months"
+                        : "Years"}
+                    </FormLabel>
+                    <Select
+                      onValueChange={(value) => field.onChange(parseInt(value))}
+                      defaultValue={field.value?.toString()}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select count" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="1">1</SelectItem>
+                        <SelectItem value="2">2</SelectItem>
+                        <SelectItem value="3">3</SelectItem>
+                        <SelectItem value="4">4</SelectItem>
+                        <SelectItem value="5">5</SelectItem>
+                        <SelectItem value="6">6</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <DialogFooter>
               <Button size={"lg"} isLoading={form.formState.isSubmitting}>
@@ -392,18 +443,52 @@ export function ViewCouponSheetPortal() {
   const [open, onChangeOpen] = React.useState(false);
   const [openPopover, onChangeOpenPopover] = React.useState(false);
   const searchParams = useSearchParams();
-  const form = useForm({
+  const couponId = searchParams.get("open_coupon_id");
+  const addEmailform = useForm({
     schema: addEmailsSchema,
     mode: "onChange",
     defaultValues: {
       emails: "",
     },
   });
-  const couponId = searchParams.get("open_coupon_id");
-  const { data, isLoading } = api.coupons.byId.useQuery(
+  const { data: coupon, isLoading } = api.coupons.byId.useQuery(
     { couponId: couponId! },
-    { enabled: !!couponId },
+    {
+      enabled: !!couponId,
+    },
   );
+
+  const { mutateAsync: updateCoupon, isPending: isUpdating } =
+    api.coupons.update.useMutation({
+      onSuccess(data) {
+        toast.info(`Coupon changes saved`, {
+          position: "bottom-center",
+        });
+        utils.coupons.invalidate();
+        couponForm.reset(data.at(0));
+        router.refresh();
+      },
+
+      onError() {
+        toast.error(`Something went wrong`, {
+          description: `when saving the code`,
+          position: "bottom-center",
+        });
+      },
+    });
+  const couponForm = useForm({
+    schema: UpdateCouponSchema,
+    mode: "onChange",
+  });
+
+  const fetchData = useCallback(async () => {
+    if (couponId)
+      couponForm.reset(await utils.coupons.byId.fetch({ couponId }));
+  }, [couponId]);
+  useEffect(() => {
+    fetchData();
+  }, [couponId]);
+
   const utils = api.useUtils();
   const { mutateAsync: addEmail } = api.coupons.addEmail.useMutation({
     onSuccess(data, variables) {
@@ -475,7 +560,11 @@ export function ViewCouponSheetPortal() {
           addEmail({ email: email.trim().toLowerCase(), couponId: couponId! }),
         ),
     );
-    form.reset();
+    addEmailform.reset();
+  }
+
+  async function onSave(values: z.infer<typeof UpdateCouponSchema>) {
+    await updateCoupon(values);
   }
 
   return (
@@ -495,137 +584,428 @@ export function ViewCouponSheetPortal() {
         className="top-16 max-h-[calc(100vh-60px)] space-y-5 bg-background/80 shadow-none backdrop-blur-xl sm:max-w-xl"
         container={container}
       >
-        <SheetHeader>
-          <SheetTitle className="text-primary">
-            {isLoading ? (
-              <Skeleton className="mb-3 h-5 w-20 rounded-full" />
-            ) : (
-              data?.code
-            )}
-          </SheetTitle>
-          {isLoading ? (
-            <Skeleton className="h-2 w-60 rounded-full" />
-          ) : (
-            <SheetDescription
-              className={cn(!data?.description && "text-muted-foreground/40")}
-            >
-              {data?.description ?? "--- no description provided ---"}
-            </SheetDescription>
-          )}
-          {isLoading ? (
-            <Skeleton className="h-3 w-60 rounded-full" />
-          ) : (
-            <small className="text-sm font-medium leading-none">
-              Subscription of {data?.subscriptionCount}{" "}
-              {data?.subscriptonFrequency == "monthly" ? "month" : "year"}
-            </small>
-          )}
-          {/* <Button variant={"outline"} className="w-full">
-            Edit Coupon
-          </Button> */}
-        </SheetHeader>
-        <Separator />
-        <div className="flex h-full flex-col gap-2">
-          <div className="flex items-end justify-between">
-            <div>
-              <div className="font-semibold">Customers</div>
-              <p className="text-xs text-muted-foreground">
-                All only users access to this coupon
-              </p>
-            </div>
-            <Popover open={openPopover} onOpenChange={onChangeOpenPopover}>
-              <PopoverTrigger asChild>
-                <Button variant={"outline"} className="w-20">
-                  Add <PlusIcon className="size-4" strokeWidth={1.25} />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="h-fit w-[400px]">
-                <Form {...form}>
+        {isLoading || couponForm.formState.isLoading ? (
+          <div className="flex flex-1 items-center justify-center">
+            <Loader2Icon className="size-10 animate-spin" />
+          </div>
+        ) : (
+          <>
+            <SheetHeader>
+              <SheetTitle className="text-primary">
+                {isLoading ? (
+                  <Skeleton className="mb-3 h-5 w-20 rounded-full" />
+                ) : (
+                  coupon?.code
+                )}
+              </SheetTitle>
+              {isLoading ? (
+                <Skeleton className="h-2 w-60 rounded-full" />
+              ) : (
+                <SheetDescription
+                  className={cn(
+                    !coupon?.description && "text-muted-foreground/40",
+                  )}
+                >
+                  {coupon?.description}
+                </SheetDescription>
+              )}
+              {isLoading ? (
+                <Skeleton className="h-3 w-60 rounded-full" />
+              ) : (
+                <small className="text-sm font-medium leading-none">
+                  Subscription of {coupon?.subscriptionCount}{" "}
+                  {coupon?.subscriptonFrequency == "monthly" ? "month" : "year"}
+                </small>
+              )}
+            </SheetHeader>
+
+            <ScrollArea className="h-full max-h-full pr-5">
+              <div className="space-y-6 overflow-visible px-1 pb-44">
+                <Separator />
+                <Form key={"Custom form"} {...couponForm}>
                   <form
-                    className="space-y-3"
-                    onSubmit={form.handleSubmit(onSubmit)}
+                    onSubmit={couponForm.handleSubmit(onSave)}
+                    key={"custom form"}
+                    className="space-y-8"
                   >
                     <FormField
-                      control={form.control}
-                      name="emails"
+                      control={couponForm.control}
+                      name="code"
                       render={({ field }) => (
                         <FormItem>
+                          <FormLabel>Code</FormLabel>
                           <FormControl>
-                            <Textarea
-                              rows={4}
-                              className="resize-none"
-                              placeholder="Enter emails seperated with comma ( , )"
+                            <Input
                               {...field}
+                              value={field.value?.toUpperCase()}
                             />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <div className="w-full text-right">
-                      <Button isLoading={form.formState.isSubmitting}>
-                        Apply
-                      </Button>
+                    <FormField
+                      control={couponForm.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              value={field.value?.toString()}
+                              className="resize-none"
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Recommended to increase the accessbility
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex w-full gap-2">
+                      <FormField
+                        control={couponForm.control}
+                        name="startsOn"
+                        render={({ field }) => (
+                          <FormItem className="flex w-full flex-col">
+                            <FormLabel>Starts On</FormLabel>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                      "pl-3 text-left font-normal",
+                                      !field.value && "text-muted-foreground",
+                                    )}
+                                  >
+                                    {field.value ? (
+                                      format(field.value, "PPP")
+                                    ) : (
+                                      <span>Pick a date</span>
+                                    )}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-auto p-0"
+                                align="start"
+                              >
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={(date) => {
+                                    if (date! > couponForm.getValues().endsOn)
+                                      couponForm.setValue(
+                                        "endsOn",
+                                        date ?? new Date(),
+                                      );
+                                    field.onChange(date);
+                                  }}
+                                  disabled={(date) =>
+                                    date < subDays(new Date(), 1)
+                                  }
+                                  initialFocus
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={couponForm.control}
+                        name="endsOn"
+                        render={({ field }) => (
+                          <FormItem className="flex w-full flex-col">
+                            <FormLabel>Ends On</FormLabel>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                      "pl-3 text-left font-normal",
+                                      !field.value && "text-muted-foreground",
+                                    )}
+                                  >
+                                    {field.value ? (
+                                      format(field.value, "PPP")
+                                    ) : (
+                                      <span>Pick a date</span>
+                                    )}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-auto p-0"
+                                align="start"
+                              >
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={field.onChange}
+                                  disabled={(date) =>
+                                    date <
+                                    (couponForm.getValues().startsOn ??
+                                      new Date())
+                                  }
+                                  initialFocus
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
+
+                    <FormField
+                      control={couponForm.control}
+                      name="type"
+                      render={({ field }) => (
+                        <FormItem className="flex w-full flex-col">
+                          <FormLabel>Subscription Type</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value?.toString()}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select frequency" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="open">Open</SelectItem>
+                              <SelectItem value="restricted">
+                                Restricted
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {couponForm.getValues().type === "open" && (
+                      <FormField
+                        control={couponForm.control}
+                        name="maxUsersCountForOpen"
+                        render={({ field }) => (
+                          <FormItem className="flex w-full flex-col">
+                            <FormLabel>Max. Users Count</FormLabel>
+                            <Input
+                              type="number"
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(parseInt(e.target.value))
+                              }
+                            />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    <div className="flex w-full gap-2">
+                      <FormField
+                        control={couponForm.control}
+                        name="subscriptonFrequency"
+                        render={({ field }) => (
+                          <FormItem className="flex w-full flex-col">
+                            <FormLabel>Subscription Frequency</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value?.toString()}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select frequency" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                                <SelectItem value="yearly">Yearly</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={couponForm.control}
+                        name="subscriptionCount"
+                        render={({ field }) => (
+                          <FormItem className="flex w-full flex-col">
+                            <FormLabel>
+                              No. of{" "}
+                              {couponForm.getValues().subscriptonFrequency ===
+                              "monthly"
+                                ? "Months"
+                                : "Years"}
+                            </FormLabel>
+                            <Select
+                              onValueChange={(value) =>
+                                field.onChange(parseInt(value))
+                              }
+                              defaultValue={field.value?.toString()}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select count" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="1">1</SelectItem>
+                                <SelectItem value="2">2</SelectItem>
+                                <SelectItem value="3">3</SelectItem>
+                                <SelectItem value="4">4</SelectItem>
+                                <SelectItem value="5">5</SelectItem>
+                                <SelectItem value="6">6</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <SheetFooter className="fixed bottom-0 left-5 right-5 w-[90%] items-center justify-center gap-3 bg-background/30 py-3 backdrop-blur-sm sm:flex-col">
+                      {couponForm.formState.isDirty && (
+                        <Button
+                          size={"lg"}
+                          isLoading={isUpdating}
+                          className="w-full animate-in"
+                        >
+                          Save
+                        </Button>
+                      )}
+                      {/* <Button
+                size={"lg"}
+                variant={"destructive"}
+                isLoading={isPending}
+                loadingText="Processing..."
+                onClick={() => deleteCoupon({ couponId: couponId! })}
+              >
+                Delete Coupon
+              </Button> */}
+                    </SheetFooter>
                   </form>
                 </Form>
-              </PopoverContent>
-            </Popover>
-          </div>
-          <ScrollArea className="max-h-[70%]">
-            <div className="flex flex-col gap-3 pb-10 pr-5">
-              {isLoading ? (
-                Array.from({ length: 8 }).map((_, index) => (
-                  <div
-                    className="flex items-center justify-between gap-1"
-                    key={index}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="size-9 rounded-full" />
+
+                {coupon?.type === "restricted" && (
+                  <>
+                    <Separator />
+                    {/* Customer Header */}
+                    <div className="flex items-end justify-between">
                       <div>
-                        <Skeleton className="mb-2 h-3 w-32 rounded-full" />
-                        <Skeleton className="h-2 w-1/2 rounded-full" />
+                        <div className="font-semibold">Customers</div>
+                        <p className="text-xs text-muted-foreground">
+                          All only users access to this coupon
+                        </p>
                       </div>
+                      <Popover
+                        open={openPopover}
+                        onOpenChange={onChangeOpenPopover}
+                      >
+                        <PopoverTrigger asChild>
+                          <Button variant={"outline"} className="w-20">
+                            Add{" "}
+                            <PlusIcon className="size-4" strokeWidth={1.25} />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent align="end" className="h-fit w-[400px]">
+                          <Form {...addEmailform}>
+                            <form
+                              className="space-y-3"
+                              onSubmit={addEmailform.handleSubmit(onSubmit)}
+                            >
+                              <FormField
+                                control={addEmailform.control}
+                                name="emails"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Textarea
+                                        rows={4}
+                                        className="resize-none"
+                                        placeholder="Enter emails seperated with comma ( , )"
+                                        {...field}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <div className="w-full text-right">
+                                <Button
+                                  isLoading={
+                                    addEmailform.formState.isSubmitting
+                                  }
+                                >
+                                  Apply
+                                </Button>
+                              </div>
+                            </form>
+                          </Form>
+                        </PopoverContent>
+                      </Popover>
                     </div>
-                    <div className="text-right">
-                      <Skeleton className="mb-2 h-8 w-20" />
-                      <Skeleton className="ml-auto h-1 w-14 rounded-full" />
+
+                    {/* List */}
+                    <div className="flex flex-col gap-3 pb-10 pr-5">
+                      {isLoading ? (
+                        Array.from({ length: 8 }).map((_, index) => (
+                          <div
+                            className="flex items-center justify-between gap-1"
+                            key={index}
+                          >
+                            <div className="flex items-center gap-2">
+                              <Skeleton className="size-9 rounded-full" />
+                              <div>
+                                <Skeleton className="mb-2 h-3 w-32 rounded-full" />
+                                <Skeleton className="h-2 w-1/2 rounded-full" />
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <Skeleton className="mb-2 h-8 w-20" />
+                              <Skeleton className="ml-auto h-1 w-14 rounded-full" />
+                            </div>
+                          </div>
+                        ))
+                      ) : coupon?.customers.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center gap-3 py-20">
+                          <Users2
+                            className="size-20 text-muted-foreground/50"
+                            strokeDasharray={2}
+                            strokeDashoffset={4}
+                            strokeWidth={0.2}
+                          />
+                          <p className="w-1/2 text-center text-xs text-muted-foreground/80">
+                            Add users to the particular coupon code to restrict
+                            the copoun to that users
+                          </p>
+                        </div>
+                      ) : (
+                        coupon?.customers.map((customer) => (
+                          <CustomerListItem
+                            key={customer.id}
+                            {...{ customer }}
+                          />
+                        ))
+                      )}
                     </div>
-                  </div>
-                ))
-              ) : data?.customers.length === 0 ? (
-                <div className="flex flex-col items-center justify-center gap-3 py-20">
-                  <Users2
-                    className="size-20 text-muted-foreground/50"
-                    strokeDasharray={2}
-                    strokeDashoffset={4}
-                    strokeWidth={0.2}
-                  />
-                  <p className="w-1/2 text-center text-xs text-muted-foreground/80">
-                    Add users to the particular coupon code to restrict the
-                    copoun to that users
-                  </p>
-                </div>
-              ) : (
-                data?.customers.map((customer) => (
-                  <CustomerListItem key={customer.id} {...{ customer }} />
-                ))
-              )}
-            </div>
-          </ScrollArea>
-        </div>
-        <SheetFooter className="fixed bottom-5 left-5 right-5 w-[90%]">
-          <Button
-            size={"lg"}
-            variant={"outline"}
-            isLoading={isPending}
-            loadingText="Processing..."
-            onClick={() => deleteCoupon({ couponId: couponId! })}
-            className="w-full border-destructive bg-background/60 text-destructive backdrop-blur-md hover:bg-background/80 hover:backdrop-blur-2xl"
-          >
-            Delete Coupon
-          </Button>
-        </SheetFooter>
+                  </>
+                )}
+              </div>
+            </ScrollArea>
+          </>
+        )}
       </SheetContent>
     </Sheet>
   );
