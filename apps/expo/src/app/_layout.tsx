@@ -1,6 +1,6 @@
 import "@bacons/text-decoder/install";
 
-import { Slot, SplashScreen, useRouter, useSegments } from "expo-router";
+import { Slot, SplashScreen, Stack, useRouter, useSegments } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -89,7 +89,9 @@ function InitialLayout() {
 
   return (
     <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-      <Slot screenOptions={{ headerShown: false }} />
+      <Stack
+        screenOptions={{ headerShown: false, animation: "ios_from_right" }}
+      />
       <StatusBar
         style={"auto"}
         backgroundColor={
@@ -142,10 +144,6 @@ export default function RootLayout() {
         <ClerkLoaded>
           <TRPCProvider>
             <BottomSheetModalProvider>
-              {/*
-          The Stack component displays the current page.
-          It also allows you to configure your screens 
-          */}
               <InitialLayout />
               <PortalHost />
             </BottomSheetModalProvider>

@@ -70,7 +70,10 @@ export default function Index() {
             return (
               <Link href={"/profile"}>
                 <Avatar alt="Avatar" className="size-9">
-                  <AvatarImage src={user?.imageUrl} />
+                  <AvatarImage
+                    src={user?.imageUrl}
+                    source={{ uri: user?.imageUrl }}
+                  />
                   <AvatarFallback>
                     <User
                       size={32}

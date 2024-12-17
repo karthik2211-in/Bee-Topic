@@ -29,14 +29,21 @@ export const GoogleSignInButton = () => {
   const onPress = React.useCallback(async () => {
     setIsLoading(true);
     try {
-      const { createdSessionId, setActive } = await startOAuthFlow({
+      const { createdSessionId, signUp, setActive } = await startOAuthFlow({
         redirectUrl: Linking.createURL("/", { scheme: "beetopic" }),
+        unsafeMetadata: { college: "BMS college" },
       });
 
       if (createdSessionId) {
         setActive!({ session: createdSessionId });
       } else {
         // Use signIn or signUp for next steps such as MFA
+        await signUp?.authenticateWithRedirect({
+          strategy: "oauth_google",
+          continueSignUp: true,
+          redirectUrl: Linking.createURL("/", { scheme: "beetopic" }),
+          redirectUrlComplete: Linking.createURL("/", { scheme: "beetopic" }),
+        });
       }
     } catch (err) {
       console.error("OAuth error", err);
