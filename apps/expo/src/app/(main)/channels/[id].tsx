@@ -32,6 +32,7 @@ import VideoCard from "~/components/video-card";
 import { ActivityIndicator } from "~/lib/activity-indicator";
 import { Crown } from "~/lib/icons/Crown";
 import { Hash } from "~/lib/icons/Hash";
+import { Pause } from "~/lib/icons/Pause";
 import { PlayCircle } from "~/lib/icons/PlayCircle";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { formatDuration, formatViewCount } from "~/lib/utils";
@@ -77,6 +78,9 @@ export default function Chapter() {
   );
 
   const videosData = videos?.pages?.flatMap((page) => page.items) || [];
+
+  const hasPermissionToAccess =
+    channel?.isSubscribed && !channel?.isSubscriptionPaused;
 
   return (
     <View style={{ flex: 1 }}>
@@ -158,7 +162,9 @@ export default function Chapter() {
                 )}
               </CardHeader>
               <CardFooter className="w-full flex-1 flex-col items-center justify-center gap-2 px-3 py-3">
-                {channel?.isSubscribed && !channel.isSubscriptionExpired ? (
+                {channel?.isSubscribed &&
+                !channel.isSubscriptionPaused &&
+                !channel.isSubscriptionExpired ? (
                   <AlertDialog className="w-full">
                     <AlertDialogTrigger asChild>
                       <Button
@@ -178,12 +184,11 @@ export default function Chapter() {
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>
-                          Do you want to unsubscribe?
+                          Do you want to pause the subscription?
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                          By unsubscribing this channel you will lost your
-                          subscription and you won't long be access the contents
-                          of this channel.
+                          By pausing subscription of this channel you will no
+                          longer can access content of this channel.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -207,6 +212,15 @@ export default function Chapter() {
                       <Text>Renew Subscription</Text>
                     </Button>
                   </Link>
+                ) : channel?.isSubscriptionPaused ? (
+                  <Button variant={"outline"} className="w-full items-center">
+                    <Pause
+                      size={20}
+                      strokeWidth={1}
+                      className="fill-foreground text-foreground"
+                    />
+                    <Text>Paused</Text>
+                  </Button>
                 ) : (
                   <Link href={`/subscribe/${channel?.id}`} asChild>
                     <Button className="w-full">
@@ -243,28 +257,14 @@ export default function Chapter() {
             });
             return (
               <Link
-                disabled={!channel?.isSubscribed}
-                href={
-                  channel?.isSubscribed
-                    ? `/videos/${videoData.ut_fileKey}?next=${videosData[index + 1]?.ut_fileKey ?? ""}`
-                    : `/subscribe/${channel?.id}`
-                }
-                asChild
+                disabled={!hasPermissionToAccess}
+                href={`/videos/${videoData.ut_fileKey}?next=${videosData[index + 1]?.ut_fileKey ?? ""}`}
                 key={videoData.id}
               >
-                <TouchableNativeFeedback
-                  background={TouchableNativeFeedback.Ripple(
-                    isDarkColorScheme
-                      ? "rgba(255,255,255,0.2)"
-                      : "rgba(0,0,0,0.2)",
-                    false,
-                  )}
-                >
-                  <VideoCard
-                    style={{ opacity: channel?.isSubscribed ? 1 : 0.3 }}
-                    videoData={videoData}
-                  />
-                </TouchableNativeFeedback>
+                <VideoCard
+                  style={{ opacity: hasPermissionToAccess ? 1 : 0.3 }}
+                  videoData={videoData}
+                />
               </Link>
             );
           }}

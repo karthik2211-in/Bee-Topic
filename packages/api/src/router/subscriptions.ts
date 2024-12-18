@@ -173,6 +173,8 @@ export const subscriptionsRouter = {
           return subscription;
         },
       );
-      return subscriptionTransaction;
+      return {
+        coupon,
+      };
     }),
 } satisfies TRPCRouterRecord;

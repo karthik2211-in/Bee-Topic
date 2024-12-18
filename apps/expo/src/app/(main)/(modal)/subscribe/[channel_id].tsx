@@ -1,6 +1,6 @@
-import React from "react";
 import { Image, View } from "react-native";
 import Animated, { Easing, FlipInXDown } from "react-native-reanimated";
+import Toast from "react-native-root-toast";
 import { useLocalSearchParams } from "expo-router";
 import { z } from "zod";
 
@@ -50,9 +50,17 @@ export default function Index() {
         { shouldFocus: true },
       );
     },
-    async onSuccess() {
+    async onSuccess(data) {
       await utils.channels.invalidate();
       await utils.chapters.invalidate();
+      Toast.show(
+        `You have access ${data.coupon.subscriptionCount} ${data.coupon.subscriptonFrequency === "monthly" ? "Months" : "Years"} subscription`,
+        {
+          position: Toast.positions.BOTTOM,
+          duration: Toast.durations.LONG,
+          shadow: true,
+        },
+      );
     },
   });
 
@@ -116,7 +124,7 @@ export default function Index() {
           <Large className="w-3/4 text-center">
             Hurray! Your a member of this channel now 🥳
           </Large>
-          <Muted>You have accessed 3 months worth membership</Muted>
+          <Muted>You have accessed {} months worth membership</Muted>
         </View>
       ) : (
         <Form {...form}>
