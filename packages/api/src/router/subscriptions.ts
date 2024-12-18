@@ -51,7 +51,8 @@ export const subscriptionsRouter = {
     .input(z.object({ channelId: z.string().min(1) }))
     .mutation((opts) =>
       opts.ctx.db
-        .delete(Subscriptions)
+        .update(Subscriptions)
+        .set({ isPaused: true })
         .where(
           and(
             eq(Subscriptions.channelId, opts.input.channelId),

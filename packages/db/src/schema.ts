@@ -244,6 +244,7 @@ export const Subscriptions = pgTable(
         onUpdate: "cascade",
       })
       .notNull(),
+    isPaused: t.boolean().default(false),
     clerkUserId: t.text().notNull(),
     startsOn: t
       .timestamp({ mode: "date", withTimezone: true })

@@ -60,6 +60,7 @@ export async function getChannelById({
     totalChapters: agregate.at(0)?.totalChapters,
     subscriptionsCount: subscriptionsAgregate.at(0)?.subscriptionsCount ?? 0,
     isSubscribed: !!subscription?.id,
+    isSubscriptionPaused: subscription?.isPaused,
     isSubscriptionExpired:
       new Date(Date.now()) >= new Date(subscription?.endsOn ?? Date.now()),
     createdBy: user.fullName,
