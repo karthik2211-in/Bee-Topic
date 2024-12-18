@@ -1,8 +1,14 @@
-import { Image, TouchableNativeFeedback, View } from "react-native";
+import {
+  Image,
+  TouchableNativeFeedback,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Animated, { Easing, FadeIn } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { BlurView } from "@react-native-community/blur";
 import { FlashList } from "@shopify/flash-list";
 
 import {
@@ -88,14 +94,24 @@ export default function Chapter() {
         options={{
           headerTitle: "",
           headerShadowVisible: false,
-          headerTitleAlign: "center",
           headerTransparent: true,
+          headerBackground() {
+            return (
+              <BlurView
+                blurAmount={64}
+                blurType={isDarkColorScheme ? "chromeMaterialLight" : "light"}
+                style={{
+                  flex: 1,
+                  overflow: "hidden",
+                }}
+              />
+            );
+          },
         }}
       />
-      <StatusBar style={"light"} />
 
       {isLoading || isChaptersLoading ? (
-        <View className="flex-1 justify-center gap-4 py-32">
+        <View className="mt-24 flex-1 justify-center gap-4 py-32">
           <ActivityIndicator size={"large"} className="text-primary" />
         </View>
       ) : (
@@ -104,9 +120,9 @@ export default function Chapter() {
           estimatedItemSize={200}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={
-            <Card className="h-fit rounded-none border-0 border-b border-b-border pb-3">
-              <CardContent className="relative flex-1 object-contain p-0">
-                <LinearGradient
+            <Card className="mt-28 h-fit rounded-none border-0 border-b border-b-border pb-3">
+              <CardContent className="relative flex-1 items-center justify-center object-contain py-0">
+                {/* <LinearGradient
                   colors={
                     isDarkColorScheme
                       ? [
@@ -132,20 +148,24 @@ export default function Chapter() {
                     height: "100%",
                     width: "100%",
                   }}
-                />
+                /> */}
                 <Image
                   source={{
                     uri: "https://media.istockphoto.com/id/1356762790/video/web-development-concept.jpg?s=640x640&k=20&c=ONFGjyXNy8CqhTSmnEI2X7X1tEvHCBsT83imvtDgdCI=",
                   }}
                   resizeMode="cover"
                   style={{
-                    width: "auto",
+                    width: 200,
                     flex: 1,
-                    height: 300,
+                    height: 230,
+                    shadowColor: "black",
+                    shadowOpacity: 1,
+                    borderRadius: 8,
+                    aspectRatio: 9 / 6,
                   }}
                 />
               </CardContent>
-              <CardHeader className="items-start gap-2 p-3">
+              <CardHeader className="items-start gap-2">
                 <CardTitle className="text-xl leading-snug">
                   {channel?.title}
                 </CardTitle>
@@ -156,18 +176,19 @@ export default function Chapter() {
                   <Muted className="font-semibold">{channel?.createdBy}</Muted>
                 </Muted>
                 {channel?.description && (
-                  <CardDescription className="text-foreground/70">
+                  <CardDescription className="text-foreground/90">
                     {channel?.description}
                   </CardDescription>
                 )}
               </CardHeader>
-              <CardFooter className="w-full flex-1 flex-col items-center justify-center gap-2 px-3 py-3">
+              <CardFooter className="w-full flex-1 flex-col items-center justify-center gap-2">
                 {channel?.isSubscribed &&
                 !channel.isSubscriptionPaused &&
                 !channel.isSubscriptionExpired ? (
                   <AlertDialog className="w-full">
                     <AlertDialogTrigger asChild>
                       <Button
+                        size={"lg"}
                         isLoading={isUnSubscribing}
                         variant={"outline"}
                         className="w-full bg-accent/5"
@@ -208,29 +229,36 @@ export default function Chapter() {
                   </AlertDialog>
                 ) : channel?.isSubscribed && channel.isSubscriptionExpired ? (
                   <Link href={`/subscribe/${channel?.id}`} asChild>
-                    <Button variant={"secondary"} className="w-full">
+                    <Button
+                      size={"lg"}
+                      variant={"secondary"}
+                      className="w-full"
+                    >
                       <Text>Renew Subscription</Text>
                     </Button>
                   </Link>
                 ) : channel?.isSubscriptionPaused ? (
-                  <Button variant={"outline"} className="w-full items-center">
+                  <Button
+                    size={"lg"}
+                    variant={"outline"}
+                    className="w-full items-center"
+                  >
                     <Pause
-                      size={20}
-                      strokeWidth={1}
-                      className="fill-foreground text-foreground"
+                      size={22}
+                      className="fill-destructive text-destructive"
                     />
-                    <Text>Paused</Text>
+                    <Text>Resume Subscription</Text>
                   </Button>
                 ) : (
                   <Link href={`/subscribe/${channel?.id}`} asChild>
-                    <Button className="w-full">
+                    <Button size={"lg"} className="w-full">
                       <Text>Subscribe To Watch</Text>
                     </Button>
                   </Link>
                 )}
 
                 <Link href={`/chapters-list/${channel?.id}`} asChild>
-                  <Button variant={"secondary"} className="w-full">
+                  <Button size={"lg"} variant={"secondary"} className="w-full">
                     <Text className="font-normal">
                       {
                         chapters?.find(
@@ -241,13 +269,18 @@ export default function Chapter() {
                     </Text>
                   </Button>
                 </Link>
-                <Muted>
-                  {
-                    chapters?.find(
-                      (chapter) => chapter.id === chaptersList?.activeChapterId,
-                    )?.description
-                  }
-                </Muted>
+                {chapters?.find(
+                  (chapter) => chapter.id === chaptersList?.activeChapterId,
+                )?.description && (
+                  <Muted>
+                    {
+                      chapters?.find(
+                        (chapter) =>
+                          chapter.id === chaptersList?.activeChapterId,
+                      )?.description
+                    }
+                  </Muted>
+                )}
               </CardFooter>
             </Card>
           }
@@ -260,11 +293,14 @@ export default function Chapter() {
                 disabled={!hasPermissionToAccess}
                 href={`/videos/${videoData.ut_fileKey}?next=${videosData[index + 1]?.ut_fileKey ?? ""}`}
                 key={videoData.id}
+                asChild
               >
-                <VideoCard
-                  style={{ opacity: hasPermissionToAccess ? 1 : 0.3 }}
-                  videoData={videoData}
-                />
+                <TouchableOpacity>
+                  <VideoCard
+                    style={{ opacity: hasPermissionToAccess ? 1 : 0.3 }}
+                    videoData={videoData}
+                  />
+                </TouchableOpacity>
               </Link>
             );
           }}

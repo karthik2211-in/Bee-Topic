@@ -49,15 +49,15 @@ export default forwardRef<
   return (
     <Card
       ref={ref}
-      className="mt-1 flex gap-2 overflow-hidden border-0 p-3 shadow-none"
+      className="mt-1 flex w-full gap-2 rounded-none border-0 p-6 py-3 shadow-none"
       {...props}
     >
-      <View className="flex-shrink flex-row">
+      <View className="w-full max-w-full flex-row">
         <CardContent className="rounded-sm p-0 pt-1">
           <AspectRatio
             ratio={9 / 6}
             style={{ width: 94, height: 64 }}
-            className="overflow-hidden rounded-sm border border-border/40 bg-accent/80 object-cover"
+            className="overflow-hidden rounded-md border border-border/40 bg-accent/80 object-cover"
           >
             {thumbneil && (
               <Image
@@ -70,17 +70,17 @@ export default forwardRef<
             )}
           </AspectRatio>
         </CardContent>
-        <CardHeader className="h-full w-full flex-shrink items-start justify-between gap-2 px-3 py-0">
-          <View className="gap-1">
-            <CardTitle className="text-base">{videoData?.title}</CardTitle>
-            <CardDescription className="p-0 text-foreground/70">
-              {formatDuration(videoData.duration)} •{" "}
-              {formatViewCount(videoData.viewCount ?? 0)} views
+        <CardHeader className="h-full w-full flex-wrap items-start justify-between gap-0.5 py-0">
+          <CardTitle className="text-base">{videoData?.title}</CardTitle>
+          <CardDescription className="p-0 text-foreground/70">
+            {formatDuration(videoData.duration)} •{" "}
+            {formatViewCount(videoData.viewCount ?? 0)} views
+          </CardDescription>
+          {videoData.description && (
+            <CardDescription className="w-full max-w-full flex-grow-0 pr-20 text-xs">
+              {videoData.description}
             </CardDescription>
-            {videoData.description && (
-              <Muted className="text-xs">{videoData.description}</Muted>
-            )}
-          </View>
+          )}
         </CardHeader>
       </View>
     </Card>
