@@ -25,6 +25,28 @@ export const subscriptionsRouter = {
       }),
     ),
 
+  getSubscribers: protectedProcedure
+    .input(z.object({ channelId: z.string().min(1) }))
+    .mutation((opts) => {
+      return opts.ctx.db.transaction(async (tx) => {
+        const subscribers = await tx.query.Subscriptions.findMany({
+          where: eq(Subscriptions.channelId, opts.input.channelId),
+        });
+        const clerk = await clerkClient();
+        return Promise.all(
+          subscribers.map(async (subscriber) => {
+            const user = await clerk.users.getUser(subscriber.clerkUserId);
+            return {
+              ...subscriber,
+              email: user.primaryEmailAddress?.emailAddress,
+              imageUrl: user.imageUrl,
+              fullName: user.fullName,
+            };
+          }),
+        );
+      });
+    }),
+
   delete: protectedProcedure
     .input(z.object({ channelId: z.string().min(1) }))
     .mutation((opts) =>
