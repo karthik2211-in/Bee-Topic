@@ -99,7 +99,7 @@ export default function Chapter() {
             return (
               <BlurView
                 blurAmount={64}
-                blurType={isDarkColorScheme ? "chromeMaterialLight" : "light"}
+                blurType={isDarkColorScheme ? "extraDark" : "light"}
                 style={{
                   flex: 1,
                   overflow: "hidden",
