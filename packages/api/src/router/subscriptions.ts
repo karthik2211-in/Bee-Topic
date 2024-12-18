@@ -166,6 +166,7 @@ export const subscriptionsRouter = {
               set: {
                 startsOn: new Date(Date.now()),
                 endsOn: endOfSubscription,
+                isPaused: false,
               },
               target: [Subscriptions.clerkUserId, Subscriptions.channelId],
             });
