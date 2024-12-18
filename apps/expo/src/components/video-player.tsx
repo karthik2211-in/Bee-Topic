@@ -6,6 +6,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import {
+  GestureEvent,
+  GestureHandlerRootView,
+  PinchGestureHandler,
+  PinchGestureHandlerEventPayload,
+} from "react-native-gesture-handler";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useEvent, useEventListener } from "expo";
 import { LinearGradient } from "expo-linear-gradient";
@@ -13,7 +19,12 @@ import * as NavigationBar from "expo-navigation-bar";
 import { router } from "expo-router";
 import * as Orientation from "expo-screen-orientation";
 import { StatusBar } from "expo-status-bar";
-import { useVideoPlayer, VideoView, VideoViewProps } from "expo-video";
+import {
+  useVideoPlayer,
+  VideoContentFit,
+  VideoView,
+  VideoViewProps,
+} from "expo-video";
 import Slider from "@react-native-community/slider";
 
 import { ActivityIndicator } from "~/lib/activity-indicator";
@@ -39,6 +50,7 @@ type VideoPlayerMetaData = {
 type VideoPlayerProps = Omit<VideoViewProps, "player"> & {
   videoSource: string;
   onProgress?: (currentTime: number) => void;
+  onStatusChange?: ({ isPlaying }: { isPlaying: boolean }) => void;
   nextVideoSource?: string;
   /** Identify your video with unique ID */
   videoId: string;
@@ -51,6 +63,7 @@ type VideoPlayerProps = Omit<VideoViewProps, "player"> & {
 export default function VideoPlayer({
   videoSource,
   onProgress,
+  onStatusChange,
   nextVideoSource,
   videoId,
   FooterComponent,
@@ -76,6 +89,8 @@ export default function VideoPlayer({
   );
 
   const [showControls, setShowControls] = React.useState(true);
+  const [resizeMode, setResizeMode] =
+    React.useState<VideoContentFit>("contain");
 
   const { isPlaying } = useEvent(player, "playingChange", {
     isPlaying: player.playing,
@@ -97,6 +112,11 @@ export default function VideoPlayer({
       }
     })();
   }, [videoId]);
+
+  //pass the playing status
+  useEffect(() => {
+    onStatusChange?.({ isPlaying });
+  }, [isPlaying]);
 
   useEffect(() => {
     onProgress?.(currentTime); //pass the current time
@@ -138,7 +158,7 @@ export default function VideoPlayer({
   const enterFullScreen = async () => {
     setIsFullScreen(true);
     await NavigationBar.setVisibilityAsync("hidden");
-    Orientation.lockAsync(Orientation.OrientationLock.LANDSCAPE); // Lock to landscape for full-screen mode
+    Orientation.lockAsync(Orientation.OrientationLock.LANDSCAPE_RIGHT); // Lock to landscape for full-screen mode
   };
 
   const exitFullScreen = async () => {
@@ -174,176 +194,197 @@ export default function VideoPlayer({
     };
   }, [isFullScreen]);
 
+  const onPinchGestureEvent = (
+    event: GestureEvent<PinchGestureHandlerEventPayload>,
+  ) => {
+    const scale = event.nativeEvent.scale;
+
+    if (scale > 1) {
+      // Pinch-out detected
+      setResizeMode("cover");
+    } else if (scale < 1) {
+      // Pinch-in detected
+      setResizeMode("contain");
+    }
+  };
+
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "black",
-        position: "relative",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <StatusBar hidden translucent />
-      <TouchableOpacity
-        onPress={() => {
-          handleControlsVisibility();
-        }}
-        activeOpacity={1}
-        style={styles.contentContainer}
-      />
-      <VideoView
-        {...videoViewProps}
-        style={{
-          width: "100%",
-          flex: 1,
-          height,
-        }}
-        pointerEvents="none"
-        player={player}
-        nativeControls={false}
-        allowsPictureInPicture={false}
-        contentFit="contain"
-      />
-      {showControls && (
-        <AnimatedLinearGradientView
-          colors={[
-            "rgba(0,0,0,0.8)",
-            "rgba(0,0,0,0.4)",
-            "rgba(0,0,0,0.2)",
-            "rgba(0,0,0,0.4)",
-            "rgba(0,0,0,0.8)",
-          ]}
-          pointerEvents={"box-none"}
-          entering={FadeIn}
-          exiting={FadeOut}
-          style={styles.controlsContainer}
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <PinchGestureHandler onGestureEvent={onPinchGestureEvent}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "black",
+            position: "relative",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
+          <StatusBar hidden translucent />
           <TouchableOpacity
-            activeOpacity={1}
-            onPress={(e) => {
-              e.stopPropagation();
-              handleControlsClose();
+            onPress={() => {
+              handleControlsVisibility();
             }}
-            disabled={!showControls}
-            style={styles.controlsInner}
-          >
-            <Animated.View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                width: "100%",
-                paddingVertical: 5,
-              }}
+            activeOpacity={1}
+            style={styles.contentContainer}
+          />
+          <VideoView
+            {...videoViewProps}
+            style={{
+              width: "100%",
+              flex: 1,
+              height,
+            }}
+            pointerEvents="none"
+            player={player}
+            nativeControls={false}
+            allowsPictureInPicture={false}
+            contentFit={resizeMode}
+            startsPictureInPictureAutomatically
+          />
+          {showControls && (
+            <AnimatedLinearGradientView
+              colors={[
+                "rgba(0,0,0,0.8)",
+                "rgba(0,0,0,0.4)",
+                "rgba(0,0,0,0.2)",
+                "rgba(0,0,0,0.4)",
+                "rgba(0,0,0,0.8)",
+              ]}
+              pointerEvents={"box-none"}
+              entering={FadeIn}
+              exiting={FadeOut}
+              style={styles.controlsContainer}
             >
-              <Button
-                size={"icon"}
-                variant={"ghost"}
-                className="size-14 rounded-full active:bg-transparent"
-                onPress={() => {
-                  router.back();
-                  exitFullScreen();
-                }}
-              >
-                <ArrowLeft className="text-foreground" />
-              </Button>
-              <Animated.View className={"gap-1"}>
-                <Small className="text-center">{md?.title}</Small>
-                <Muted className="text-foreground/60">{md?.description}</Muted>
-              </Animated.View>
-              <Animated.View className={"w-10"}></Animated.View>
-            </Animated.View>
-            {player.status === "loading" ? (
-              <ActivityIndicator size={52} className="text-white" />
-            ) : (
-              <Button
-                size={"icon"}
-                className="size-32 rounded-full active:bg-transparent"
-                variant={"ghost"}
+              <TouchableOpacity
+                activeOpacity={1}
                 onPress={(e) => {
-                  if (isPlaying) {
-                    player.pause();
-                    if (controlsTimeout.current)
-                      clearTimeout(controlsTimeout.current); //prevent closing controls when video is paused
-                  } else {
-                    if (controlsTimeout.current)
-                      clearTimeout(controlsTimeout.current);
-                    player.play();
-                    startTimeToHideControls();
-                  }
+                  e.stopPropagation();
+                  handleControlsClose();
                 }}
+                disabled={!showControls}
+                style={styles.controlsInner}
               >
-                {isPlaying ? (
-                  <AnimatedPauseCircle
-                    entering={FadeIn}
-                    exiting={FadeOut}
-                    size={64}
-                    className={"text-white"}
-                    strokeWidth={1}
-                  />
+                <Animated.View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    width: "100%",
+                    paddingVertical: 5,
+                  }}
+                >
+                  <Button
+                    size={"icon"}
+                    variant={"ghost"}
+                    className="size-14 rounded-full active:bg-transparent"
+                    onPress={() => {
+                      router.back();
+                      exitFullScreen();
+                    }}
+                  >
+                    <ArrowLeft className="text-foreground" />
+                  </Button>
+                  <Animated.View className={"gap-1"}>
+                    <Small className="text-center">{md?.title}</Small>
+                    <Muted className="text-foreground/60">
+                      {md?.description}
+                    </Muted>
+                  </Animated.View>
+                  <Animated.View className={"w-10"}></Animated.View>
+                </Animated.View>
+                {player.status === "loading" ? (
+                  <ActivityIndicator size={52} className="text-white" />
                 ) : (
-                  <AnimatedPlayCircle
-                    entering={FadeIn}
-                    exiting={FadeOut}
-                    className={"text-white"}
-                    size={64}
-                    strokeWidth={1}
-                  />
+                  <Button
+                    size={"icon"}
+                    className="size-32 rounded-full active:bg-transparent"
+                    variant={"ghost"}
+                    onPress={(e) => {
+                      if (isPlaying) {
+                        player.pause();
+                        if (controlsTimeout.current)
+                          clearTimeout(controlsTimeout.current); //prevent closing controls when video is paused
+                      } else {
+                        if (controlsTimeout.current)
+                          clearTimeout(controlsTimeout.current);
+                        player.play();
+                        startTimeToHideControls();
+                      }
+                    }}
+                  >
+                    {isPlaying ? (
+                      <AnimatedPauseCircle
+                        entering={FadeIn}
+                        exiting={FadeOut}
+                        size={64}
+                        className={"text-white"}
+                        strokeWidth={1}
+                      />
+                    ) : (
+                      <AnimatedPlayCircle
+                        entering={FadeIn}
+                        exiting={FadeOut}
+                        className={"text-white"}
+                        size={64}
+                        strokeWidth={1}
+                      />
+                    )}
+                  </Button>
                 )}
-              </Button>
-            )}
-            <Animated.View
-              pointerEvents={"auto"}
-              style={{ width: "100%", flexShrink: 0, gap: 5 }}
-            >
-              <Animated.View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  width: "100%",
-                }}
-                pointerEvents={"auto"}
-              >
-                <Small>{formatTime(currentTime)}</Small>
-                <Slider
-                  style={{ width: "90%", height: 26 }}
-                  minimumValue={0}
-                  disabled={player.status === "idle"}
-                  maximumValue={player.duration}
-                  value={player.currentTime}
-                  removeClippedSubviews
-                  onSlidingStart={() => {
-                    if (controlsTimeout.current)
-                      clearInterval(controlsTimeout.current); //prevent closing controls when sliding
-                  }}
-                  onSlidingComplete={(time) => {
-                    player.currentTime = time;
-                    if (!isPlaying) player.play(); //play if playback is paused
-                    startTimeToHideControls(); //after time seek start to hide
-                  }}
-                  minimumTrackTintColor="hsl(47.9 95.8% 53.1%)"
-                  maximumTrackTintColor="white"
-                  thumbTintColor="hsl(47.9 95.8% 53.1%)"
-                />
-                <Small>{formatTime(player.duration)}</Small>
-              </Animated.View>
-              <Animated.View
-                style={{
-                  width: "auto",
-                  flexDirection: "row",
-                  justifyContent: "flex-end",
-                  paddingHorizontal: 20,
-                }}
-              >
-                {FooterComponent}
-              </Animated.View>
-            </Animated.View>
-          </TouchableOpacity>
-        </AnimatedLinearGradientView>
-      )}
-    </View>
+                <Animated.View
+                  pointerEvents={"auto"}
+                  style={{ width: "100%", flexShrink: 0, gap: 5 }}
+                >
+                  <Animated.View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      width: "100%",
+                    }}
+                    pointerEvents={"auto"}
+                  >
+                    <Small>{formatTime(currentTime)}</Small>
+                    <Slider
+                      style={{ width: "90%", height: 26 }}
+                      minimumValue={0}
+                      disabled={player.status === "idle"}
+                      maximumValue={player.duration}
+                      value={player.currentTime}
+                      removeClippedSubviews
+                      onSlidingStart={() => {
+                        if (controlsTimeout.current)
+                          clearInterval(controlsTimeout.current); //prevent closing controls when sliding
+                      }}
+                      onSlidingComplete={(time) => {
+                        player.currentTime = time;
+                        if (!isPlaying) player.play(); //play if playback is paused
+                        startTimeToHideControls(); //after time seek start to hide
+                      }}
+                      minimumTrackTintColor="hsl(47.9 95.8% 53.1%)"
+                      maximumTrackTintColor="white"
+                      thumbTintColor="hsl(47.9 95.8% 53.1%)"
+                    />
+                    <Small>{formatTime(player.duration)}</Small>
+                  </Animated.View>
+                  <Animated.View
+                    style={{
+                      width: "auto",
+                      flexDirection: "row",
+                      justifyContent: "flex-end",
+                      paddingHorizontal: 20,
+                    }}
+                  >
+                    {FooterComponent}
+                  </Animated.View>
+                </Animated.View>
+              </TouchableOpacity>
+            </AnimatedLinearGradientView>
+          )}
+        </View>
+      </PinchGestureHandler>
+    </GestureHandlerRootView>
   );
 }
 

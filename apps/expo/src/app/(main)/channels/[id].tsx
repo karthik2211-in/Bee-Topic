@@ -246,7 +246,7 @@ export default function Chapter() {
                 disabled={!channel?.isSubscribed}
                 href={
                   channel?.isSubscribed
-                    ? `/videos/${videoData.ut_fileKey}?next=${videosData[index + 1]?.ut_fileKey}`
+                    ? `/videos/${videoData.ut_fileKey}?next=${videosData[index + 1]?.ut_fileKey ?? ""}`
                     : `/subscribe/${channel?.id}`
                 }
                 asChild

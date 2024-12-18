@@ -1,6 +1,13 @@
 import "@bacons/text-decoder/install";
 
-import { Slot, SplashScreen, Stack, useRouter, useSegments } from "expo-router";
+import {
+  Slot,
+  SplashScreen,
+  Stack,
+  useFocusEffect,
+  useRouter,
+  useSegments,
+} from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -10,7 +17,7 @@ import { TRPCProvider } from "~/utils/api";
 
 import "../styles.css";
 
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ClerkLoaded, ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
@@ -49,7 +56,7 @@ function InitialLayout() {
   const segments = useSegments();
   const router = useRouter();
 
-  React.useEffect(() => {
+  useEffect(() => {
     (async () => {
       const theme = await AsyncStorage.getItem("theme");
 
@@ -69,27 +76,27 @@ function InitialLayout() {
       }
 
       setIsColorSchemeLoaded(true);
-    })().finally(() => {
+    })();
+  }, [isSignedIn, isLoaded, isColorSchemeLoaded]);
+
+  useFocusEffect(
+    useCallback(() => {
       if (isLoaded) {
-        const isAuthSegment = segments[0] === "(auth)";
+        const isAuthSegment = segments["0"] === "(auth)";
 
         if (isSignedIn && isAuthSegment) {
           router.replace("/(main)");
         } else if (!isSignedIn) {
           router.replace("/(auth)");
         }
-        SplashScreen.hideAsync();
-      }
-    });
-  }, [isSignedIn, isLoaded]);
 
-  if (!isColorSchemeLoaded) {
-    return null;
-  }
+        if (isColorSchemeLoaded) SplashScreen.hideAsync();
+      }
+    }, [isLoaded, isSignedIn, isColorSchemeLoaded]),
+  );
 
   return (
     <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-      <Slot screenOptions={{ headerShown: false }} />
       <StatusBar
         style={"auto"}
         backgroundColor={
@@ -98,6 +105,7 @@ function InitialLayout() {
             : LIGHT_THEME.colors.background
         }
       />
+      <Slot />
     </ThemeProvider>
   );
 }
