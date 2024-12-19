@@ -13,6 +13,7 @@ import {
 } from "@bt/db/schema";
 
 import { protectedProcedure } from "../trpc";
+import { getChannelById } from "./channels";
 
 export const subscriptionsRouter = {
   create: protectedProcedure
@@ -36,11 +37,17 @@ export const subscriptionsRouter = {
         return Promise.all(
           subscribers.map(async (subscriber) => {
             const user = await clerk.users.getUser(subscriber.clerkUserId);
+            const subscriberWithExtra = await getChannelById({
+              channelId: opts.input.channelId,
+              ctx: opts.ctx,
+            });
             return {
               ...subscriber,
               email: user.primaryEmailAddress?.emailAddress,
               imageUrl: user.imageUrl,
               fullName: user.fullName,
+              ...subscriberWithExtra,
+              subscribedAt: subscriber.createdAt,
             };
           }),
         );
