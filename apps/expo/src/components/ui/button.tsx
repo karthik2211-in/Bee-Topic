@@ -98,21 +98,21 @@ const Button = React.forwardRef<
             borderless: false,
             foreground: true,
           }}
-          {...props}
           disabled={isLoading || props.disabled}
           children={
             isLoading ? (
-              <>
+              <React.Fragment>
                 {children}
                 <ActivityIndicator
                   className={buttonTextVariants({ variant, size })}
                   size={18}
                 />
-              </>
+              </React.Fragment>
             ) : (
               children
             )
           }
+          {...props}
         />
       </TextClassContext.Provider>
     );

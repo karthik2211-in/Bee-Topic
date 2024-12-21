@@ -38,12 +38,6 @@ export const GoogleSignInButton = () => {
         setActive!({ session: createdSessionId });
       } else {
         // Use signIn or signUp for next steps such as MFA
-        await signUp?.authenticateWithRedirect({
-          strategy: "oauth_google",
-          continueSignUp: true,
-          redirectUrl: Linking.createURL("/", { scheme: "beetopic" }),
-          redirectUrlComplete: Linking.createURL("/", { scheme: "beetopic" }),
-        });
       }
     } catch (err) {
       console.error("OAuth error", err);

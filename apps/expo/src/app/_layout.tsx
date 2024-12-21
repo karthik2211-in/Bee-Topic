@@ -19,7 +19,7 @@ import "../styles.css";
 
 import React, { useCallback, useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { ClerkLoaded, ClerkProvider, useAuth } from "@clerk/clerk-expo";
+import { ClerkLoaded, ClerkProvider, useSession } from "@clerk/clerk-expo";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { PortalHost } from "@rn-primitives/portal";
 
@@ -52,7 +52,7 @@ SplashScreen.preventAutoHideAsync();
 function InitialLayout() {
   const { colorScheme, setColorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isSignedIn, isLoaded, session } = useSession();
   const segments = useSegments();
   const router = useRouter();
 
@@ -83,9 +83,16 @@ function InitialLayout() {
     useCallback(() => {
       if (isLoaded) {
         const isAuthSegment = segments["0"] === "(auth)";
+        const isMainSegment = segments["0"] === "(main)";
 
         if (isSignedIn && isAuthSegment) {
           router.replace("/(main)");
+        } else if (
+          isSignedIn &&
+          isMainSegment &&
+          !session.user.publicMetadata.onBoardingCompleted
+        ) {
+          router.replace("/(onboarding)");
         } else if (!isSignedIn) {
           router.replace("/(auth)");
         }
@@ -105,7 +112,15 @@ function InitialLayout() {
             : LIGHT_THEME.colors.background
         }
       />
-      <Slot />
+      <Stack
+        screenOptions={{
+          background: isDarkColorScheme
+            ? DARK_THEME.colors.background
+            : LIGHT_THEME.colors.background,
+          headerShown: false,
+          animation: "none",
+        }}
+      />
     </ThemeProvider>
   );
 }
@@ -145,7 +160,7 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1 }} className="bg-background">
       <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
         <ClerkLoaded>
           <TRPCProvider>

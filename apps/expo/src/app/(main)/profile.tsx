@@ -1,11 +1,10 @@
-import React, { useCallback, useState } from "react";
-import { TouchableNativeFeedback, TouchableOpacity, View } from "react-native";
-import { Tabs } from "expo-router";
+import { useCallback, useState } from "react";
+import { TouchableNativeFeedback, View } from "react-native";
+import { Stack } from "expo-router";
 import { useAuth, useUser } from "@clerk/clerk-expo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
 import { Text } from "~/components/ui/text";
 import { Large, Muted } from "~/components/ui/typography";
@@ -30,7 +29,7 @@ export default function Profile() {
   const { isDarkColorScheme, setColorScheme } = useColorScheme();
   return (
     <View className="items-center gap-2 py-3">
-      <Tabs.Screen
+      <Stack.Screen
         options={{
           title: "Profile",
           headerTitle: "Profile",
