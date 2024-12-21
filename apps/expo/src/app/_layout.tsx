@@ -19,7 +19,12 @@ import "../styles.css";
 
 import React, { useCallback, useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { ClerkLoaded, ClerkProvider, useSession } from "@clerk/clerk-expo";
+import {
+  ClerkLoaded,
+  ClerkProvider,
+  useSession,
+  useUser,
+} from "@clerk/clerk-expo";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { PortalHost } from "@rn-primitives/portal";
 
@@ -52,7 +57,7 @@ SplashScreen.preventAutoHideAsync();
 function InitialLayout() {
   const { colorScheme, setColorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
-  const { isSignedIn, isLoaded, session } = useSession();
+  const { isSignedIn, isLoaded, user } = useUser();
   const segments = useSegments();
   const router = useRouter();
 
@@ -85,12 +90,16 @@ function InitialLayout() {
         const isAuthSegment = segments["0"] === "(auth)";
         const isMainSegment = segments["0"] === "(main)";
 
-        if (isSignedIn && isAuthSegment) {
+        if (
+          isSignedIn &&
+          isAuthSegment &&
+          user.publicMetadata.onBoardingCompleted
+        ) {
           router.replace("/(main)");
         } else if (
           isSignedIn &&
-          isMainSegment &&
-          !session.user.publicMetadata.onBoardingCompleted
+          (isMainSegment || isAuthSegment) &&
+          !user.publicMetadata.onBoardingCompleted
         ) {
           router.replace("/(onboarding)");
         } else if (!isSignedIn) {
