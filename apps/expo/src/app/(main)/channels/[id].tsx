@@ -120,35 +120,8 @@ export default function Chapter() {
           estimatedItemSize={200}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={
-            <Card className="mt-28 h-fit rounded-none border-0 border-b border-b-border pb-3">
+            <Card className="mt-32 h-fit rounded-none border-0 border-b border-b-border pb-3">
               <CardContent className="relative flex-1 items-center justify-center object-contain py-0">
-                {/* <LinearGradient
-                  colors={
-                    isDarkColorScheme
-                      ? [
-                          "rgba(0,0,0,0.9)",
-                          "rgba(0,0,0,0.6)",
-                          "rgba(0,0,0,0.2)",
-                          "rgba(0,0,0,0.4)",
-                          "rgba(0,0,0,1)",
-                        ]
-                      : [
-                          "rgba(0,0,0,0.9)",
-                          "rgba(0,0,0,0.6)",
-                          "rgba(255,255,255,0.2)",
-                          "rgba(255,255,255,0.4)",
-                          "rgba(255,255,255,1)",
-                        ]
-                  }
-                  style={{
-                    flex: 1,
-                    position: "absolute",
-                    top: 0,
-                    zIndex: 9999,
-                    height: "100%",
-                    width: "100%",
-                  }}
-                /> */}
                 <Image
                   source={{
                     uri: "https://media.istockphoto.com/id/1356762790/video/web-development-concept.jpg?s=640x640&k=20&c=ONFGjyXNy8CqhTSmnEI2X7X1tEvHCBsT83imvtDgdCI=",
