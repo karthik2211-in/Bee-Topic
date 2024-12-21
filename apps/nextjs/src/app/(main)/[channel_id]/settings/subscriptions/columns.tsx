@@ -45,7 +45,7 @@ export const SubscribersColumns: ColumnDef<Subscriber>[] = [
               },
             );
           }}
-          className="pointer-events-auto z-40 h-full items-center justify-start gap-3"
+          className="pointer-events-auto z-40 h-full w-full items-center justify-start gap-3"
           variant={"ghost"}
         >
           <Avatar className="size-9 border-2 border-accent-foreground/30">
