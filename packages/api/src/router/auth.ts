@@ -24,7 +24,7 @@ export const authRouter = {
     return users.data;
   }),
   updatePublicMetaData: protectedProcedure
-    .input(z.object({ institutionName: z.string(), course: z.string() }))
+    .input(z.object({ institutionId: z.string(), courseId: z.string() }))
     .mutation(async (opts) => {
       const client = await clerkClient();
       const user = await client.users.updateUserMetadata(

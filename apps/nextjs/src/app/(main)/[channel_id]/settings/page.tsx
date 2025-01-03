@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { z } from "zod";
@@ -20,11 +21,13 @@ import { Textarea } from "@bt/ui/textarea";
 import { toast } from "@bt/ui/toast";
 
 import { api } from "~/trpc/react";
+import { UploadDropzone } from "~/utils/uploadthing";
 import { DeleteChannelDialog } from "../../create-channel";
 
 const channelDetailsSchema = z.object({
   title: z.string().min(1, "Required"),
   description: z.string().optional(),
+  thumbneilId: z.string().optional(),
 });
 
 export default function Page() {
@@ -45,12 +48,12 @@ export default function Page() {
       toast.error(error.message);
     },
     onSuccess(data) {
-      toast.success("Channels details saved");
       router.refresh();
       utils.videos.invalidate();
       form.reset({
         title: data[0]?.title,
         description: data[0]?.description ?? "",
+        thumbneilId: data[0]?.thumbneilId ?? "",
       });
     },
   });
@@ -59,10 +62,15 @@ export default function Page() {
 
   async function onSubmitVideo(values: z.infer<typeof channelDetailsSchema>) {
     await updateChannel({ id: params.channel_id as string, ...values });
+    toast.success("Channels details saved");
   }
 
   React.useEffect(() => {
-    form.reset({ title: video?.title, description: video?.description ?? "" });
+    form.reset({
+      title: video?.title,
+      description: video?.description ?? "",
+      thumbneilId: video?.thumbneilId ?? "",
+    });
   }, [isLoading]);
 
   if (isLoading)
@@ -102,7 +110,7 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="grid grid-cols-5 gap-5 py-5 pr-48">
+          <div className="grid grid-cols-5 gap-5 py-5 pr-32">
             <div className="col-span-3 w-full space-y-6">
               <FormField
                 control={form.control}
@@ -143,7 +151,38 @@ export default function Page() {
                 )}
               />
             </div>
-            <div></div>
+            <div className="col-span-2 w-full">
+              <FormField
+                control={form.control}
+                name="thumbneilId"
+                render={({ field }) => (
+                  <div className="relative flex aspect-auto h-60 w-full items-center justify-center overflow-hidden rounded-md border bg-background/90">
+                    {field.value ? (
+                      <Image
+                        alt="thumbneil"
+                        fill
+                        src={`https://utfs.io/f/${field.value}`}
+                      />
+                    ) : (
+                      <UploadDropzone
+                        className="ut-button:bg-secondary ut-button:after:bg-primary ut-button:text-secondary-foreground ut-button:hover:opacity-90 ut-button:ring-primary ut-button:outline-primary ut-button:w-full h-full border-none"
+                        endpoint={"imageUploader"}
+                        onClientUploadComplete={async (res) => {
+                          field.onChange(res.at(0)?.key);
+                          console.log("response", res);
+                          await updateChannel({
+                            id: params.channel_id as string,
+                            ...form.getValues(),
+                            thumbneilId: res.at(0)?.key,
+                          });
+                          toast.success("Channel thumbneil updated");
+                        }}
+                      />
+                    )}
+                  </div>
+                )}
+              />
+            </div>
           </div>
         </form>
       </Form>

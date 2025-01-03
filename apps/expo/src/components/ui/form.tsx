@@ -7,6 +7,7 @@ import * as LabelPrimitive from "@rn-primitives/label";
 import * as Slot from "@rn-primitives/slot";
 import {
   useForm as __useForm,
+  useWatch as __useWatch,
   Controller,
   ControllerProps,
   FieldPath,
@@ -22,6 +23,8 @@ import { cn } from "~/lib/utils";
 import { Text } from "./text";
 
 const Form = FormProvider;
+
+export const useWatch = __useWatch;
 
 type FormFieldContextValue<
   TFieldValues extends FieldValues = FieldValues,
@@ -133,6 +136,7 @@ const FormControl = React.forwardRef<
     <Slot.View
       ref={ref}
       id={formItemId}
+      nativeID={formItemId}
       aria-describedby={
         !error
           ? `${formDescriptionId}`

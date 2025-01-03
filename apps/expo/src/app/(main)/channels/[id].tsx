@@ -1,13 +1,6 @@
-import {
-  Image,
-  TouchableNativeFeedback,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Image, TouchableOpacity, View } from "react-native";
 import Animated, { Easing, FadeIn } from "react-native-reanimated";
-import { LinearGradient } from "expo-linear-gradient";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { BlurView } from "@react-native-community/blur";
 import { FlashList } from "@shopify/flash-list";
 
@@ -31,17 +24,14 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { Skeleton } from "~/components/ui/skeleton";
 import { Text } from "~/components/ui/text";
 import { Muted } from "~/components/ui/typography";
 import VideoCard from "~/components/video-card";
 import { ActivityIndicator } from "~/lib/activity-indicator";
 import { Crown } from "~/lib/icons/Crown";
-import { Hash } from "~/lib/icons/Hash";
 import { Pause } from "~/lib/icons/Pause";
-import { PlayCircle } from "~/lib/icons/PlayCircle";
+import { Sprout } from "~/lib/icons/Sprout";
 import { useColorScheme } from "~/lib/useColorScheme";
-import { formatDuration, formatViewCount } from "~/lib/utils";
 import { api } from "~/utils/api";
 
 export default function Chapter() {
@@ -86,7 +76,9 @@ export default function Chapter() {
   const videosData = videos?.pages?.flatMap((page) => page.items) || [];
 
   const hasPermissionToAccess =
-    channel?.isSubscribed && !channel?.isSubscriptionPaused;
+    channel?.isSubscribed &&
+    !channel?.isSubscriptionPaused &&
+    !channel?.isSubscriptionExpired;
 
   return (
     <View style={{ flex: 1 }}>
@@ -122,21 +114,34 @@ export default function Chapter() {
           ListHeaderComponent={
             <Card className="mt-32 h-fit rounded-none border-0 border-b border-b-border pb-3">
               <CardContent className="relative flex-1 items-center justify-center object-contain py-0">
-                <Image
-                  source={{
-                    uri: "https://media.istockphoto.com/id/1356762790/video/web-development-concept.jpg?s=640x640&k=20&c=ONFGjyXNy8CqhTSmnEI2X7X1tEvHCBsT83imvtDgdCI=",
-                  }}
-                  resizeMode="cover"
-                  style={{
-                    width: 200,
-                    flex: 1,
-                    height: 230,
-                    shadowColor: "black",
-                    shadowOpacity: 1,
-                    borderRadius: 8,
-                    aspectRatio: 9 / 6,
-                  }}
-                />
+                {channel?.thumbneilId ? (
+                  <Image
+                    source={{
+                      uri: `https://utfs.io/f/${channel.thumbneilId}`,
+                    }}
+                    resizeMode="cover"
+                    style={{
+                      width: 200,
+                      flex: 1,
+                      height: 230,
+                      shadowColor: "black",
+                      shadowOpacity: 1,
+                      borderRadius: 8,
+                      aspectRatio: 9 / 6,
+                    }}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      width: "auto",
+                      flex: 1,
+                      height: 205,
+                    }}
+                    className="items-center justify-center border-b border-b-border"
+                  >
+                    <Sprout size={64} className="text-muted-foreground/80" />
+                  </View>
+                )}
               </CardContent>
               <CardHeader className="items-start gap-2">
                 <CardTitle className="text-xl leading-snug">

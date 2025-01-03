@@ -85,20 +85,20 @@ export default function VideoScreen() {
           title: videoDetails?.title ?? "",
           description: `${videoDetails?.chapters.channel.title} ( ${videoDetails?.chapters.title} )`,
         }}
-        FooterComponent={
-          <Link
-            style={{ opacity: nextVideoId ? 1 : 0 }}
-            disabled={!nextVideoId}
-            href={`/videos/${nextVideoId}`}
-            replace
-            asChild
-          >
-            <Button variant={"ghost"} className="h-10 active:bg-transparent">
-              <SkipForward size={18} className="text-foreground" />
-              <Text>Next Video</Text>
-            </Button>
-          </Link>
-        }
+        // FooterComponent={
+        //   <Link
+        //     style={{ opacity: nextVideoId ? 1 : 0 }}
+        //     disabled={!nextVideoId}
+        //     href={`/videos/${nextVideoId}?next=${""}`}
+        //     replace
+        //     asChild
+        //   >
+        //     <Button variant={"ghost"} className="h-10 active:bg-transparent">
+        //       <SkipForward size={18} className="text-foreground" />
+        //       <Text>Next Video</Text>
+        //     </Button>
+        //   </Link>
+        // }
         onStatusChange={({ isPlaying }) => {
           if (isPlaying && currentStartTime === null) {
             startSegment(currentTime); // Start a new segment if video is playing

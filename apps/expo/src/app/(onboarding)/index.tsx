@@ -11,6 +11,8 @@ import { useAuth, useClerk, useSession, useUser } from "@clerk/clerk-expo";
 import { BlurView } from "@react-native-community/blur";
 import { z } from "zod";
 
+import { Institutions } from "@bt/db/schema";
+
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
@@ -22,6 +24,7 @@ import {
   FormMessage,
   useForm,
 } from "~/components/ui/form";
+import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -32,14 +35,15 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Text } from "~/components/ui/text";
-import { H3, Lead, Muted } from "~/components/ui/typography";
+import { H3, Lead } from "~/components/ui/typography";
 import { User } from "~/lib/icons/User";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { api } from "~/utils/api";
 
 const academicSchema = z.object({
-  institutionName: z.object({ value: z.string(), label: z.string() }),
+  institution: z.object({ value: z.string(), label: z.string() }),
   course: z.object({ value: z.string(), label: z.string() }),
+  courseType: z.object({ value: z.string(), label: z.string() }).optional(),
 });
 
 const AnimatedAvatar = Animated.createAnimatedComponent(Avatar);
@@ -53,6 +57,7 @@ export default function Index() {
     schema: academicSchema,
     mode: "onChange",
   });
+
   const insets = useSafeAreaInsets();
   const contentInsets = {
     top: insets.top,
@@ -68,26 +73,37 @@ export default function Index() {
     },
   });
 
-  const institutions = [
-    { label: "BMS College of Engineering", value: "bms" },
-    { label: "KIMS College of Nursing", value: "kims" },
-    { label: "Dayanada Sagar College of Engineering", value: "dsce" },
-    { label: "Sri Venkateshwara College of Engineering", value: "svce" },
-    { label: "KIA College of Engineering", value: "kia" },
-  ];
-  const courses = [
-    { label: "B.E. in Computer Science", value: "bcs" },
-    { label: "B.E. in Electronics and Communication", value: "bec" },
-    { label: "B.E. in Mechanical Engineering", value: "bme" },
-    { label: "B.E. in Civil Engineering", value: "bce" },
-    { label: "B.E. in Electrical Engineering", value: "bee" },
+  const CourseType: {
+    label: string;
+    value: typeof Institutions.$inferSelect.type;
+  }[] = [
+    { label: "PUC", value: "puc" },
+    { label: "Diploma", value: "diploma" },
+    { label: "Engineering", value: "engineering" },
   ];
 
+  const institutions = api.institutions.getColleges.useQuery(
+    {
+      type: "engineering",
+    },
+    // {
+    //   enabled: !!form.getValues().courseType?.value,
+    // },
+  );
+  const courses = api.institutions.getCourses.useQuery(
+    {
+      institutionId: form.getValues().institution?.value,
+    },
+    {
+      enabled: !!form.getValues().institution,
+    },
+  );
+
   async function onSubmit(values: z.infer<typeof academicSchema>) {
-    const { institutionName, course } = values;
+    const { institution, course } = values;
     await mutateAsync({
-      institutionName: institutionName.value,
-      course: course.value,
+      institutionId: institution.value,
+      courseId: course.value,
     });
   }
 
@@ -120,7 +136,7 @@ export default function Index() {
         <AnimatedAvatar
           entering={FadeInDown.duration(1000)}
           alt="Avatar"
-          className="size-24 border-2 border-border/80"
+          className="size-20 border-2 border-border/80"
         >
           <AvatarImage src={user?.imageUrl} source={{ uri: user?.imageUrl }} />
           <AvatarFallback>
@@ -139,9 +155,10 @@ export default function Index() {
         </Lead>
         <Form {...form}>
           <View className={"w-full gap-6"}>
+            {/* <Text>{JSON.stringify(form.getValues(), undefined, 2)}</Text> */}
             <FormField
               control={form.control}
-              name="institutionName"
+              name="institution"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Institution</FormLabel>
@@ -155,16 +172,20 @@ export default function Index() {
                       </SelectTrigger>
                       <SelectContent insets={contentInsets} className="w-full">
                         <SelectGroup>
-                          <SelectLabel>Institutions</SelectLabel>
-                          {institutions.map((institution) => (
-                            <SelectItem
-                              key={institution.value}
-                              label={institution.label}
-                              value={institution.value}
-                            >
-                              {institution.label}
-                            </SelectItem>
-                          ))}
+                          {institutions?.data
+                            ?.flatMap((course) => ({
+                              value: course.id,
+                              label: course.name,
+                            }))
+                            ?.map((institution) => (
+                              <SelectItem
+                                key={institution.value}
+                                label={institution.label}
+                                value={institution.value}
+                              >
+                                {institution.label}
+                              </SelectItem>
+                            ))}
                         </SelectGroup>
                       </SelectContent>
                     </Select>
@@ -173,40 +194,50 @@ export default function Index() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="course"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Course</FormLabel>
-                  <FormControl>
-                    <Select {...field} onValueChange={field.onChange}>
-                      <SelectTrigger>
-                        <SelectValue
-                          className="native:text-lg text-sm text-foreground"
-                          placeholder="Select Course"
-                        />
-                      </SelectTrigger>
-                      <SelectContent insets={contentInsets} className="w-full">
-                        <SelectGroup>
-                          <SelectLabel>Courses</SelectLabel>
-                          {courses.map((course) => (
-                            <SelectItem
-                              key={course.value}
-                              label={course.label}
-                              value={course.value}
-                            >
-                              {course.label}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
+            {form.getValues().institution && (
+              <FormField
+                control={form.control}
+                name="course"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Course</FormLabel>
+                    <FormControl>
+                      <Select {...field} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue
+                            className="native:text-lg text-sm text-foreground"
+                            placeholder="Select Course"
+                          />
+                        </SelectTrigger>
+                        <SelectContent
+                          insets={contentInsets}
+                          className="w-full"
+                        >
+                          <SelectGroup>
+                            {courses?.data
+                              ?.flatMap((course) => ({
+                                value: course.id,
+                                label: course.name,
+                              }))
+                              ?.map((course) => (
+                                <SelectItem
+                                  key={course.value}
+                                  label={course.label}
+                                  value={course.value}
+                                >
+                                  {course.label}
+                                </SelectItem>
+                              ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <Button
               isLoading={form.formState.isSubmitting}

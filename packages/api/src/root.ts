@@ -3,6 +3,7 @@ import { authRouter } from "./router/auth";
 import { channelsRouter } from "./router/channels";
 import { ChaptersRouter } from "./router/chapters";
 import { couponsRouter } from "./router/coupons";
+import { institutionsRouter } from "./router/institutions";
 import { paymentsRouter } from "./router/payments";
 import { subscriptionsRouter } from "./router/subscriptions";
 import { VideosRouter } from "./router/videos";
@@ -17,6 +18,7 @@ export const appRouter = createTRPCRouter({
   analytics: analyticsRouter,
   payments: paymentsRouter,
   coupons: couponsRouter,
+  institutions: institutionsRouter,
 });
 
 // export type definition of API

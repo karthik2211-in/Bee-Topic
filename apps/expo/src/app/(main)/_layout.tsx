@@ -5,7 +5,7 @@ export default function MainStackLayout() {
     <Stack
       screenOptions={{
         headerBackTitleVisible: false,
-        animation: "ios_from_right",
+        animation: "fade",
         headerShadowVisible: false,
       }}
     />

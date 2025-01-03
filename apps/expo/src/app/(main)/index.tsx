@@ -22,6 +22,7 @@ import {
 import { Skeleton } from "~/components/ui/skeleton";
 import { Text } from "~/components/ui/text";
 import { H3, Lead, Muted } from "~/components/ui/typography";
+import { Sprout } from "~/lib/icons/Sprout";
 import { User } from "~/lib/icons/User";
 import { useColorScheme } from "~/lib/useColorScheme";
 import { api } from "~/utils/api";
@@ -104,7 +105,7 @@ export default function Index() {
       />
 
       {isLoading ? (
-        <View className="mt-24 gap-3 p-3">
+        <View className="mt-24 gap-4 p-3">
           {Array.from({ length: 5 }).map((_, i) => (
             <Skeleton key={i} className={"h-56 w-full rounded-2xl"} />
           ))}
@@ -152,17 +153,33 @@ export default function Index() {
                   >
                     <View className="flex-1">
                       <CardContent className="flex-1 object-contain p-0">
-                        <Image
-                          source={{
-                            uri: "https://s2.dmcdn.net/v/PhtPf1ZckrzTH_Sd3/x1080",
-                          }}
-                          resizeMode="cover"
-                          style={{
-                            width: "auto",
-                            flex: 1,
-                            height: 205,
-                          }}
-                        />
+                        {channel.thumbneilId ? (
+                          <Image
+                            source={{
+                              uri: `https://utfs.io/f/${channel.thumbneilId}`,
+                            }}
+                            resizeMode="cover"
+                            style={{
+                              width: "auto",
+                              flex: 1,
+                              height: 205,
+                            }}
+                          />
+                        ) : (
+                          <View
+                            style={{
+                              width: "auto",
+                              flex: 1,
+                              height: 205,
+                            }}
+                            className="items-center justify-center border-b border-b-border"
+                          >
+                            <Sprout
+                              size={64}
+                              className="text-muted-foreground/70"
+                            />
+                          </View>
+                        )}
                       </CardContent>
                       <CardHeader className="items-start gap-2 p-3">
                         <CardTitle className="text-xl leading-snug">
@@ -172,7 +189,7 @@ export default function Index() {
                           <Muted className="text-xs">Created by</Muted>
                           <View className="flex-row items-center justify-center gap-1">
                             <Avatar
-                              className="size-5 border border-border"
+                              className="size-6 border border-border"
                               alt="Channel Creator"
                             >
                               <AvatarImage
@@ -211,7 +228,7 @@ export default function Index() {
             isFetchingNextPage ? (
               <ActivityIndicator
                 size="small"
-                className="my-4"
+                className="my-5"
                 color={isDarkColorScheme ? "white" : "black"}
               />
             ) : (

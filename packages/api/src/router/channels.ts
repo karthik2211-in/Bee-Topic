@@ -78,6 +78,7 @@ export const channelsRouter = {
           id: Channels.id,
           title: Channels.title,
           createdAt: Channels.createdAt,
+          thumbneilId: Channels.thumbneilId,
           chapterCount: sql`count(${Chapters.id})`
             .mapWith(Number)
             .as("chapterCount"),

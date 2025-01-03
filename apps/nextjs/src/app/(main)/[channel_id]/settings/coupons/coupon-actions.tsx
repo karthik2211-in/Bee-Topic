@@ -601,13 +601,23 @@ export function ViewCouponSheetPortal() {
               {isLoading ? (
                 <Skeleton className="h-2 w-60 rounded-full" />
               ) : (
-                <SheetDescription
-                  className={cn(
-                    !coupon?.description && "text-muted-foreground/40",
-                  )}
-                >
-                  {coupon?.description}
-                </SheetDescription>
+                <>
+                  <SheetDescription
+                    className={cn(
+                      !coupon?.description && "text-muted-foreground/40",
+                    )}
+                  >
+                    {coupon?.description}
+                  </SheetDescription>
+                  <Button
+                    variant={"link"}
+                    className="w-fit self-end text-destructive"
+                    isLoading={isPending}
+                    onClick={() => deleteCoupon({ couponId: couponId! })}
+                  >
+                    Delete Coupon
+                  </Button>
+                </>
               )}
               {isLoading ? (
                 <Skeleton className="h-3 w-60 rounded-full" />

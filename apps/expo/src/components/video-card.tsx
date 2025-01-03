@@ -71,7 +71,7 @@ export default forwardRef<
           </AspectRatio>
         </CardContent>
         <CardHeader className="h-full w-full flex-wrap items-start justify-between gap-0.5 py-0">
-          <CardTitle className="text-base">{videoData?.title}</CardTitle>
+          <CardTitle className="pr-10 text-base">{videoData?.title}</CardTitle>
           <CardDescription className="p-0 text-foreground/70">
             {formatDuration(videoData.duration)} •{" "}
             {formatViewCount(videoData.viewCount ?? 0)} views

@@ -8,6 +8,12 @@ export const SubscriptionFrequency = pgEnum("subscription_frequency", [
   "yearly",
 ]);
 
+export const CollegeCourseType = pgEnum("college_course_type", [
+  "puc",
+  "diploma",
+  "engineering",
+]);
+
 export const CouponType = pgEnum("coupon_type", ["open", "restricted"]);
 
 export const Channels = pgTable("channels", (t) => ({
@@ -20,6 +26,7 @@ export const Channels = pgTable("channels", (t) => ({
   description: t.text(),
   createdAt: t.timestamp().defaultNow().notNull(),
   isPublished: t.boolean().default(false),
+  thumbneilId: t.varchar({ length: 100 }),
   updatedAt: t
     .timestamp({ mode: "date", withTimezone: true })
     .$onUpdate(() => new Date()),
@@ -264,7 +271,49 @@ export const Subscriptions = pgTable(
   }),
 );
 
+export const Institutions = pgTable("institutions", (t) => ({
+  id: t
+    .varchar({ length: 100 })
+    .default(sql`CONCAT('bt-ins-', gen_random_uuid())`)
+    .primaryKey(),
+  name: t.text().notNull().unique(),
+  type: CollegeCourseType("type").notNull(),
+  updatedAt: t
+    .timestamp({ mode: "date", withTimezone: true })
+    .$onUpdate(() => new Date()),
+  createdAt: t
+    .timestamp({ mode: "date", withTimezone: true })
+    .notNull()
+    .defaultNow(),
+}));
+
+export const Courses = pgTable("courses", (t) => ({
+  id: t
+    .varchar({ length: 100 })
+    .default(sql`CONCAT('bt-ins-', gen_random_uuid())`)
+    .primaryKey(),
+  instituionId: t
+    .varchar({ length: 100 })
+    .notNull()
+    .references(() => Institutions.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
+  name: t.text().notNull().unique(),
+  updatedAt: t
+    .timestamp({ mode: "date", withTimezone: true })
+    .$onUpdate(() => new Date()),
+  createdAt: t
+    .timestamp({ mode: "date", withTimezone: true })
+    .notNull()
+    .defaultNow(),
+}));
+
 //Input Schemas
+
+export const CreateInstitutionSchema = createInsertSchema(Institutions, {
+  name: z.string().min(1, "Name is required"),
+}).omit({ id: true, createdAt: true, updatedAt: true });
 
 export const CreateVideoSchema = createInsertSchema(Videos, {
   title: z.string().max(256),
@@ -378,3 +427,14 @@ export const VideosAnalyticsRelations = relations(
     }),
   }),
 );
+
+export const InstitutionsRelations = relations(Institutions, ({ many }) => ({
+  courses: many(Courses),
+}));
+
+export const CoursesRelations = relations(Courses, ({ one }) => ({
+  institution: one(Institutions, {
+    fields: [Courses.instituionId],
+    references: [Institutions.id],
+  }),
+}));
