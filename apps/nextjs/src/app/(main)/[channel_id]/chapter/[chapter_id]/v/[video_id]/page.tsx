@@ -100,7 +100,7 @@ export function DeleteVideoDialog({
 export default function Page() {
   const params = useParams();
   const { data: video, isLoading } = api.videos.byId.useQuery({
-    id: params.video_id as string,
+    video_id: params.video_id as string,
   });
   const utils = api.useUtils();
   const form = useForm({
@@ -149,7 +149,7 @@ export default function Page() {
     <div className="relative w-full">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmitVideo)}>
-          <div className="sticky top-16 z-50 flex items-center justify-between bg-background/90 pr-48">
+          <div className="sticky top-0 z-50 flex items-center justify-between bg-background/90 pr-48">
             <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
               Video Details
             </h4>

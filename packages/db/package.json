@@ -35,12 +35,14 @@
     "@neondatabase/serverless": "^0.10.1",
     "drizzle-orm": "^0.35.1",
     "drizzle-zod": "^0.5.1",
+    "ws": "^8.18.0",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@bt/eslint-config": "workspace:*",
     "@bt/prettier-config": "workspace:*",
     "@bt/tsconfig": "workspace:*",
+    "@types/ws": "^8.5.13",
     "dotenv-cli": "^7.4.2",
     "drizzle-kit": "^0.26.2",
     "eslint": "catalog:",

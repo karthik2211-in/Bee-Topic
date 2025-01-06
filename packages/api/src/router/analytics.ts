@@ -16,7 +16,7 @@ import { CreateVideosAnalytics, VideosAnalytics } from "@bt/db/schema";
 
 import { protectedProcedure } from "../trpc";
 
-export const AnalyticsRouter = {
+export const analyticsRouter = {
   create: protectedProcedure
     .input(CreateVideosAnalytics)
     .mutation(({ ctx, input }) => {

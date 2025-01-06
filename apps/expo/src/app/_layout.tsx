@@ -1,18 +1,31 @@
 import "@bacons/text-decoder/install";
 
-import { Slot, SplashScreen, useRouter, useSegments } from "expo-router";
+import {
+  Slot,
+  SplashScreen,
+  Stack,
+  useFocusEffect,
+  useRouter,
+  useSegments,
+} from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Theme, ThemeProvider } from "@react-navigation/native";
+import { DefaultTheme, Theme, ThemeProvider } from "@react-navigation/native";
 
 import { TRPCProvider } from "~/utils/api";
 
-import "expo-router";
 import "../styles.css";
 
-import React from "react";
-import { ClerkLoaded, ClerkProvider, useAuth } from "@clerk/clerk-expo";
+import React, { useCallback, useEffect } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import {
+  ClerkLoaded,
+  ClerkProvider,
+  useSession,
+  useUser,
+} from "@clerk/clerk-expo";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { PortalHost } from "@rn-primitives/portal";
 
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
@@ -22,10 +35,12 @@ import { useColorScheme } from "~/lib/useColorScheme";
 const LIGHT_THEME: Theme = {
   dark: false,
   colors: NAV_THEME.light,
+  fonts: DefaultTheme.fonts,
 };
 const DARK_THEME: Theme = {
   dark: true,
   colors: NAV_THEME.dark,
+  fonts: DefaultTheme.fonts,
 };
 
 export {
@@ -42,11 +57,11 @@ SplashScreen.preventAutoHideAsync();
 function InitialLayout() {
   const { colorScheme, setColorScheme, isDarkColorScheme } = useColorScheme();
   const [isColorSchemeLoaded, setIsColorSchemeLoaded] = React.useState(false);
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isSignedIn, isLoaded, user } = useUser();
   const segments = useSegments();
   const router = useRouter();
 
-  React.useEffect(() => {
+  useEffect(() => {
     (async () => {
       const theme = await AsyncStorage.getItem("theme");
 
@@ -66,27 +81,38 @@ function InitialLayout() {
       }
 
       setIsColorSchemeLoaded(true);
-    })().finally(() => {
-      if (isLoaded) {
-        const isAuthSegment = segments[0] === "(auth)";
+    })();
+  }, [isSignedIn, isLoaded, isColorSchemeLoaded]);
 
-        if (isSignedIn && isAuthSegment) {
+  useFocusEffect(
+    useCallback(() => {
+      if (isLoaded) {
+        const isAuthSegment = segments["0"] === "(auth)";
+        const isMainSegment = segments["0"] === "(main)";
+
+        if (
+          isSignedIn &&
+          isAuthSegment &&
+          user.publicMetadata.onBoardingCompleted
+        ) {
           router.replace("/(main)");
+        } else if (
+          isSignedIn &&
+          (isMainSegment || isAuthSegment) &&
+          !user.publicMetadata.onBoardingCompleted
+        ) {
+          router.replace("/(onboarding)");
         } else if (!isSignedIn) {
           router.replace("/(auth)");
         }
-        SplashScreen.hideAsync();
-      }
-    });
-  }, [isSignedIn, isLoaded]);
 
-  if (!isColorSchemeLoaded) {
-    return null;
-  }
+        if (isColorSchemeLoaded) SplashScreen.hideAsync();
+      }
+    }, [isLoaded, isSignedIn, isColorSchemeLoaded]),
+  );
 
   return (
     <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-      <Slot screenOptions={{ headerShown: false }} />
       <StatusBar
         style={"auto"}
         backgroundColor={
@@ -94,6 +120,15 @@ function InitialLayout() {
             ? DARK_THEME.colors.background
             : LIGHT_THEME.colors.background
         }
+      />
+      <Stack
+        screenOptions={{
+          background: isDarkColorScheme
+            ? DARK_THEME.colors.background
+            : LIGHT_THEME.colors.background,
+          headerShown: false,
+          animation: "none",
+        }}
       />
     </ThemeProvider>
   );
@@ -134,17 +169,17 @@ export default function RootLayout() {
   }
 
   return (
-    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <ClerkLoaded>
-        <TRPCProvider>
-          {/*
-          The Stack component displays the current page.
-          It also allows you to configure your screens 
-          */}
-          <InitialLayout />
-          <PortalHost />
-        </TRPCProvider>
-      </ClerkLoaded>
-    </ClerkProvider>
+    <GestureHandlerRootView style={{ flex: 1 }} className="bg-background">
+      <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+        <ClerkLoaded>
+          <TRPCProvider>
+            <BottomSheetModalProvider>
+              <InitialLayout />
+              <PortalHost />
+            </BottomSheetModalProvider>
+          </TRPCProvider>
+        </ClerkLoaded>
+      </ClerkProvider>
+    </GestureHandlerRootView>
   );
 }

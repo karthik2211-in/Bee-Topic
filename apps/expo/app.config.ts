@@ -40,15 +40,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     "expo-router",
     [
-      "react-native-video",
+      "expo-video",
       {
-        enableNotificationControls: true,
-        androidExtensions: {
-          useExoplayerRtsp: false,
-          useExoplayerSmoothStreaming: false,
-          useExoplayerHls: false,
-          useExoplayerDash: false,
-        },
+        supportsBackgroundPlayback: true,
+        supportsPictureInPicture: true,
+      },
+    ],
+    "expo-secure-store",
+    [
+      "expo-screen-orientation",
+      {
+        initialOrientation: "DEFAULT",
       },
     ],
   ],

@@ -16,7 +16,7 @@ export default async function Page({
   return (
     <div>
       <ViewCouponSheetPortal />
-      <div className="top-16 z-50 flex items-start justify-between bg-background/90 py-3 pr-48">
+      <div className="top-16 z-50 flex items-center justify-between bg-background/90 py-3 pr-48">
         <div>
           <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
             Coupons

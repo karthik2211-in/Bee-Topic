@@ -29,8 +29,9 @@ export const GoogleSignInButton = () => {
   const onPress = React.useCallback(async () => {
     setIsLoading(true);
     try {
-      const { createdSessionId, setActive } = await startOAuthFlow({
+      const { createdSessionId, signUp, setActive } = await startOAuthFlow({
         redirectUrl: Linking.createURL("/", { scheme: "beetopic" }),
+        unsafeMetadata: { college: "BMS college" },
       });
 
       if (createdSessionId) {
@@ -48,9 +49,9 @@ export const GoogleSignInButton = () => {
     <Button
       disabled={isLoading}
       size={"lg"}
-      onPress={onPress}
-      className="w-full"
       variant={"outline"}
+      onPress={onPress}
+      className="mt-12 w-full"
     >
       <Svg
         width="20"

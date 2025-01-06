@@ -3,7 +3,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { and, asc, eq, gte, ilike, sql } from "@bt/db";
+import { and, asc, eq, gte, ilike, or, sql } from "@bt/db";
 import { CreateVideoSchema, UpdateVideoSchema, Videos } from "@bt/db/schema";
 
 import { protectedProcedure } from "../trpc";
@@ -87,14 +87,23 @@ export const VideosRouter = {
     }),
 
   byId: protectedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(
+      z.object({
+        video_file_key: z.string().optional(),
+        video_id: z.string().optional(),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       const data = await ctx.db.query.Videos.findFirst({
-        where: eq(Videos.id, input.id),
+        where: or(
+          eq(Videos.ut_fileKey, input.video_file_key ?? ""),
+          eq(Videos.id, input.video_id ?? ""),
+        ),
         with: {
           chapters: {
             with: {
               channel: true,
+              videos: true,
             },
           },
         },

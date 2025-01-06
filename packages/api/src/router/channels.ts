@@ -1,6 +1,6 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { clerkClient } from "@clerk/nextjs/server";
-import RazorPay from "razorpay";
+import { endOfDay } from "date-fns";
 import { z } from "zod";
 
 import { and, asc, count, desc, eq, gte, ilike, sql } from "@bt/db";
@@ -10,6 +10,7 @@ import {
   CreateChannelSchema,
   Subscriptions,
   UpdateChannelSchema,
+  UserChannelState,
   Videos,
 } from "@bt/db/schema";
 
@@ -59,6 +60,9 @@ export async function getChannelById({
     totalChapters: agregate.at(0)?.totalChapters,
     subscriptionsCount: subscriptionsAgregate.at(0)?.subscriptionsCount ?? 0,
     isSubscribed: !!subscription?.id,
+    isSubscriptionPaused: subscription?.isPaused ?? false,
+    isSubscriptionExpired:
+      new Date(Date.now()) >= new Date(subscription?.endsOn ?? Date.now()),
     createdBy: user.fullName,
     createdByImageUrl: user.imageUrl,
     ...item,
@@ -74,6 +78,7 @@ export const channelsRouter = {
           id: Channels.id,
           title: Channels.title,
           createdAt: Channels.createdAt,
+          thumbneilId: Channels.thumbneilId,
           chapterCount: sql`count(${Chapters.id})`
             .mapWith(Number)
             .as("chapterCount"),
@@ -93,6 +98,30 @@ export const channelsRouter = {
         .orderBy(desc(Channels.createdAt));
 
       return channels;
+    }),
+
+  setActiveChapterForUser: protectedProcedure
+    .input(
+      z.object({
+        channelId: z.string().min(1),
+        activeChapterId: z.string().min(1),
+      }),
+    )
+    .mutation(({ ctx, input }) => {
+      return ctx.db
+        .insert(UserChannelState)
+        .values({
+          channelId: input.channelId,
+          activeChapterId: input.activeChapterId,
+          clerkUserId: ctx.session.userId,
+        })
+        .onConflictDoUpdate({
+          target: [UserChannelState.clerkUserId, UserChannelState.channelId],
+          set: {
+            activeChapterId: input.activeChapterId,
+            channelId: input.channelId,
+          },
+        });
     }),
 
   infinite: protectedProcedure

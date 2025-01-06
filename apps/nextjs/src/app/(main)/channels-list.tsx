@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { formatDistanceToNowStrict } from "date-fns";
@@ -108,8 +109,16 @@ export function ChannelsListClient() {
       {channels.data?.map((channel) => (
         <Card className="overflow-hidden rounded-lg transition-all duration-200 hover:cursor-pointer hover:bg-accent/80">
           <Link key={channel.id} href={`/${channel.id}`}>
-            <CardContent className="flex h-44 items-center justify-center border-b bg-primary/5 p-0">
-              <Sprout className="size-16 text-primary/60" strokeWidth={1.5} />
+            <CardContent className="relative flex h-52 items-center justify-center overflow-hidden border-b bg-primary/5 p-0">
+              {channel.thumbneilId ? (
+                <Image
+                  alt="thumbneil"
+                  fill
+                  src={`https://utfs.io/f/${channel.thumbneilId}`}
+                />
+              ) : (
+                <Sprout className="size-16 text-primary/60" strokeWidth={1.5} />
+              )}
             </CardContent>
           </Link>
           <CardHeader className="w-full flex-row justify-between p-4">

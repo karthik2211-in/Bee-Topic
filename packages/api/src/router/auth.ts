@@ -1,5 +1,6 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { clerkClient } from "@clerk/nextjs/server";
+import { z } from "zod";
 
 import { protectedProcedure, publicProcedure } from "../trpc";
 
@@ -22,4 +23,20 @@ export const authRouter = {
 
     return users.data;
   }),
+  updatePublicMetaData: protectedProcedure
+    .input(z.object({ institutionId: z.string(), courseId: z.string() }))
+    .mutation(async (opts) => {
+      const client = await clerkClient();
+      const user = await client.users.updateUserMetadata(
+        opts.ctx.session.userId,
+        {
+          publicMetadata: {
+            ...opts.input,
+            onBoardingCompleted: true,
+          },
+        },
+      );
+
+      return user;
+    }),
 } satisfies TRPCRouterRecord;

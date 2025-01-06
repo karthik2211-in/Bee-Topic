@@ -1,5 +1,13 @@
-import { Stack, Tabs } from "expo-router";
+import { Stack } from "expo-router/stack";
 
 export default function MainStackLayout() {
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Stack
+      screenOptions={{
+        headerBackTitleVisible: false,
+        animation: "fade",
+        headerShadowVisible: false,
+      }}
+    />
+  );
 }
