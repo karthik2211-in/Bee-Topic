@@ -15,7 +15,7 @@ export default function ChannelLayout({
       <TooltipProvider>
         <aside
           style={{ marginTop: -65, paddingTop: 65 }}
-          className="sticky inset-0 z-20 hidden h-screen w-60 flex-shrink-0 flex-col gap-3 border-r bg-background p-2 backdrop-blur-xl lg:flex 2xl:w-72"
+          className="sticky inset-0 z-20 h-screen w-60 flex-shrink-0 flex-col gap-3 border-r bg-background p-2 backdrop-blur-xl"
         >
           <nav className="shadow-overflow relative flex w-full flex-col gap-3 overflow-y-auto overflow-x-hidden px-3 py-3">
             <SideBarContent />
