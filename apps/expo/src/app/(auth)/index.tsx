@@ -47,20 +47,19 @@ export default function GetStarted() {
       <LinearGradient
         style={{ flex: 1 }}
         colors={[
-          "hsla(47.9,95.8%,53.1%,0.8)",
-          "hsla(47.9,95.8%,53.1%,0)",
-          "hsla(47.9,95.8%,53.1%,0)",
-          "hsla(47.9,95.8%,53.1%,0)",
-          "hsla(47.9,95.8%,53.1%,0.2)",
-          "hsla(47.9,95.8%,53.1%,0.6)",
+          "hsla(47.9,95.8%,53.1%,0.3)",
+          "hsla(47.9,95.8%,53.1%,0.05)",
+          "hsla(47.9,95.8%,53.1%,0.0)",
+          "hsla(47.9,95.8%,53.1%,0.05)",
+          "hsla(47.9,95.8%,53.1%,0.3)",
         ]}
       />
-      <ImageBackground
+      {/* <ImageBackground
         source={require("assets/honey-comb.png")}
         style={[StyleSheet.absoluteFill, { flex: 1 }]}
-      />
+      /> */}
       <BlurView
-        blurAmount={10}
+        blurAmount={40}
         blurType={isDarkColorScheme ? "dark" : "light"}
         style={[StyleSheet.absoluteFill, { flex: 1 }]}
       />
