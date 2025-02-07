@@ -1,20 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
 import { useParams } from "next/navigation";
-import {
-  BookA,
-  Edit2,
-  Folder,
-  FolderOpen,
-  HashIcon,
-  MoreVerticalIcon,
-  Trash2,
-} from "lucide-react";
+import { Folder, FolderOpen } from "lucide-react";
 
 import { RouterOutputs } from "@bt/api";
 import { cn } from "@bt/ui";
-import { Button } from "@bt/ui/button";
 import {
   Card,
   CardContent,
@@ -22,19 +12,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@bt/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@bt/ui/dropdown-menu";
-
-import { EditChapterDialog } from "./create-chapter";
 
 export default function ChapterItem({
   chapter,
 }: {
-  chapter: RouterOutputs["chapters"]["all"][number];
+  chapter: RouterOutputs["chapters"]["all"]["data"][0];
 }) {
   const params = useParams();
   return (
@@ -60,28 +42,6 @@ export default function ChapterItem({
             {chapter.videosCount} videos
           </CardDescription>
         </div>
-
-        {/* <DropdownMenu key={chapter.id}>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant={"ghost"}
-              size={"icon"}
-              className="size-8 opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100"
-            >
-              <MoreVerticalIcon className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" side="right" className="w-[150px]">
-            <EditChapterDialog chapterId={chapter.id}>
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                <Edit2 className="mr-2 size-4" /> Edit
-              </DropdownMenuItem>
-            </EditChapterDialog>
-            <DropdownMenuItem className="text-destructive">
-              <Trash2 className="mr-2 size-4" /> Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu> */}
       </CardHeader>
     </Card>
   );

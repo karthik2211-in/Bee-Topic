@@ -6,7 +6,6 @@ import { format } from "date-fns";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 import type { ChartConfig } from "@bt/ui/chart";
-import { Button } from "@bt/ui/button";
 import {
   Card,
   CardContent,

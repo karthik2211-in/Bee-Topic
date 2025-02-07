@@ -62,6 +62,7 @@
     "expo-video": "^2.0.2",
     "expo-video-thumbnails": "~9.0.2",
     "expo-web-browser": "^14.0.1",
+    "lightningcss": "^1.29.1",
     "lucide-react-native": "^0.454.0",
     "nativewind": "~4.0.36",
     "react": "catalog:react18",
