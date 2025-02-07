@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Player from "next-video/player";
 import { z } from "zod";
 
@@ -27,7 +27,6 @@ import {
   FormMessage,
   useForm,
 } from "@bt/ui/form";
-import { Input } from "@bt/ui/input";
 import { Textarea } from "@bt/ui/textarea";
 import { toast } from "@bt/ui/toast";
 

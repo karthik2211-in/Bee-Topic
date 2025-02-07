@@ -26,10 +26,9 @@ import SearchChapter from "./search-chapter";
 export default function SideBarContent() {
   const params = useParams();
   const videoId = params.video_id;
-  const router = useRouter();
   const pathname = usePathname();
   const { data } = api.videos.byId.useQuery(
-    { id: videoId as string },
+    { video_id: videoId as string },
     { enabled: !!videoId },
   );
 

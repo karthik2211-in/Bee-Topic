@@ -8,6 +8,9 @@
       "pnpm": "9.7.0",
       "ios": {
         "resourceClass": "m-medium"
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
     "development": {
@@ -23,7 +26,10 @@
       }
     },
     "production": {
-      "extends": "base"
+      "extends": "base",
+      "env": {
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_dGlnaHQtYXBlLTQwLmNsZXJrLmFjY291bnRzLmRldiQ"
+      }
     }
   },
   "submit": {
