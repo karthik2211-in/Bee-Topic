@@ -8,8 +8,8 @@
  */
 import { auth } from "@clerk/nextjs/server";
 import { initTRPC, TRPCError } from "@trpc/server";
-import { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import RP from "razorpay";
+// import { CreateNextContextOptions } from "@trpc/server/adapters/next";
+// import RP from "razorpay";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
@@ -34,19 +34,19 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
   const source = opts.headers.get("x-trpc-source") ?? "unknown";
   console.log(">>> tRPC Request from", source, "by", session?.userId);
 
-  const pg = new RP({
-    key_id: process.env.RAZORPAY_KEY_ID!,
-    key_secret: process.env.RAZORPAY_KEY_SECRETE!,
-    headers: {
-      "X-Razorpay-Account": opts.headers.get("X-Razorpay-Account") ?? undefined,
-    },
-  });
+  // const pg = new RP({
+  //   key_id: process.env.RAZORPAY_KEY_ID!,
+  //   key_secret: process.env.RAZORPAY_KEY_SECRETE!,
+  //   headers: {
+  //     "X-Razorpay-Account": opts.headers.get("X-Razorpay-Account") ?? undefined,
+  //   },
+  // });
 
   return {
     session,
     db,
     token: authToken,
-    pg,
+    // pg,
   };
 };
 

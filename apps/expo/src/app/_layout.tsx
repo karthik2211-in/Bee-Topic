@@ -49,7 +49,7 @@ export {
 } from "expo-router";
 
 // Prevent the splash screen from auto-hiding before getting the color scheme.
-SplashScreen.preventAutoHideAsync();
+// SplashScreen.preventAutoHideAsync();
 
 // This is the main layout of the app
 // It wraps your pages with the providers they need

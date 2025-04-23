@@ -2,7 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+@layer base{
+
+  :root {
   --background: 0 0% 100%;
   --foreground: 20 14.3% 4.1%;
   --card: 0 0% 100%;
@@ -25,8 +27,7 @@
   --radius: 0.1rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+.dark:root {
     --background: 20 14.3% 4.1%;
     --foreground: 60 9.1% 97.8%;
     --card: 20 14.3% 4.1%;
@@ -47,4 +48,5 @@
     --input: 12 6.5% 15.1%;
     --ring: 35.5 91.7% 32.9%;
   }
+
 }
