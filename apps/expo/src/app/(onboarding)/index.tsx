@@ -8,7 +8,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useAuth, useClerk, useSession, useUser } from "@clerk/clerk-expo";
-import { BlurView } from "@react-native-community/blur";
+import { BlurView } from "expo-blur";
 import { z } from "zod";
 
 import { Institutions } from "@bt/db/schema";

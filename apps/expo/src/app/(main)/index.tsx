@@ -8,7 +8,7 @@ import Animated, { Easing, FadeIn, FadeInDown } from "react-native-reanimated";
 import { Link, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useAuth, useUser } from "@clerk/clerk-expo";
-import { BlurView } from "@react-native-community/blur";
+import { BlurView } from "expo-blur";
 import { FlashList } from "@shopify/flash-list";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";

@@ -1,7 +1,7 @@
 import { Image, TouchableOpacity, View } from "react-native";
 import Animated, { Easing, FadeIn } from "react-native-reanimated";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
-import { BlurView } from "@react-native-community/blur";
+import { BlurView } from "expo-blur";
 import { FlashList } from "@shopify/flash-list";
 
 import {

@@ -2,7 +2,7 @@ import type { ViewProps } from "react-native";
 import * as React from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
-import { BlurView } from "@react-native-community/blur";
+import { BlurView } from "expo-blur";
 import * as AlertDialogPrimitive from "@rn-primitives/alert-dialog";
 
 import { buttonTextVariants, buttonVariants } from "~/components/ui/button";

@@ -22,7 +22,6 @@
     "@gorhom/bottom-sheet": "5",
     "@hookform/resolvers": "catalog:",
     "@react-native-async-storage/async-storage": "1.23.1",
-    "@react-native-community/blur": "^4.4.1",
     "@react-native-community/slider": "4.5.5",
     "@rn-primitives/alert-dialog": "^1.1.0",
     "@rn-primitives/aspect-ratio": "^1.1.0",

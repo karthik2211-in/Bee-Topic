@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Link, Stack, useLocalSearchParams, useNavigation } from "expo-router";
-
-import { Button } from "~/components/ui/button";
-import { Text } from "~/components/ui/text";
+import { Stack, useLocalSearchParams, useNavigation } from "expo-router";
 import VideoPlayer from "~/components/video-player";
-import { SkipForward } from "~/lib/icons/SkipForward";
 import { api } from "~/utils/api";
 
 export default function VideoScreen() {

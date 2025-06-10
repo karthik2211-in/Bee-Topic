@@ -3,20 +3,15 @@ import { StatusBar, View } from "react-native";
 import { StyleSheet } from "react-native-css-interop";
 import Animated, {
   Easing,
-  FadeIn,
-  FadeInDown,
-  FadeInUp,
-  SlideInUp,
-  useAnimatedProps,
+  FadeIn, useAnimatedProps,
   useSharedValue,
   withRepeat,
-  withTiming,
-  ZoomInRotate,
+  withTiming
 } from "react-native-reanimated";
-import { Image, ImageBackground } from "expo-image";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import * as NavigationBar from "expo-navigation-bar";
-import { BlurView } from "@react-native-community/blur";
+import { BlurView } from "expo-blur";
 
 import { H1, Lead, Muted } from "~/components/ui/typography";
 import { useColorScheme } from "~/lib/useColorScheme";
